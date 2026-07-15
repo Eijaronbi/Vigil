@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head><style>
+  body { width: 300px; padding: 12px; font-family: -apple-system, sans-serif; background: #111; color: #f5f5f0; }
+  h2 { margin: 0 0 8px; font-size: 16px; }
+  .status { display: flex; align-items: center; gap: 6px; margin-bottom: 12px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.online { background: #2ecc71; }
+  .dot.offline { background: #e74c3c; }
+  .alert { background: #1a1a1a; padding: 8px; border-radius: 4px; margin-bottom: 6px; font-size: 13px; }
+  .btn { width: 100%; padding: 8px; background: #a78bfa; color: #070708; border: none; border-radius: 4px; cursor: pointer; font-weight: 600; }
+</style></head>
+<body>
+  <h2>Vigil</h2>
+  <div class="status"><span class="dot offline" id="status-dot"></span><span id="status-text">Disconnected</span></div>
+  <div id="alerts"><div class="alert" style="color:#666;">No recent alerts</div></div>
+  <button class="btn" id="check-now">Check Messages</button>
+  <script src="popup.js"></script>
+</body>
+</html>
