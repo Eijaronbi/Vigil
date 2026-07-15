@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Groups - Message Monitor{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+    <h2>Add Group</h2>
+    <form hx-post="/groups" hx-target="#groups-table" hx-swap="outerHTML" hx-on::after-request="this.reset()">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="source">Source</label>
+                <select id="source" name="source" required>
+                    <option value="">Select source...</option>
+                    <option value="telegram">Telegram</option>
+                    <option value="whatsapp">WhatsApp</option>
+                    <option value="twitter">Twitter</option>
+                    <option value="gmail">Gmail</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" placeholder="e.g. Dev Chat" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="external_id">External ID</label>
+                <input type="text" id="external_id" name="external_id" placeholder="e.g. -1001234567890" required>
+            </div>
+            <div class="form-group" style="display: flex; align-items: flex-end;">
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Add Group</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Existing Groups</h2>
+    {% if groups %}
+    <table id="groups-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Source</th>
+                <th>Name</th>
+                <th>External ID</th>
+                <th>Enabled</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            <tr>
+                <td>{{ group.id }}</td>
+                <td><span class="badge badge-{{ group.source }}">{{ group.source }}</span></td>
+                <td>{{ group.name }}</td>
+                <td style="font-family: monospace; font-size: 13px;">{{ group.external_id }}</td>
+                <td>{{ 'Yes' if group.enabled else 'No' }}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                            hx-delete="/groups/{{ group.id }}"
+                            hx-target="closest tr"
+                            hx-swap="outerHTML swap:0.5s"
+                            hx-confirm="Remove this group?">Remove</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div id="groups-table" class="empty-state">
+        <p>No groups configured yet. Add one above.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Messages - Message Monitor{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+    <div style="display: flex; gap: 16px; align-items: end;">
+        <div class="form-group" style="flex: 1;">
+            <label for="search">Search</label>
+            <input type="text" id="search" name="search" placeholder="Search messages..."
+                   hx-get="/messages"
+                   hx-trigger="keyup changed delay:300ms"
+                   hx-target="#messages-table"
+                   hx-select="#messages-table"
+                   hx-swap="outerHTML">
+        </div>
+        <div class="form-group" style="flex: 0 0 160px;">
+            <label for="source">Source</label>
+            <select id="source" name="source"
+                    hx-get="/messages"
+                    hx-trigger="change"
+                    hx-target="#messages-table"
+                    hx-select="#messages-table"
+                    hx-swap="outerHTML">
+                <option value="">All</option>
+                <option value="telegram">Telegram</option>
+                <option value="whatsapp">WhatsApp</option>
+                <option value="twitter">Twitter</option>
+                <option value="gmail">Gmail</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button class="btn btn-outline"
+                    hx-get="/messages"
+                    hx-target="#messages-table"
+                    hx-select="#messages-table"
+                    hx-swap="outerHTML">Refresh</button>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Message History</h2>
+    {% if messages %}
+    <div id="messages-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Time</th>
+                    <th>Source</th>
+                    <th>Group</th>
+                    <th>Sender</th>
+                    <th>Message</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for msg in messages %}
+                <tr class="{% if msg.importance_score and msg.importance_score >= 7 %}highlight-important{% endif %}">
+                    <td>{{ msg.timestamp.strftime('%Y-%m-%d %H:%M') if msg.timestamp else '' }}</td>
+                    <td><span class="badge badge-{{ msg.source }}">{{ msg.source }}</span></td>
+                    <td>{{ msg.group_name }}</td>
+                    <td>{{ msg.sender }}</td>
+                    <td>{{ msg.text[:120] }}{% if msg.text|length > 120 %}...{% endif %}</td>
+                    <td class="score {% if msg.importance_score and msg.importance_score >= 7 %}score-high{% elif msg.importance_score and msg.importance_score >= 4 %}score-medium{% else %}score-low{% endif %}">{{ msg.importance_score if msg.importance_score is not none else '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div id="messages-table" class="empty-state">
+        <p>No messages found.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

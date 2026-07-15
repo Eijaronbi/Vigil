@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Message Monitor{% endblock %}
+{% block content %}
+<div class="stat-grid">
+    <div class="stat-card">
+        <div class="value">{{ recent_count }}</div>
+        <div class="label">Recent Messages</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">{{ groups_count }}</div>
+        <div class="label">Groups</div>
+    </div>
+    <div class="stat-card">
+        <div class="value">{{ important_count }}</div>
+        <div class="label">Important Messages</div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Recent Messages</h2>
+    {% if messages %}
+    <table>
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Source</th>
+                <th>Group</th>
+                <th>Sender</th>
+                <th>Message</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for msg in messages %}
+            <tr class="{% if msg.importance_score and msg.importance_score >= 7 %}highlight-important{% endif %}">
+                <td>{{ msg.timestamp.strftime('%H:%M') if msg.timestamp else '' }}</td>
+                <td><span class="badge badge-{{ msg.source }}">{{ msg.source }}</span></td>
+                <td>{{ msg.group_name }}</td>
+                <td>{{ msg.sender }}</td>
+                <td>{{ msg.text[:80] }}{% if msg.text|length > 80 %}...{% endif %}</td>
+                <td class="score {% if msg.importance_score and msg.importance_score >= 7 %}score-high{% elif msg.importance_score and msg.importance_score >= 4 %}score-medium{% else %}score-low{% endif %}">{{ msg.importance_score if msg.importance_score is not none else '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <p>No messages yet. Messages will appear here once they are collected.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

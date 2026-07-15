@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Rules - Message Monitor{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom: 24px;">
+    <h2>Add Rule</h2>
+    <form hx-post="/rules" hx-target="#rules-table" hx-swap="outerHTML" hx-on::after-request="this.reset()">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="rule_type">Type</label>
+                <select id="rule_type" name="rule_type" required>
+                    <option value="">Select type...</option>
+                    <option value="keyword">Keyword</option>
+                    <option value="sender">Sender</option>
+                    <option value="topic">Topic</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="value">Value</label>
+                <input type="text" id="value" name="value" placeholder="e.g. urgent, @username" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label for="group_id">Group ID</label>
+                <input type="number" id="group_id" name="group_id" placeholder="e.g. 1" required>
+            </div>
+            <div class="form-group">
+                <label for="priority">Priority</label>
+                <input type="number" id="priority" name="priority" placeholder="e.g. 5" value="0">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Rule</button>
+    </form>
+</div>
+
+<div class="card">
+    <h2>Existing Rules</h2>
+    {% if rules %}
+    <table id="rules-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Value</th>
+                <th>Group ID</th>
+                <th>Priority</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rule in rules %}
+            <tr>
+                <td>{{ rule.id }}</td>
+                <td><span class="badge" style="background: rgba(167, 139, 250, 0.15); color: #a78bfa;">{{ rule.rule_type }}</span></td>
+                <td>{{ rule.value }}</td>
+                <td>{{ rule.group_id }}</td>
+                <td>{{ rule.priority }}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                            hx-delete="/rules/{{ rule.id }}"
+                            hx-target="closest tr"
+                            hx-swap="outerHTML swap:0.5s"
+                            hx-confirm="Delete this rule?">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div id="rules-table" class="empty-state">
+        <p>No rules configured yet. Add one above.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
