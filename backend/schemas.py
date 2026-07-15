@@ -44,5 +44,6 @@ class GroupOut(BaseModel):
     name: str
     external_id: str
     enabled: bool
+    is_priority: bool = False
 
     model_config = {"from_attributes": True}

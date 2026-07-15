@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Corporate</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1e293b;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+    .narrow { max-width: 720px; }
+
+    nav {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 0;
+    }
+    .nav-inner {
+      max-width: 900px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1e3a5f;
+    }
+    .nav-links { display: flex; gap: 28px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: #64748b; }
+    .nav-links a:hover { color: #1e3a5f; }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 6px;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .btn-primary { background: #1e3a5f; color: #fff; }
+    .btn-primary:hover { background: #2a4a7a; }
+    .btn-secondary { background: #fff; color: #1e3a5f; border: 1px solid #cbd5e1; }
+    .btn-secondary:hover { border-color: #1e3a5f; }
+
+    .hero {
+      padding: 100px 0 80px;
+      text-align: center;
+      background: linear-gradient(to bottom, #fff, #f0f2f5);
+    }
+    .hero h1 {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: clamp(34px, 5vw, 48px);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      color: #1e3a5f;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #64748b;
+      max-width: 600px;
+      margin: 0 auto 36px;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    .hero-logos {
+      display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; margin-top: 48px;
+    }
+    .hero-logos span { font-size: 14px; color: #94a3b8; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; }
+
+    .section { padding: 80px 0; }
+    .section.alt { background: #fff; }
+    .section h2 {
+      font-family: 'IBM Plex Serif', serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 12px;
+    }
+    .section .desc { color: #64748b; margin-bottom: 40px; }
+
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .step { background: #fff; padding: 28px; border: 1px solid #e2e8f0; border-radius: 8px; border-top: 3px solid #1e3a5f; }
+    .step .num { font-size: 28px; font-weight: 700; color: #1e3a5f; font-family: 'IBM Plex Serif', serif; margin-bottom: 12px; }
+    .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: #64748b; line-height: 1.5; }
+
+    .source-table { border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+    .source-row {
+      display: flex; align-items: center; padding: 16px 24px;
+      border-bottom: 1px solid #e2e8f0; background: #fff;
+    }
+    .source-row:last-child { border-bottom: none; }
+    .source-row .name { width: 120px; font-weight: 600; font-family: 'IBM Plex Serif', serif; color: #1e3a5f; }
+    .source-row .method { width: 200px; font-size: 14px; color: #64748b; }
+    .source-row .risk { font-size: 13px; color: #10b981; font-weight: 500; }
+
+    .voice-section { background: #1e3a5f; color: #fff; text-align: center; padding: 80px 0; }
+    .voice-section h2 { color: #fff; }
+    .voice-section p { color: #94b8e0; margin-bottom: 28px; }
+    .voice-section .btn-primary { background: #fff; color: #1e3a5f; }
+    .voice-section .btn-primary:hover { background: #e2e8f0; }
+
+    .cta-section { text-align: center; }
+
+    footer { padding: 24px 0; text-align: center; font-size: 13px; color: #94a3b8; border-top: 1px solid #e2e8f0; }
+
+    @media (max-width: 720px) {
+      .steps { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .source-row { flex-wrap: wrap; gap: 4px; }
+      .source-row .name { width: auto; }
+      .source-row .method { width: auto; }
+    }
+    @media (max-width: 480px) {
+      .steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Vigil</a>
+    <div class="nav-links">
+      <a href="#how">Features</a>
+      <a href="#sources">Integrations</a>
+      <a href="#voice">Voice</a>
+      <a href="#demo">Demo</a>
+    </div>
+    <a href="#demo" class="btn btn-primary" style="padding: 10px 24px;">Request Demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container narrow">
+    <h1>Never miss what matters across every channel</h1>
+    <p>Vigil monitors WhatsApp, Telegram, Twitter, and Gmail for important messages. AI-powered classification with configurable alert channels and on-chain verification on Monad.</p>
+    <div class="hero-actions">
+      <a href="#demo" class="btn btn-primary">Try the Demo</a>
+      <a href="#how" class="btn btn-secondary">View Features</a>
+    </div>
+    <div class="hero-logos">
+      <span>WhatsApp</span>
+      <span>Telegram</span>
+      <span>Twitter</span>
+      <span>Gmail</span>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="how">
+  <div class="container">
+    <h2>How it works</h2>
+    <p class="desc">A four-stage pipeline that collects, classifies, alerts, and verifies.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Collect</h3>
+        <p>Messages stream in from all connected sources in real time.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Classify</h3>
+        <p>Keyword rules catch instantly. LLM scores for nuance and context.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Alert</h3>
+        <p>Telegram push, email digest, or voice readout. Configurable per group.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h3>Verify</h3>
+        <p>Alert hashes stored on-chain via AlertAttestation.sol on Monad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container">
+    <h2>Integrations</h2>
+    <p class="desc">Read-only connections. No risk to your accounts.</p>
+    <div class="source-table">
+      <div class="source-row">
+        <div class="name">WhatsApp</div>
+        <div class="method">Chrome extension &middot; live session</div>
+        <div class="risk">Read-only</div>
+      </div>
+      <div class="source-row">
+        <div class="name">Telegram</div>
+        <div class="method">Bot API &middot; add to any group</div>
+        <div class="risk">Read-only</div>
+      </div>
+      <div class="source-row">
+        <div class="name">Twitter / X</div>
+        <div class="method">Jina Reader &middot; no API key</div>
+        <div class="risk">Read-only</div>
+      </div>
+      <div class="source-row">
+        <div class="name">Gmail</div>
+        <div class="method">Google OAuth 2.0</div>
+        <div class="risk">Read-only</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="voice-section" id="voice">
+  <div class="container narrow">
+    <h2>Voice alerts for priority messages</h2>
+    <p>Mark a group or contact as high priority. When they send an important message, Vigil reads it aloud through your browser or device. Voice command "check messages" for a recap.</p>
+    <a href="#demo" class="btn btn-primary">Enable Voice</a>
+  </div>
+</section>
+
+<section class="section cta-section" id="demo">
+  <div class="container narrow">
+    <h2>Start monitoring in 30 seconds</h2>
+    <p class="desc">No signup required. Connect one source and see alerts immediately on your dashboard.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Try the Demo</a>
+      <a href="#" class="btn btn-secondary">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Spark Hackathon &middot; Monad Testnet</div>
+</footer>
+
+</body>
+</html>

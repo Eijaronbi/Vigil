@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Message Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --midnight: #0A1220;
+  --gold: #C4984A;
+  --pearl: #E8E0D4;
+  --slate: #1A2640;
+  --dim: #6B7A8F;
+  --glow: rgba(196, 152, 74, 0.08);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Barlow', sans-serif;
+  font-weight: 300;
+  color: var(--pearl); background: var(--midnight);
+  line-height: 1.6;
+}
+h1, h2, h3 { font-family: 'Cinzel', serif; font-weight: 600; letter-spacing: 0.02em; }
+h1 { font-size: clamp(2.5rem, 5vw, 4.2rem); line-height: 1.1; font-weight: 700; letter-spacing: 0.04em; }
+h2 { font-size: clamp(1.6rem, 2.8vw, 2.5rem); line-height: 1.2; letter-spacing: 0.03em; }
+h3 { font-size: 1.25rem; letter-spacing: 0.02em; }
+p { margin-bottom: 1rem; color: var(--dim); }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  background: rgba(10, 18, 32, 0.95);
+  backdrop-filter: none;
+}
+nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px;
+}
+.logo { font-family: 'Cinzel', serif; font-size: 1.25rem; font-weight: 700; letter-spacing: 0.1em; color: var(--gold); }
+.nav-links { display: flex; gap: 2.5rem; align-items: center; }
+.nav-links a { font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 0.18em; color: var(--dim); transition: color 0.3s; }
+.nav-links a:hover { color: var(--gold); }
+.cta-nav {
+  border: 1px solid var(--gold); color: var(--gold);
+  padding: 0.5rem 1.5rem; font-size: 0.7rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.15em;
+  transition: background 0.3s;
+}
+.cta-nav:hover { background: rgba(196, 152, 74, 0.1); }
+
+.hero-cinematic {
+  min-height: 100vh; padding-top: 72px;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; position: relative; overflow: hidden;
+}
+.hero-cinematic::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 30%, rgba(196, 152, 74, 0.06) 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, rgba(196, 152, 74, 0.04) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-cinematic-inner { position: relative; z-index: 1; max-width: 780px; padding: 4rem 2rem; }
+.hero-cinematic-inner .kicker {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.25em;
+  color: var(--gold); margin-bottom: 2rem; display: block;
+}
+.hero-cinematic-inner h1 { margin-bottom: 1.5rem; }
+.hero-cinematic-inner h1 .accent { color: var(--gold); }
+.hero-cinematic-inner .sub {
+  font-size: 1.125rem; color: var(--dim); line-height: 1.8;
+  max-width: 560px; margin: 0 auto 3rem; font-weight: 300;
+}
+.hero-buttons { display: flex; gap: 1.5rem; justify-content: center; }
+.btn-cinematic {
+  display: inline-block; background: var(--gold); color: var(--midnight);
+  padding: 1rem 2.5rem; font-family: 'Cinzel', serif; font-weight: 600;
+  font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.15em;
+  border: none; cursor: pointer; transition: opacity 0.3s;
+}
+.btn-cinematic:hover { opacity: 0.85; }
+.btn-cinematic-outline {
+  background: transparent; color: var(--gold);
+  border: 1px solid rgba(196, 152, 74, 0.3);
+}
+.btn-cinematic-outline:hover { border-color: var(--gold); background: rgba(196, 152, 74, 0.05); }
+
+.section-cinematic {
+  padding: 7rem 0; position: relative;
+}
+.s-cinematic-alt { background: var(--slate); }
+
+.section-header { margin-bottom: 4rem; max-width: 600px; }
+.section-header p { font-size: 1rem; color: var(--dim); }
+
+.steps-grid-cin { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; }
+.step-cin {
+  text-align: center; padding: 2.5rem 1.5rem;
+  border: 1px solid rgba(255,255,255,0.06);
+  position: relative;
+}
+.step-cin::after {
+  content: attr(data-num); font-family: 'Cinzel', serif;
+  font-size: 4rem; font-weight: 800; color: rgba(196, 152, 74, 0.06);
+  position: absolute; top: 0.5rem; right: 1rem; line-height: 1;
+  pointer-events: none;
+}
+.step-cin h3 { margin-bottom: 0.75rem; color: var(--gold); }
+.step-cin p { font-size: 0.875rem; color: var(--dim); }
+
+.sources-grid-cin { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.source-cin {
+  padding: 2rem; border: 1px solid rgba(255,255,255,0.06);
+  text-align: center; transition: border-color 0.3s, background 0.3s;
+}
+.source-cin:hover { border-color: rgba(196, 152, 74, 0.2); background: rgba(196, 152, 74, 0.03); }
+.source-cin .icon { font-size: 2rem; display: block; margin-bottom: 1rem; }
+.source-cin h3 { font-family: 'Barlow', sans-serif; font-weight: 500; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 0.75rem; }
+.source-cin p { font-size: 0.8125rem; color: var(--dim); }
+
+.voice-cinematic {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+}
+.voice-cinematic-left .cmd-display {
+  font-family: 'Cinzel', serif; font-size: 2.5rem; font-weight: 600;
+  color: var(--gold); line-height: 1.2;
+}
+.voice-cinematic-left .cmd-display .q { color: var(--dim); font-weight: 300; }
+.voice-cinematic-right p { font-size: 1.0625rem; }
+
+.cta-cinematic {
+  text-align: center; padding: 8rem 0;
+  position: relative;
+}
+.cta-cinematic::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 50%, rgba(196, 152, 74, 0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+.cta-cinematic h2 { margin-bottom: 1.5rem; }
+.cta-cinematic p { color: var(--dim); max-width: 420px; margin: 0 auto 2.5rem; }
+
+footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding: 2.5rem 0; color: rgba(255,255,255,0.3);
+  font-size: 0.8125rem;
+}
+footer .container { display: flex; justify-content: space-between; align-items: center; }
+footer a { color: rgba(255,255,255,0.4); }
+.footer-links { display: flex; gap: 2rem; }
+
+@keyframes cinFade {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cin-in { animation: cinFade 0.9s ease-out both; }
+
+@keyframes cinReveal {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.cin-r { animation: cinReveal 0.7s ease-out both; }
+
+@keyframes goldPulse {
+  0%, 100% { text-shadow: 0 0 20px rgba(196, 152, 74, 0.1); }
+  50% { text-shadow: 0 0 40px rgba(196, 152, 74, 0.2); }
+}
+.pulse-gold { animation: goldPulse 4s ease-in-out infinite; }
+
+@media (max-width: 900px) {
+  .steps-grid-cin { grid-template-columns: repeat(2, 1fr); }
+  .sources-grid-cin { grid-template-columns: repeat(2, 1fr); }
+  .voice-cinematic { grid-template-columns: 1fr; gap: 2rem; }
+  footer .container { flex-direction: column; gap: 1rem; text-align: center; }
+}
+@media (max-width: 600px) {
+  .steps-grid-cin { grid-template-columns: 1fr; }
+  .sources-grid-cin { grid-template-columns: 1fr; }
+  .nav-links a:not(.cta-nav) { display: none; }
+  .hero-buttons { flex-direction: column; align-items: center; }
+  .hero-cinematic-inner .sub { font-size: 1rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <span class="logo">VIGIL</span>
+    <div class="nav-links">
+      <a href="#how">How It Works</a>
+      <a href="#sources">Sources</a>
+      <a href="#voice">Voice</a>
+      <a href="#cta" class="cta-nav">Demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-cinematic">
+  <div class="hero-cinematic-inner">
+    <span class="kicker cin-in">Spark Hackathon 2026</span>
+    <h1 class="cin-in">Every message.<br><span class="accent pulse-gold">Every channel.</span></h1>
+    <p class="sub cin-in">Vigil monitors WhatsApp, Telegram, Twitter and Gmail. AI classifies urgency. Voice alerts you. Monad testnet anchors attestations on-chain.</p>
+    <div class="hero-buttons cin-in">
+      <a href="#cta" class="btn-cinematic">Launch Demo</a>
+      <a href="#how" class="btn-cinematic btn-cinematic-outline">How It Works</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-cinematic" id="how">
+  <div class="container">
+    <div class="section-header">
+      <h2>The sequence.</h2>
+      <p>Four deliberate stages from connection to proof.</p>
+    </div>
+    <div class="steps-grid-cin">
+      <div class="step-cin" data-num="01">
+        <h3>Connect</h3>
+        <p>OAuth for each source. WhatsApp, Telegram, Twitter, Gmail linked in one session.</p>
+      </div>
+      <div class="step-cin" data-num="02">
+        <h3>Classify</h3>
+        <p>AI reads every inbound message. Priority score and category assigned automatically.</p>
+      </div>
+      <div class="step-cin" data-num="03">
+        <h3>Alert</h3>
+        <p>Voice alerts for critical items. Say "check messages" for audio summary.</p>
+      </div>
+      <div class="step-cin" data-num="04">
+        <h3>Attest</h3>
+        <p>Hash and submit to Monad testnet. Public, verifiable, gas-free per message.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-cinematic s-cinematic-alt" id="sources">
+  <div class="container">
+    <div class="section-header">
+      <h2>Sources.</h2>
+      <p>Four channels, one stream.</p>
+    </div>
+    <div class="sources-grid-cin">
+      <div class="source-cin">
+        <span class="icon">\u2610</span>
+        <h3>WhatsApp</h3>
+        <p>Business API, groups, DMs. Thread-aware classification with media context.</p>
+      </div>
+      <div class="source-cin">
+        <span class="icon">\u25B3</span>
+        <h3>Telegram</h3>
+        <p>Bot API for channels, groups, private chats. Caption and poll analysis.</p>
+      </div>
+      <div class="source-cin">
+        <span class="icon">\u2606</span>
+        <h3>Twitter / X</h3>
+        <p>Real-time account and keyword tracking. AI scoring before alerting.</p>
+      </div>
+      <div class="source-cin">
+        <span class="icon">\u2709</span>
+        <h3>Gmail</h3>
+        <p>Label monitoring with smart summarization and sender priority routing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-cinematic" id="voice">
+  <div class="container">
+    <div class="voice-cinematic">
+      <div class="voice-cinematic-left">
+        <div class="cmd-display">
+          <span class="q">\u201C</span>check messages<span class="q">\u201D</span>
+        </div>
+      </div>
+      <div class="voice-cinematic-right">
+        <p>Priority alerts are read aloud through your device. The wake command catches you up on everything flagged across every source. No screen interaction required.</p>
+        <p style="margin-top: 1rem;">Voice attestation lets you sign and submit to Monad testnet hands-free.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-cinematic" id="cta">
+  <div class="container">
+    <h2>30 seconds. No signup.</h2>
+    <p>Sandbox connects to a demo Telegram bot. Full classification pipeline running in your browser.</p>
+    <a href="#" class="btn-cinematic">Launch Sandbox</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>VIGIL \u2014 Spark Hackathon 2026</span>
+    <div class="footer-links">
+      <a href="#">Documentation</a>
+      <a href="#">GitHub</a>
+      <a href="#">Monad Testnet</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

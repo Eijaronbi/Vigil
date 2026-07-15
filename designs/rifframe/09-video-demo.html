@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — See it in action</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=Spectral:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f8f9fc;
+  --bg-alt: #eef0f5;
+  --fg: #0a0a1a;
+  --fg-muted: #5a5a7a;
+  --primary: #4a7dff;
+  --primary-hover: #3a6aee;
+  --border: #d6dae5;
+  --radius: 10px;
+  --font-sans: 'Nunito Sans', system-ui, sans-serif;
+  --font-serif: 'Spectral', Georgia, serif;
+  --max-w: 1200px;
+  --space: 1rem;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-sans); color: var(--fg); background: var(--bg); line-height: 1.6; }
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 calc(var(--space) * 2); }
+a { color: inherit; text-decoration: none; }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: calc(var(--space) * 1.5) calc(var(--space) * 2); max-width: var(--max-w); margin: 0 auto; }
+.logo { font-family: var(--font-serif); font-weight: 600; font-size: 1.4rem; }
+.nav-links { display: flex; gap: calc(var(--space) * 2); }
+.nav-links a { font-size: 0.9rem; color: var(--fg-muted); font-weight: 600; }
+.nav-cta { background: var(--fg); color: #fff; padding: 0.55rem 1.4rem; border-radius: var(--radius); font-weight: 700; font-size: 0.9rem; }
+
+.hero { padding: calc(var(--space) * 5) 0 0; }
+.hero-inner { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: center; max-width: var(--max-w); margin: 0 auto; padding: 0 calc(var(--space) * 2); }
+.hero h1 { font-family: var(--font-serif); font-size: clamp(2.25rem, 4.5vw, 3.25rem); line-height: 1.15; }
+.hero h1 span { color: var(--primary); }
+.hero p { font-size: 1.05rem; color: var(--fg-muted); margin-top: var(--space); max-width: 420px; }
+.hero-actions { display: flex; gap: var(--space); margin-top: calc(var(--space) * 2); }
+.btn { padding: 0.75rem 1.75rem; border-radius: var(--radius); font-weight: 700; font-size: 0.9rem; border: none; cursor: pointer; font-family: inherit; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+
+.video-placeholder { background: var(--fg); border-radius: var(--radius); aspect-ratio: 16/10; display: flex; align-items: center; justify-content: center; color: #fff; position: relative; overflow: hidden; }
+.video-placeholder .play { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; border: none; color: #fff; }
+.video-placeholder .caption { position: absolute; bottom: var(--space); left: var(--space); right: var(--space); text-align: center; font-size: 0.8rem; opacity: 0.6; }
+
+.section { padding: calc(var(--space) * 5) 0; }
+.section-title { font-family: var(--font-serif); font-size: 2rem; text-align: center; margin-bottom: calc(var(--space) * 3); }
+
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--space) * 2); }
+.step { text-align: center; }
+.step .icon-circle { width: 56px; height: 56px; border-radius: 50%; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem; font-size: 1.25rem; border: 1px solid var(--border); }
+.step h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+.step p { font-size: 0.85rem; color: var(--fg-muted); }
+
+.source-demo { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space); }
+.source-card { padding: calc(var(--space) * 1.5); border: 1px solid var(--border); border-radius: var(--radius); text-align: center; background: #fff; }
+.source-card .icon { font-size: 1.75rem; margin-bottom: 0.4rem; }
+.source-card h3 { font-size: 1rem; }
+.source-card .meta { font-size: 0.8rem; color: var(--fg-muted); margin-top: 0.25rem; }
+.source-card .demo-link { display: inline-block; margin-top: 0.75rem; font-size: 0.8rem; color: var(--primary); font-weight: 600; }
+
+.voice-demo-section { background: var(--fg); color: #fff; padding: calc(var(--space) * 4) 0; }
+.voice-demo-section .container { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: center; }
+.voice-demo-section h2 { font-family: var(--font-serif); font-size: 1.75rem; }
+.voice-demo-section p { font-size: 0.95rem; opacity: 0.8; margin: var(--space) 0 calc(var(--space) * 1.5); }
+.voice-demo-section .btn { background: var(--primary); color: #fff; }
+.demo-preview { background: rgba(255,255,255,0.06); border-radius: var(--radius); padding: calc(var(--space) * 2); text-align: center; }
+.demo-preview .command { font-family: var(--font-serif); font-size: 1.15rem; font-style: italic; margin-bottom: var(--space); }
+.demo-preview .response-text { font-size: 0.9rem; opacity: 0.7; }
+
+.cta-block { text-align: center; padding: calc(var(--space) * 5) 0; }
+.cta-block h2 { font-family: var(--font-serif); font-size: 2rem; }
+.cta-block p { color: var(--fg-muted); max-width: 480px; margin: var(--space) auto calc(var(--space) * 2); }
+
+footer { padding: calc(var(--space) * 3) 0; border-top: 1px solid var(--border); }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: calc(var(--space) * 2); }
+.footer-grid h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space); }
+.footer-grid a { display: block; font-size: 0.85rem; color: var(--fg-muted); margin-bottom: 0.35rem; }
+.footer-bottom { margin-top: calc(var(--space) * 2); padding-top: calc(var(--space) * 2); border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--fg-muted); display: flex; justify-content: space-between; }
+
+@media (max-width: 768px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .steps { grid-template-columns: repeat(2, 1fr); }
+  .source-demo { grid-template-columns: repeat(2, 1fr); }
+  .voice-demo-section .container { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .steps { grid-template-columns: 1fr; }
+  .source-demo { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Vigil</span>
+  <div class="nav-links">
+    <a href="#">Demo</a>
+    <a href="#">Sources</a>
+    <a href="#">Voice</a>
+    <a href="#">How it works</a>
+  </div>
+  <a href="#" class="nav-cta">Try Vigil</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <div>
+      <h1>See Vigil <span>in action</span></h1>
+      <p>Watch how Vigil connects WhatsApp, Telegram, Twitter, and Gmail — classifies every message, alerts you by voice, and attests critical events on Monad testnet.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-primary">Try it free →</a>
+        <a href="#" class="btn btn-secondary">Read docs</a>
+      </div>
+    </div>
+    <div class="video-placeholder">
+      <button class="play">▶</button>
+      <div class="caption">Watch: Vigil in 90 seconds</div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">How it works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="icon-circle">🔗</div>
+        <h3>Connect</h3>
+        <p>One-click OAuth links for all four sources.</p>
+      </div>
+      <div class="step">
+        <div class="icon-circle">🧠</div>
+        <h3>Classify</h3>
+        <p>AI tags: urgent, action, info, or noise.</p>
+      </div>
+      <div class="step">
+        <div class="icon-circle">🔊</div>
+        <h3>Alert</h3>
+        <p>Voice alerts for priority. Say "check messages."</p>
+      </div>
+      <div class="step">
+        <div class="icon-circle">🔗</div>
+        <h3>Attest</h3>
+        <p>Hash to Monad testnet. Tamper-proof.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Select a source to demo</h2>
+    <div class="source-demo">
+      <div class="source-card">
+        <div class="icon">💬</div>
+        <h3>WhatsApp</h3>
+        <div class="meta">Chats, groups, media</div>
+        <div class="demo-link">Watch demo →</div>
+      </div>
+      <div class="source-card">
+        <div class="icon">✈️</div>
+        <h3>Telegram</h3>
+        <div class="meta">Channels, groups, DMs</div>
+        <div class="demo-link">Watch demo →</div>
+      </div>
+      <div class="source-card">
+        <div class="icon">🐦</div>
+        <h3>Twitter / X</h3>
+        <div class="meta">Accounts, lists, search</div>
+        <div class="demo-link">Watch demo →</div>
+      </div>
+      <div class="source-card">
+        <div class="icon">📧</div>
+        <h3>Gmail</h3>
+        <div class="meta">Inbox, labels, filters</div>
+        <div class="demo-link">Watch demo →</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="voice-demo-section">
+  <div class="container">
+    <div>
+      <h2>Voice in action</h2>
+      <p>Hear how Vigil reads your priority messages aloud. The demo below plays a real voice alert sequence — urgent message, classification readout, and the "check messages" command.</p>
+      <a href="#" class="btn">Play voice demo</a>
+    </div>
+    <div class="demo-preview">
+      <div class="command">"check messages"</div>
+      <div class="response-text">"Urgent — Telegram, operations channel: 'Server room temperature critical.' Action needed — Gmail: 'Q3 audit report requires signature.' 14 other messages classified as routine."</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-block">
+  <div class="container">
+    <h2>Try Vigil in 30 seconds</h2>
+    <p>No signup, no credit card. Connect a source and get your first classified message immediately.</p>
+    <a href="#" class="btn btn-primary">Start monitoring →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="logo">Vigil</span>
+        <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0.5rem;">Multi-source message monitoring with AI classification and on-chain attestation on Monad testnet.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="#">Demo</a>
+        <a href="#">Sources</a>
+        <a href="#">Voice</a>
+        <a href="#">Attestation</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Vigil. Spark Hackathon.</span>
+      <span>Monad testnet</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

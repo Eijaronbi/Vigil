@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Retro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bitter:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f5efe6;
+      color: #2c2416;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+    .narrow { max-width: 640px; }
+
+    nav {
+      padding: 20px 0;
+      border-bottom: 2px solid #2c2416;
+    }
+    .nav-inner {
+      max-width: 800px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Bitter', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      border: 2px solid #2c2416;
+      padding: 4px 12px;
+    }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 14px; font-weight: 500; color: #6b5e4e; text-transform: uppercase; letter-spacing: 0.06em; }
+    .nav-links a:hover { color: #2c2416; }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Bitter', serif;
+      border: 2px solid #2c2416;
+      transition: all 0.15s;
+      background: transparent;
+      color: #2c2416;
+    }
+    .btn:hover { background: #2c2416; color: #f5efe6; }
+    .btn-primary { background: #2c2416; color: #f5efe6; }
+    .btn-primary:hover { background: #4a3f2c; border-color: #4a3f2c; }
+
+    .hero {
+      padding: 100px 0 60px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Bitter', serif;
+      font-size: clamp(40px, 6vw, 60px);
+      font-weight: 700;
+      line-height: 1.08;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 18px;
+      color: #6b5e4e;
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    .hero-divider {
+      width: 100%;
+      height: 4px;
+      background: repeating-linear-gradient(90deg, #2c2416 0px, #2c2416 8px, transparent 8px, transparent 16px);
+      margin: 48px 0 0;
+    }
+
+    .section { padding: 80px 0; }
+    .section h2 {
+      font-family: 'Bitter', serif;
+      font-size: clamp(28px, 4vw, 36px);
+      font-weight: 700;
+      margin-bottom: 12px;
+      position: relative;
+      display: inline-block;
+    }
+    .section h2::after {
+      content: '';
+      display: block;
+      width: 40px;
+      height: 3px;
+      background: #c4a97d;
+      margin-top: 4px;
+    }
+    .section .desc { color: #6b5e4e; margin-bottom: 36px; }
+
+    .steps { display: flex; gap: 0; }
+    .step {
+      flex: 1;
+      padding: 24px;
+      border: 2px solid #2c2416;
+      border-right: none;
+      position: relative;
+    }
+    .step:last-child { border-right: 2px solid #2c2416; }
+    .step .num { font-family: 'Bitter', serif; font-size: 32px; font-weight: 700; color: #c4a97d; line-height: 1; margin-bottom: 12px; }
+    .step h3 { font-family: 'Bitter', serif; font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+    .step p { font-size: 14px; color: #6b5e4e; }
+
+    .sources { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .source-item {
+      border: 2px solid #2c2416;
+      padding: 20px;
+      background: transparent;
+    }
+    .source-item strong { font-family: 'Bitter', serif; font-size: 18px; font-weight: 600; display: block; margin-bottom: 4px; }
+    .source-item span { font-size: 14px; color: #6b5e4e; }
+
+    .tag { display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid #c4a97d; color: #c4a97d; padding: 3px 8px; margin-bottom: 12px; }
+
+    .voice-section { border: 2px solid #2c2416; padding: 60px 24px; text-align: center; }
+    .voice-section h2 { display: block; }
+    .voice-section h2::after { margin: 4px auto 0; }
+    .voice-section p { color: #6b5e4e; margin-bottom: 24px; }
+
+    .cta-section { text-align: center; }
+
+    footer { padding: 24px 0; text-align: center; font-size: 13px; color: #8a7e6e; border-top: 2px solid #2c2416; }
+    footer span { font-size: 18px; }
+
+    @media (max-width: 720px) {
+      .steps { flex-direction: column; }
+      .step { border-right: 2px solid #2c2416; border-bottom: none; }
+      .step:last-child { border-bottom: 2px solid #2c2416; }
+      .sources { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Vigil</a>
+    <div class="nav-links">
+      <a href="#how">Process</a>
+      <a href="#sources">Sources</a>
+      <a href="#demo">Try</a>
+    </div>
+    <a href="#demo" class="btn">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container narrow">
+    <span class="tag">Est. 2026</span>
+    <h1>Never miss what matters</h1>
+    <p>Watch WhatsApp, Telegram, Twitter, and Gmail from one place. AI finds the important messages. Alerts arrive by Telegram, email, or voice.</p>
+    <div class="hero-actions">
+      <a href="#demo" class="btn btn-primary">Try the Demo</a>
+      <a href="#how" class="btn">How It Works</a>
+    </div>
+    <div class="hero-divider"></div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <h2>Process</h2>
+    <p class="desc">Four steps from message to alert.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="num">01</div>
+        <h3>Connect</h3>
+        <p>Extension for WhatsApp. Bot for Telegram. Reader for Twitter. OAuth for Gmail.</p>
+      </div>
+      <div class="step">
+        <div class="num">02</div>
+        <h3>Set Rules</h3>
+        <p>Keywords, senders, topics. LLM catches the rest.</p>
+      </div>
+      <div class="step">
+        <div class="num">03</div>
+        <h3>Alert</h3>
+        <p>Telegram, email digest, or voice readout.</p>
+      </div>
+      <div class="step">
+        <div class="num">04</div>
+        <h3>Attest</h3>
+        <p>On Monad testnet. Permanent. Verifiable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container narrow">
+    <h2>Sources</h2>
+    <p class="desc">Read-only connections across every major channel.</p>
+    <div class="sources">
+      <div class="source-item"><strong>WhatsApp</strong><span>Chrome extension uses your live session</span></div>
+      <div class="source-item"><strong>Telegram</strong><span>Bot API, add to any group</span></div>
+      <div class="source-item"><strong>Twitter / X</strong><span>Jina Reader, no API key</span></div>
+      <div class="source-item"><strong>Gmail</strong><span>Google OAuth 2.0</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container narrow voice-section">
+    <h2>Voice</h2>
+    <p>Mark a group as priority. When they send something important, Vigil reads it aloud. Say "check messages" for a spoken recap.</p>
+    <a href="#demo" class="btn btn-primary">Enable Voice</a>
+  </div>
+</section>
+
+<section class="section cta-section" id="demo">
+  <div class="container narrow">
+    <h2>Start monitoring</h2>
+    <p class="desc">No signup. Connect one source. See alerts immediately.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Try the Demo</a>
+      <a href="#" class="btn">View on GitHub</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Spark Hackathon &middot; Monad Testnet</div>
+</footer>
+
+</body>
+</html>

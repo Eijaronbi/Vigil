@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     gmail_oauth_client_id: str = ""
     gmail_oauth_client_secret: str = ""
     gmail_oauth_refresh_token: str = ""
+    groq_api_key: str = ""
+    groq_model: str = "llama-3.3-70b-versatile"
     openrouter_api_key: str = ""
     openrouter_model: str = "openai/gpt-4o-mini"
     importance_threshold: int = 6

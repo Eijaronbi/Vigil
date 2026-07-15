@@ -4,10 +4,14 @@ import httpx
 
 
 class LLMScorer:
-    def __init__(self, api_key: str, model: str = "openai/gpt-4o-mini"):
+    def __init__(self, api_key: str, model: str = "llama-3.3-70b-versatile", base_url: str | None = None):
         self.api_key = api_key
         self.model = model
-        self.api_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.base_url = base_url or "https://api.groq.com/openai/v1"
+
+    @property
+    def api_url(self) -> str:
+        return f"{self.base_url.rstrip('/')}/chat/completions"
 
     async def score(
         self,

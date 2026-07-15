@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Terminal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg: #0A0A0A;
+  --c-surface: #111111;
+  --c-surface-2: #1A1A1A;
+  --c-text: #E0E0E0;
+  --c-text-secondary: #707070;
+  --c-accent: #00FF41;
+  --c-accent-dim: rgba(0,255,65,0.15);
+  --c-amber: #FFB000;
+  --c-border: #222222;
+  --c-card: #111111;
+  --ff-mono: 'IBM Plex Mono', monospace;
+  --ff-sans: 'IBM Plex Sans', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-sans); background: var(--c-bg); color: var(--c-text); line-height: 1.6; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+a { text-decoration: none; color: inherit; }
+body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px); z-index: 9999; }
+
+/* Variation tabs */
+.variation-bar {
+  position: fixed; top: 56px; left: 0; right: 0; z-index: 99;
+  background: var(--c-surface); border-bottom: 1px solid var(--c-border);
+  overflow-x: auto; white-space: nowrap;
+  display: flex; gap: 0;
+}
+.variation-bar::-webkit-scrollbar { height: 2px; }
+.variation-bar::-webkit-scrollbar-thumb { background: var(--c-border); }
+.var-btn {
+  flex-shrink: 0; padding: 10px 16px; font-family: var(--ff-mono); font-size: 0.7rem;
+  color: var(--c-text-secondary); background: transparent; border: none;
+  border-right: 1px solid var(--c-border); cursor: pointer;
+  text-transform: uppercase; letter-spacing: 0.08em; transition: all 0.15s;
+}
+.var-btn:hover { color: var(--c-text); }
+.var-btn.active { color: var(--c-accent); background: var(--c-accent-dim); }
+.var-btn .num { color: var(--c-accent); margin-right: 6px; }
+
+/* Nav */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--c-border); background: var(--c-bg); }
+nav .container { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.logo { font-family: var(--ff-mono); font-weight: 600; font-size: 1rem; color: var(--c-accent); letter-spacing: 0.05em; }
+.logo::before { content: '> '; color: var(--c-text-secondary); }
+.nav-links { display: flex; gap: 24px; font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.1em; }
+.nav-links a { position: relative; transition: color 0.15s; }
+.nav-links a:hover { color: var(--c-accent); }
+.nav-links a::before { content: '[ '; color: var(--c-text-secondary); }
+.nav-links a::after { content: ' ]'; color: var(--c-text-secondary); }
+.nav-cta { background: transparent; color: var(--c-accent); border: 1px solid var(--c-accent); padding: 8px 20px; font-family: var(--ff-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s; }
+.nav-cta:hover { background: var(--c-accent); color: var(--c-bg); }
+
+/* Hero */
+.hero { padding: 150px 0 80px; }
+.hero-content { max-width: 800px; }
+.hero .cursor-line { font-family: var(--ff-mono); font-size: 0.8rem; color: var(--c-text-secondary); margin-bottom: 20px; }
+.hero .cursor-line span { color: var(--c-accent); }
+.hero h1 { font-family: var(--ff-mono); font-weight: 500; font-size: 2.8rem; line-height: 1.2; letter-spacing: -0.02em; color: var(--c-text); transition: opacity 0.3s; }
+.hero h1 span { color: var(--c-accent); }
+.hero p { font-family: var(--ff-mono); font-size: 0.9rem; color: var(--c-text-secondary); margin: 20px 0 32px; max-width: 560px; line-height: 1.7; }
+.hero-actions { display: flex; gap: 16px; align-items: center; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--c-accent); color: var(--c-bg); padding: 12px 28px; font-family: var(--ff-mono); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: none; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--c-text); padding: 12px 28px; font-family: var(--ff-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid var(--c-border); cursor: pointer; transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: var(--c-accent); color: var(--c-accent); }
+
+.terminal-block { margin-top: 48px; background: var(--c-surface); border: 1px solid var(--c-border); padding: 20px 24px; font-family: var(--ff-mono); font-size: 0.8rem; }
+.terminal-block .line { margin-bottom: 6px; }
+.terminal-block .line:last-child { margin-bottom: 0; }
+.terminal-block .prompt { color: var(--c-text-secondary); }
+.terminal-block .prompt::before { content: '$ '; color: var(--c-accent); }
+.terminal-block .highlight { color: var(--c-accent); }
+.terminal-block .warn { color: var(--c-amber); }
+
+.section { padding: 80px 0; border-top: 1px solid var(--c-border); }
+.section-header { margin-bottom: 48px; }
+.section-header .kicker { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+.section-header .kicker::before { content: '# '; color: var(--c-accent); }
+.section-header h2 { font-family: var(--ff-sans); font-weight: 600; font-size: 2.2rem; letter-spacing: -0.02em; color: var(--c-text); }
+.section-header p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); margin-top: 8px; }
+
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--c-border); }
+.step { background: var(--c-surface-2); padding: 28px 24px; }
+.step .num { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-accent); margin-bottom: 8px; }
+.step h3 { font-family: var(--ff-sans); font-weight: 600; font-size: 1rem; margin-bottom: 8px; }
+.step p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); line-height: 1.6; }
+
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--c-border); }
+.source-card { background: var(--c-surface-2); padding: 28px 24px; }
+.source-card h3 { font-family: var(--ff-sans); font-weight: 600; font-size: 1rem; margin-bottom: 6px; }
+.source-card p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); }
+.source-protocol { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-accent); margin-bottom: 10px; }
+
+.voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.voice-list { list-style: none; }
+.voice-list li { padding: 14px 0; border-bottom: 1px solid var(--c-border); font-family: var(--ff-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+.voice-list li:last-child { border-bottom: none; }
+.voice-list li::before { content: '>'; color: var(--c-accent); font-family: var(--ff-mono); }
+
+.cta-section { text-align: center; border-top: 1px solid var(--c-border); }
+.cta-section h2 { font-family: var(--ff-sans); font-weight: 600; font-size: 2rem; letter-spacing: -0.02em; }
+.cta-section p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); max-width: 440px; margin: 10px auto 28px; }
+
+footer { border-top: 1px solid var(--c-border); padding: 48px 0; }
+footer .container { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; }
+footer h4 { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+footer a { display: block; font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); margin-bottom: 8px; transition: color 0.15s; }
+footer a:hover { color: var(--c-text); }
+footer .logo { font-size: 1rem; margin-bottom: 12px; }
+footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); }
+.footer-bottom { border-top: 1px solid var(--c-border); margin-top: 32px; padding-top: 20px; text-align: center; font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); }
+
+@media (max-width: 900px) {
+  .steps, .sources-grid { grid-template-columns: 1fr 1fr; }
+  .voice-grid { grid-template-columns: 1fr; }
+  footer .container { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2rem; }
+}
+@media (max-width: 560px) {
+  .steps, .sources-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.6rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="container">
+<a href="#" class="logo">vigil</a>
+<div class="nav-links">
+<a href="#">home</a>
+<a href="#how">how it works</a>
+<a href="#sources">sources</a>
+<a href="#voice">voice</a>
+</div>
+<button class="nav-cta">_deploy</button>
+</div>
+</nav>
+
+<div class="variation-bar" id="varBar">
+<button class="var-btn active" data-var="0"><span class="num">01</span> never miss what matters</button>
+<button class="var-btn" data-var="1"><span class="num">02</span> your inboxes, on alert</button>
+<button class="var-btn" data-var="2"><span class="num">03</span> hear what you'd miss</button>
+<button class="var-btn" data-var="3"><span class="num">04</span> every channel, one voice</button>
+<button class="var-btn" data-var="4"><span class="num">05</span> AI that reads</button>
+<button class="var-btn" data-var="5"><span class="num">06</span> before you look</button>
+<button class="var-btn" data-var="6"><span class="num">07</span> read the room</button>
+<button class="var-btn" data-var="7"><span class="num">08</span> ears across channels</button>
+<button class="var-btn" data-var="8"><span class="num">09</span> never read again</button>
+<button class="var-btn" data-var="9"><span class="num">10</span> alert for everywhere</button>
+</div>
+
+<section class="hero">
+<div class="container">
+<div class="hero-content" id="heroContent">
+<div class="cursor-line"><span>●</span> <span id="statusLine">system ready</span> — monitoring <span id="sourceCount">4</span> sources</div>
+<h1 id="heroTitle">Never miss <span>what matters.</span></h1>
+<p id="heroSub">You can't read every message. Vigil reads them for you — aloud. It listens across WhatsApp, Telegram, Twitter, and Gmail. When it detects messages you classify as important, it speaks up. Hands-free awareness, always on.</p>
+<div class="hero-actions">
+<button class="btn-primary">deploy now →</button>
+<button class="btn-secondary">read the docs</button>
+</div>
+<div class="terminal-block">
+<div class="line"><span class="prompt">vigil --init</span> connecting sources...</div>
+<div class="line"><span class="prompt">✓</span> WhatsApp <span class="highlight">connected</span></div>
+<div class="line"><span class="prompt">✓</span> Telegram <span class="highlight">connected</span></div>
+<div class="line"><span class="prompt">✓</span> Twitter <span class="highlight">connected</span></div>
+<div class="line"><span class="prompt">✓</span> Gmail <span class="highlight">connected</span></div>
+<div class="line"><span class="prompt">●</span> classifier <span class="highlight">active</span> | alerts <span class="highlight">armed</span> | chain <span class="warn">monad-testnet</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="how">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Protocol</div>
+<h2>How It Works</h2>
+<p>Four operations. One pipeline.</p>
+</div>
+<div class="steps">
+<div class="step">
+<div class="num">01_connect</div>
+<h3>Connect</h3>
+<p>Authenticate your messaging accounts through secure OAuth. Vigil maintains persistent connections to WhatsApp, Telegram, Twitter, and Gmail.</p>
+</div>
+<div class="step">
+<div class="num">02_classify</div>
+<h3>Classify</h3>
+<p>Every message passes through the AI classifier — urgency scoring, spam filtering, sender reputation. It knows what matters to you.</p>
+</div>
+<div class="step">
+<div class="num">03_alert</div>
+<h3>Alert</h3>
+<p>High-priority messages trigger voice alerts through your speakers. Say "check messages" to hear a summary of everything you missed.</p>
+</div>
+<div class="step">
+<div class="num">04_attest</div>
+<h3>Attest</h3>
+<p>Critical messages are hashed and attested on Monad testnet. Tamper-proof records with on-chain timestamps. Public. Permanent.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="sources">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Integrations</div>
+<h2>Supported Sources</h2>
+<p>Every channel, one interface.</p>
+</div>
+<div class="sources-grid">
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: WHATSAPP</div>
+<h3>WhatsApp</h3>
+<p>Monitor individual and group conversations. Chrome extension hooks into your WhatsApp Web session. No separate login needed.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: TELEGRAM</div>
+<h3>Telegram</h3>
+<p>Official Bot API — channels, supergroups, and private chats. Add the bot to any group and it watches in real time.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: TWITTER</div>
+<h3>Twitter / X</h3>
+<p>DMs, mentions, keyword tracking, and list feeds. Jina Reader polls accounts — no API key, no login, read-only.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: GMAIL</div>
+<h3>Gmail</h3>
+<p>Official Google OAuth 2.0. Watches your inbox for urgent senders, keywords, and priority labels. Push notifications.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="voice">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Audio</div>
+<h2>Voice Alerts</h2>
+<p>Hear what matters.</p>
+</div>
+<div class="voice-grid">
+<div>
+<ul class="voice-list">
+<li>Real-time voice alerts on priority messages</li>
+<li>"Check messages" wakes the system — hear what you missed</li>
+<li>AI reads message content aloud in natural voice</li>
+<li>Configurable quiet hours with emergency bypass</li>
+<li>Multi-device audio output — speakers, headphones, anything</li>
+</ul>
+</div>
+<div>
+<div class="terminal-block">
+<div class="line"><span class="prompt">$</span> voice alert — priority: high</div>
+<div class="line"><span class="prompt">→</span> source: gmail | sender: ops@company.com</div>
+<div class="line"><span class="prompt">→</span> subject: "Production database failing"</div>
+<div class="line"><span class="warn">◆ speaking alert...</span></div>
+<div class="line"><span class="prompt">→</span> "Urgent: production database is down in us-east-1"</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section cta-section">
+<div class="container">
+<h2>Try Vigil in 30 Seconds</h2>
+<p>No account. No credit card. Connect a source and hear your first alert.</p>
+<div class="hero-actions" style="justify-content: center;">
+<button class="btn-primary">deploy now →</button>
+<button class="btn-secondary">view on github</button>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<div>
+<div class="logo">vigil</div>
+<p>Multi-source message monitoring with AI classification, voice alerts, and on-chain attestation on Monad testnet.</p>
+</div>
+<div>
+<h4>Product</h4>
+<a href="#how">How It Works</a>
+<a href="#sources">Sources</a>
+<a href="#voice">Voice Alerts</a>
+<a href="#">Pricing</a>
+</div>
+<div>
+<h4>Connect</h4>
+<a href="#">Documentation</a>
+<a href="#">GitHub</a>
+<a href="#">Status</a>
+<a href="#">Contact</a>
+</div>
+</div>
+<div class="container"><div class="footer-bottom">© 2026 Vigil — Spark Hackathon on Monad Testnet</div></div>
+</footer>
+
+<script>
+(function(){
+  var vars = [
+    {
+      status: "never miss what matters",
+      title: 'Never miss <span>what matters.</span>',
+      sub: 'You can\'t read every message. Vigil reads them for you — aloud. It listens across WhatsApp, Telegram, Twitter, and Gmail. When it detects messages you classify as important, it speaks up. Hands-free awareness, always on.'
+    },
+    {
+      status: "your inboxes on alert",
+      title: 'Your inboxes, <span>on alert.</span>',
+      sub: 'Every message across WhatsApp, Telegram, Twitter, and Gmail is monitored 24/7. When something urgent comes in, Vigil sounds off. Voice alerts. Telegram push. Email digest. You choose the channel.'
+    },
+    {
+      status: "hear what matters",
+      title: 'Hear what you\'d <span>otherwise miss.</span>',
+      sub: 'You can\'t read every message. Vigil reads them for you — aloud. It listens across WhatsApp, Telegram, Twitter, and Gmail. When it detects something important, it speaks up. Hands-free awareness, always on.'
+    },
+    {
+      status: "one voice for all channels",
+      title: 'Every channel. <span>One voice.</span>',
+      sub: 'Four sources. One alert system. WhatsApp, Telegram, Twitter, and Gmail all feed into the same AI-powered pipeline. Classification. Alerts. Voice readout. On-chain attestation. Unified.'
+    },
+    {
+      status: "AI classifier active",
+      title: 'AI that reads <span>every message.</span>',
+      sub: 'AI doesn\'t sleep. It scans every message from WhatsApp, Telegram, Twitter, and Gmail — scores urgency, detects spam, flags senders. Only the important ones reach you. No noise. Just signal.'
+    },
+    {
+      status: "proactive alert system",
+      title: 'Before you <span>even look.</span>',
+      sub: 'Why check your messages when your messages can check you? Vigil monitors all four channels in real time. When something urgent drops, you hear it instantly. No refreshing. No scrolling.'
+    },
+    {
+      status: "multi-channel awareness",
+      title: 'Read the room. <span>All of them.</span>',
+      sub: 'WhatsApp groups. Telegram channels. Twitter DMs. Gmail threads. Vigil keeps a pulse on all of them simultaneously. AI classifies the noise. Voice alerts cut through it. You stay aware.'
+    },
+    {
+      status: "voice-first monitoring",
+      title: 'Your ears across <span>every channel.</span>',
+      sub: 'Let Vigil be your ears. It connects to WhatsApp, Telegram, Twitter, and Gmail. Listens 24/7. AI decides what matters. Then speaks it out loud. You go about your day, never out of the loop.'
+    },
+    {
+      status: "hands-free alerts",
+      title: 'Never read another <span>urgent message.</span>',
+      sub: 'Let Vigil do the reading. It watches WhatsApp, Telegram, Twitter, and Gmail. AI flags the critical ones. Voice reads them aloud. You stay informed without lifting a finger.'
+    },
+    {
+      status: "full coverage",
+      title: 'The alert system for <span>everywhere.</span>',
+      sub: 'WhatsApp, Telegram, Twitter, Gmail. Vigil connects to all four. AI classifies. Voice alerts notify. On-chain records prove. One system. Every channel. Never miss what matters.'
+    }
+  ];
+
+  var titleEl = document.getElementById('heroTitle');
+  var subEl = document.getElementById('heroSub');
+  var statusEl = document.getElementById('statusLine');
+  var varBtns = document.querySelectorAll('.var-btn');
+  var sourceCount = document.getElementById('sourceCount');
+
+  function switchVar(index) {
+    var v = vars[index];
+    titleEl.innerHTML = v.title;
+    subEl.textContent = v.sub;
+    statusEl.textContent = v.status;
+    varBtns.forEach(function(b, i) {
+      b.classList.toggle('active', i === index);
+    });
+  }
+
+  varBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      switchVar(parseInt(btn.getAttribute('data-var')));
+    });
+  });
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', function(e) {
+    var n = parseInt(e.key);
+    if (n >= 1 && n <= 9) switchVar(n - 1);
+    if (n === 0) switchVar(9);
+  });
+})();
+</script>
+</body>
+</html>

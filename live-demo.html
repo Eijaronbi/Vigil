@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Live Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0b;
+      color: #f0efed;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .container { max-width: 600px; margin: 0 auto; padding: 40px 24px; flex: 1; }
+
+    h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    .status {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 16px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      margin-bottom: 32px;
+    }
+    .status .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .status.connected { background: rgba(34,197,94,0.1); color: #22c55e; }
+    .status.connected .dot { background: #22c55e; }
+    .status.disconnected { background: rgba(239,68,68,0.1); color: #ef4444; }
+    .status.disconnected .dot { background: #ef4444; }
+
+    .controls { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .input-group { display: flex; gap: 8px; }
+    .input-group input {
+      flex: 1; padding: 12px 16px; background: #111; border: 1px solid #1e1e1e;
+      color: #f0efed; font-size: 14px; font-family: inherit; border-radius: 8px;
+    }
+    .input-group input::placeholder { color: #444; }
+    .input-group input:focus { outline: none; border-color: #a78bfa; }
+
+    .btn {
+      padding: 12px 24px; border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap;
+    }
+    .btn-primary { background: #a78bfa; color: #0a0a0b; }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-secondary { background: #1a1a1a; color: #f0efed; border: 1px solid #2a2a2e; }
+    .btn-secondary:hover { border-color: #555; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { opacity: 0.9; }
+
+    .presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+    .preset-btn {
+      padding: 6px 14px; font-size: 12px; background: #111;
+      border: 1px solid #1e1e1e; color: #888; border-radius: 6px;
+      cursor: pointer; font-family: inherit; transition: all 0.15s;
+    }
+    .preset-btn:hover { border-color: #555; color: #f0efed; }
+
+    .log { border: 1px solid #1e1e1e; border-radius: 12px; padding: 16px; max-height: 300px; overflow-y: auto; }
+    .log h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: #555; margin-bottom: 12px; }
+    .log-entry { padding: 10px 0; border-bottom: 1px solid #141414; font-size: 13px; }
+    .log-entry:last-child { border-bottom: none; }
+    .log-entry .time { color: #555; font-size: 11px; }
+    .log-entry .msg { color: #ccc; margin-top: 2px; }
+    .log-entry .speaking { color: #22c55e; font-size: 11px; margin-top: 2px; }
+
+    .voice-indicator {
+      display: none; align-items: center; gap: 8px;
+      padding: 12px 16px; background: rgba(34,197,94,0.08);
+      border: 1px solid rgba(34,197,94,0.2); border-radius: 8px;
+      margin-bottom: 16px; font-size: 14px; color: #22c55e;
+    }
+    .voice-indicator.active { display: flex; }
+    .voice-indicator .pulse { width: 8px; height: 8px; border-radius: 50%; background: #22c55e; animation: pulse 1s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    footer { text-align: center; padding: 24px; font-size: 13px; color: #444; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vigil &mdash; Live Demo</h1>
+    <div class="presets">
+      <button class="preset-btn" data-msg="Deal alert from Deals Group. Price target at forty five hundred.">Deal alert</button>
+      <button class="preset-btn" data-msg="Priority message from Joy. Meeting confirmed for tomorrow.">Priority msg</button>
+      <button class="preset-btn" data-msg="Urgent: Server outage detected in us-east-1.">Urgent alert</button>
+      <button class="preset-btn" data-msg="New lead from Acme Corp. Budget is 50k.">New lead</button>
+      <button class="preset-btn" data-msg="Reminder: Deadline for Q3 report is this Friday.">Deadline</button>
+    </div>
+
+    <div id="voiceIndicator" class="voice-indicator">
+      <div class="pulse"></div>
+      <span>Speaking now...</span>
+    </div>
+
+    <div class="status disconnected" id="status">
+      <span class="dot"></span>
+      <span>Disconnected</span>
+    </div>
+
+    <div class="controls">
+      <div class="input-group">
+        <input type="text" id="messageInput" placeholder="Type a test message..." value="Deal alert from Deals Group. Price target at forty five hundred.">
+        <button class="btn btn-primary" id="sendBtn">Send &amp; Speak</button>
+      </div>
+      <button class="btn btn-secondary" id="checkBtn">Say "check messages"</button>
+    </div>
+
+    <div class="log" id="log">
+      <h3>Activity Log</h3>
+      <div style="color:#444; font-size:13px;">Send a message to hear it spoken aloud.</div>
+    </div>
+  </div>
+
+  <footer>Vigil &middot; Spark Hackathon &middot; Monad Testnet</footer>
+
+  <script>
+    (function() {
+      var API = "http://localhost:8080";
+      var ws = null;
+      var statusEl = document.getElementById("status");
+      var logEl = document.getElementById("log");
+      var indicator = document.getElementById("voiceIndicator");
+      var msgInput = document.getElementById("messageInput");
+      var sendBtn = document.getElementById("sendBtn");
+      var checkBtn = document.getElementById("checkBtn");
+      var audioEl = new Audio();
+      var isSpeaking = false;
+
+      function connect() {
+        try {
+          ws = new WebSocket("ws://localhost:8080/ws");
+          ws.onopen = function() {
+            statusEl.className = "status connected";
+            statusEl.innerHTML = '<span class="dot"></span><span>Connected to Vigil</span>';
+            addLog("WebSocket connected");
+          };
+          ws.onmessage = function(event) {
+            try {
+              var data = JSON.parse(event.data);
+              if (data.type === "alert" || data.type === "priority_alert") {
+                var text = data.summary || ("Alert from " + data.group + ". " + data.sender + ". " + data.text);
+                addLog("Alert received from " + (data.group || "?") + " &mdash; score: " + data.score, true);
+                speakText(text, data.type === "priority_alert");
+              }
+            } catch(e) {
+              addLog("WebSocket parse error: " + e.message);
+            }
+          };
+          ws.onclose = function() {
+            statusEl.className = "status disconnected";
+            statusEl.innerHTML = '<span class="dot"></span><span>Disconnected. Retrying in 5s...</span>';
+            addLog("WebSocket disconnected");
+            ws = null;
+            setTimeout(connect, 5000);
+          };
+          ws.onerror = function() {
+            if (ws) ws.close();
+          };
+        } catch(e) {
+          addLog("WebSocket error: " + e.message);
+          setTimeout(connect, 5000);
+        }
+      }
+
+      function speakText(text, force) {
+        if (!text) return;
+        if (isSpeaking) {
+          audioEl.pause();
+          audioEl = new Audio();
+          isSpeaking = false;
+        }
+        addLog("Fetching TTS...");
+        indicator.className = "voice-indicator active";
+        fetch(API + "/api/tts?text=" + encodeURIComponent(text), { cache: "no-store" })
+          .then(function(r) {
+            if (!r.ok) throw new Error("TTS returned " + r.status);
+            return r.blob();
+          })
+          .then(function(blob) {
+            var url = URL.createObjectURL(blob);
+            audioEl = new Audio(url);
+            audioEl.onended = function() {
+              isSpeaking = false;
+              indicator.className = "voice-indicator";
+              URL.revokeObjectURL(url);
+              addLog("Finished speaking");
+            };
+            audioEl.onerror = function() {
+              isSpeaking = false;
+              indicator.className = "voice-indicator";
+              URL.revokeObjectURL(url);
+              addLog("TTS playback error, falling back to browser voice");
+              fallbackSpeak(text);
+            };
+            isSpeaking = true;
+            audioEl.play();
+            addLog("Speaking via Edge Neural TTS");
+          })
+          .catch(function(err) {
+            indicator.className = "voice-indicator";
+            addLog("TTS server error: " + err.message + ", falling back to browser voice");
+            fallbackSpeak(text);
+          });
+      }
+
+      function fallbackSpeak(text) {
+        if (!window.speechSynthesis) {
+          addLog("No speech synthesis available");
+          return;
+        }
+        var utter = new SpeechSynthesisUtterance(text);
+        utter.rate = 0.9;
+        utter.onstart = function() {
+          isSpeaking = true;
+          indicator.className = "voice-indicator active";
+        };
+        utter.onend = function() {
+          isSpeaking = false;
+          indicator.className = "voice-indicator";
+        };
+        utter.onerror = function() {
+          isSpeaking = false;
+          indicator.className = "voice-indicator";
+        };
+        window.speechSynthesis.speak(utter);
+      }
+
+      function addLog(html, isAlert) {
+        var entry = document.createElement("div");
+        entry.className = "log-entry";
+        var time = new Date().toLocaleTimeString();
+        entry.innerHTML = '<div class="time">' + time + '</div><div class="msg' + (isAlert ? '" style="color:#a78bfa"' : '"') + '>' + html + '</div>';
+        var first = logEl.querySelector(".log-entry");
+        if (first) {
+          logEl.insertBefore(entry, first);
+        } else {
+          logEl.appendChild(entry);
+        }
+      }
+
+      function sendMessage() {
+        var text = msgInput.value.trim();
+        if (!text) return;
+
+        addLog("Sending: \"" + text.substring(0, 60) + "...\"");
+
+        fetch(API + "/api/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            source: "telegram",
+            group_name: "Demo Group",
+            sender: "Demo User",
+            text: text
+          })
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          addLog("Message saved (id: " + data.id + ", score: " + (data.importance_score || "pending") + ")");
+          speakText("Demo alert: " + text, true);
+        })
+        .catch(function(err) {
+          addLog("API error: " + err.message);
+          speakText("Demo alert: " + text, true);
+        });
+      }
+
+      document.querySelectorAll(".preset-btn").forEach(function(btn) {
+        btn.addEventListener("click", function() {
+          msgInput.value = btn.getAttribute("data-msg");
+        });
+      });
+
+      sendBtn.addEventListener("click", sendMessage);
+      msgInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") sendMessage();
+      });
+
+      checkBtn.addEventListener("click", function() {
+        speakText("You have 3 important alerts. Deal alert from Deals Group. Priority message from Joy. Server outage alert.");
+        addLog("Voice: \"You have 3 important alerts...\"");
+      });
+
+      connect();
+    })();
+  </script>
+</body>
+</html>

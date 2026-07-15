@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Technical</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #fafafa;
+      color: #1a1a2e;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .layout { display: flex; min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      flex-shrink: 0;
+      background: #1a1a2e;
+      color: #ccc;
+      padding: 32px 0;
+      position: sticky; top: 0; height: 100vh;
+      overflow-y: auto;
+    }
+    .sidebar .logo {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      color: #7c3aed;
+      padding: 0 24px 24px;
+      display: block;
+      border-bottom: 1px solid #2a2a4e;
+      margin-bottom: 16px;
+    }
+    .sidebar nav { display: flex; flex-direction: column; }
+    .sidebar a {
+      padding: 8px 24px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #888;
+      border-left: 2px solid transparent;
+      transition: all 0.1s;
+    }
+    .sidebar a:hover, .sidebar a.active { color: #fff; background: rgba(124,58,237,0.1); border-left-color: #7c3aed; }
+
+    .main { flex: 1; min-width: 0; padding: 48px;}
+    .container { max-width: 780px; }
+
+    .nav-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 48px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .breadcrumb {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #888;
+    }
+    .breadcrumb span { color: #7c3aed; }
+
+    .hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 17px;
+      color: #555;
+      max-width: 600px;
+      margin-bottom: 32px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      font-weight: 500;
+      border: 1px solid;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: #7c3aed; color: #fff; border-color: #7c3aed; }
+    .btn-primary:hover { background: #6d28d9; }
+    .btn-outline { border-color: #ccc; color: #555; }
+    .btn-outline:hover { border-color: #7c3aed; color: #7c3aed; }
+
+    .badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 8px;
+      background: #ede9fe;
+      color: #7c3aed;
+      border-radius: 0;
+      margin-bottom: 16px;
+    }
+
+    .section { padding: 64px 0; }
+    .section h2 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding: 20px 0;
+      border-bottom: 1px solid #eee;
+    }
+    .step:first-child { border-top: 1px solid #eee; }
+    .step-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: #7c3aed;
+      background: #f5f3ff;
+      padding: 4px 8px;
+      min-width: 90px;
+      text-align: center;
+    }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+    .step-body span { font-size: 15px; color: #666; }
+
+    .sources { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #e0e0e0; }
+    .source-item {
+      padding: 20px;
+      border-bottom: 1px solid #e0e0e0;
+      border-right: 1px solid #e0e0e0;
+    }
+    .source-item:nth-child(even) { border-right: none; }
+    .source-item:nth-last-child(-n+2) { border-bottom: none; }
+    .source-item .icon { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #7c3aed; margin-bottom: 4px; }
+    .source-item strong { display: block; font-size: 15px; }
+    .source-item span { font-size: 14px; color: #666; }
+
+    pre {
+      background: #1a1a2e;
+      color: #e0e0e0;
+      padding: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 32px 0;
+      overflow-x: auto;
+    }
+    pre .highlight { color: #7c3aed; }
+
+    footer { padding: 24px 0; text-align: center; font-size: 13px; color: #888; font-family: 'JetBrains Mono', monospace; border-top: 1px solid #e0e0e0; }
+
+    @media (max-width: 720px) {
+      .sidebar { display: none; }
+      .main { padding: 24px; }
+      .sources { grid-template-columns: 1fr; }
+      .source-item { border-right: none; }
+      .source-item:nth-last-child(-n+2) { border-bottom: 1px solid #e0e0e0; }
+      .source-item:last-child { border-bottom: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <a href="#" class="logo">vigil/</a>
+    <nav>
+      <a href="#" class="active">readme.md</a>
+      <a href="#how">architecture.md</a>
+      <a href="#sources">sources.md</a>
+      <a href="#voice">voice.md</a>
+      <a href="#demo">quickstart.md</a>
+    </nav>
+  </aside>
+
+  <div class="main">
+    <div class="container">
+      <div class="nav-bar">
+        <div class="breadcrumb">vigil/ <span>readme.md</span></div>
+        <a href="#demo" class="btn btn-primary">Try Demo</a>
+      </div>
+
+      <section class="hero">
+        <div class="badge">v0.1.0 &middot; spark-hackathon</div>
+        <h1>Never miss what matters</h1>
+        <p>Multi-source message monitor for WhatsApp, Telegram, Twitter, and Gmail. Hybrid AI classifier. Telegram, email, and voice alerts. On-chain attestation on Monad testnet.</p>
+        <a href="#how" class="btn btn-outline">Read the docs</a>
+      </section>
+
+      <section class="section" id="how">
+        <h2>Architecture</h2>
+        <pre>vigil/<br>  backend/          # FastAPI + Celery + SQLite<br>    watchers/        # Connectors per source<br>    classifier/      # Rules + LLM scorer<br>    dispatcher/      # Telegram, email, TTS<br>    routers/         # REST + dashboard<br>  extension/         # Chrome extension (MV3)<br>  contracts/         # AlertAttestation.sol<br>  hackathon/         # Landing page, docs</pre>
+
+        <div class="steps">
+          <div class="step">
+            <div class="step-code">collect()</div>
+            <div class="step-body">
+              <strong>Collect messages</strong>
+              <span>WhatsApp via Chrome extension. Telegram via Bot API. Twitter via Jina Reader. Gmail via OAuth.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-code">classify()</div>
+            <div class="step-body">
+              <strong>Classify with AI</strong>
+              <span>Keyword and sender rules catch instantly. LLM (Groq) scores for nuance.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-code">alert()</div>
+            <div class="step-body">
+              <strong>Send alerts</strong>
+              <span>Telegram push, email digest, or voice readout via edge-tts.</span>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-code">attest()</div>
+            <div class="step-body">
+              <strong>Attest on-chain</strong>
+              <span>keccak256 hash stored on Monad testnet. verify() returns bool.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="sources">
+        <h2>Connected Sources</h2>
+        <div class="sources">
+          <div class="source-item">
+            <div class="icon">// whatsapp</div>
+            <strong>WhatsApp</strong>
+            <span>Chrome extension hooks into live WhatsApp Web</span>
+          </div>
+          <div class="source-item">
+            <div class="icon">// telegram</div>
+            <strong>Telegram</strong>
+            <span>Bot API, add to any group</span>
+          </div>
+          <div class="source-item">
+            <div class="icon">// twitter</div>
+            <strong>Twitter / X</strong>
+            <span>Jina Reader, no API key needed</span>
+          </div>
+          <div class="source-item">
+            <div class="icon">// gmail</div>
+            <strong>Gmail</strong>
+            <span>Google OAuth 2.0</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="voice">
+        <h2>Voice Alerts</h2>
+        <p style="color:#555; margin-bottom: 20px;">Mark a group as priority. New messages are read aloud automatically. Say "check messages" for a summary.</p>
+        <pre><span class="highlight">$</span> curl http://localhost:8000/api/tts?text=Priority+message+from+Deals+Group</pre>
+      </section>
+
+      <section class="section" id="demo">
+        <h2>Quickstart</h2>
+        <p style="color:#555; margin-bottom: 20px;">No signup. Connect one source and see alerts immediately.</p>
+        <pre><span class="highlight">$</span> git clone https://github.com/vigil/monitor
+<span class="highlight">$</span> cd vigil && pip install -r requirements.txt
+<span class="highlight">$</span> uvicorn backend.main:app --reload</pre>
+        <div style="margin-top: 24px;">
+          <a href="#" class="btn btn-primary">Try the Demo</a>
+          <a href="#" class="btn btn-outline" style="margin-left: 8px;">View on GitHub</a>
+        </div>
+      </section>
+
+      <footer>
+        Spark Hackathon &middot; Monad Testnet
+      </footer>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

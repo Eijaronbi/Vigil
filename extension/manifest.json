@@ -3,8 +3,8 @@
   "name": "Vigil - Message Monitor",
   "version": "1.0.0",
   "description": "Monitors WhatsApp Web, reads important messages aloud",
-  "permissions": ["storage", "alarms", "tts"],
-  "host_permissions": ["https://web.whatsapp.com/*", "http://localhost:8000/*"],
+  "permissions": ["storage", "alarms", "tts", "notifications"],
+  "host_permissions": ["https://web.whatsapp.com/*", "http://localhost:8080/*"],
   "background": {"service_worker": "background.js"},
   "content_scripts": [{
     "matches": ["https://web.whatsapp.com/*"],

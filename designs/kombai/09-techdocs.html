@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Tech Docs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg: #F8F9FC;
+  --c-surface: #EFF1F5;
+  --c-text: #1E293B;
+  --c-text-secondary: #6B7280;
+  --c-accent: #4F6F8F;
+  --c-accent-dark: #3A5470;
+  --c-border: #D1D9E6;
+  --c-card: #FFFFFF;
+  --c-sidebar: #F1F3F8;
+  --c-code-bg: #1E293B;
+  --c-code-text: #E2E8F0;
+  --ff-sans: 'Atkinson Hyperlegible', sans-serif;
+  --ff-serif: 'Tinos', Georgia, serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-sans); color: var(--c-text); background: var(--c-bg); line-height: 1.7; }
+a { text-decoration: none; color: inherit; }
+
+/* Layout */
+.app-layout { display: flex; min-height: 100vh; }
+
+/* Sidebar */
+.sidebar { width: 260px; flex-shrink: 0; background: var(--c-sidebar); border-right: 1px solid var(--c-border); padding: 24px 0; position: fixed; top: 0; left: 0; bottom: 0; overflow-y: auto; }
+.sidebar .logo { font-family: var(--ff-serif); font-size: 1.25rem; font-weight: 700; color: var(--c-text); padding: 0 24px 24px; border-bottom: 1px solid var(--c-border); margin-bottom: 16px; display: block; }
+.sidebar .logo span { color: var(--c-accent); }
+.sidebar nav { padding: 0 16px; }
+.sidebar .nav-section { margin-bottom: 20px; }
+.sidebar .nav-section-title { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--c-text-secondary); padding: 0 8px; margin-bottom: 6px; }
+.sidebar a { display: block; padding: 6px 8px; font-size: 0.85rem; color: var(--c-text-secondary); border-radius: 4px; transition: all 0.15s; }
+.sidebar a:hover, .sidebar a.active { background: var(--c-card); color: var(--c-text); }
+.sidebar .sidebar-cta { margin: 24px 16px 0; padding: 10px 16px; background: var(--c-accent); color: white; text-align: center; font-weight: 700; font-size: 0.8rem; border: none; border-radius: 4px; cursor: pointer; display: block; transition: background 0.15s; }
+.sidebar .sidebar-cta:hover { background: var(--c-accent-dark); color: white; }
+
+/* Main */
+.main { margin-left: 260px; flex: 1; max-width: 860px; padding: 48px 56px; }
+
+/* Hero */
+.hero { margin-bottom: 56px; }
+.hero .breadcrumb { font-size: 0.78rem; color: var(--c-text-secondary); margin-bottom: 12px; }
+.hero .breadcrumb span { color: var(--c-accent); }
+.hero h1 { font-family: var(--ff-serif); font-weight: 700; font-size: 2.8rem; line-height: 1.15; letter-spacing: -0.01em; }
+.hero h1 span { color: var(--c-accent); }
+.hero p { font-size: 1.05rem; color: var(--c-text-secondary); margin: 12px 0 24px; max-width: 560px; }
+.hero-actions { display: flex; gap: 12px; }
+.btn-primary { background: var(--c-accent); color: white; padding: 12px 28px; font-weight: 700; font-size: 0.85rem; border: none; border-radius: 4px; cursor: pointer; transition: background 0.15s; }
+.btn-primary:hover { background: var(--c-accent-dark); }
+.btn-secondary { background: white; color: var(--c-text); padding: 12px 28px; font-weight: 700; font-size: 0.85rem; border: 1px solid var(--c-border); border-radius: 4px; cursor: pointer; transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: var(--c-accent); color: var(--c-accent); }
+
+/* Section content */
+.content-section { margin-bottom: 48px; }
+.content-section .section-header { margin-bottom: 24px; }
+.content-section .section-header h2 { font-family: var(--ff-serif); font-weight: 700; font-size: 1.6rem; letter-spacing: -0.01em; }
+.content-section .section-header p { font-size: 0.9rem; color: var(--c-text-secondary); margin-top: 4px; }
+
+/* Steps — table-like */
+.steps-table { width: 100%; border-collapse: collapse; }
+.steps-table .step-row { border-bottom: 1px solid var(--c-border); }
+.steps-table .step-row:last-child { border-bottom: none; }
+.steps-table .step-cell { padding: 20px 16px 20px 0; vertical-align: top; }
+.steps-table .step-num { font-family: var(--ff-serif); font-size: 1.8rem; font-weight: 700; color: var(--c-accent); opacity: 0.3; width: 40px; }
+.steps-table .step-desc h3 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+.steps-table .step-desc p { font-size: 0.85rem; color: var(--c-text-secondary); }
+
+/* Source cards */
+.sources-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.source-card { background: var(--c-card); border: 1px solid var(--c-border); border-radius: 4px; padding: 20px; }
+.source-card .source-name { font-weight: 700; font-size: 0.9rem; margin-bottom: 4px; }
+.source-card .source-name code { font-family: var(--ff-sans); font-size: 0.75rem; background: var(--c-surface); padding: 1px 6px; border-radius: 2px; color: var(--c-accent); margin-left: 6px; }
+.source-card p { font-size: 0.82rem; color: var(--c-text-secondary); }
+
+/* Code block */
+.code-block { background: var(--c-code-bg); color: var(--c-code-text); padding: 20px 24px; border-radius: 4px; font-size: 0.82rem; line-height: 1.7; overflow-x: auto; margin: 16px 0; }
+.code-block .comment { color: #64748B; }
+.code-block .keyword { color: #93C5FD; }
+.code-block .string { color: #86EFAC; }
+
+/* Voice */
+.voice-features { columns: 2; column-gap: 24px; list-style: none; }
+.voice-features li { break-inside: avoid; padding: 10px 0; border-bottom: 1px solid var(--c-border); font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
+.voice-features li::before { content: '›'; color: var(--c-accent); font-weight: 700; font-size: 1.1rem; }
+
+/* CTA */
+.cta-box { background: var(--c-card); border: 1px solid var(--c-border); border-radius: 4px; padding: 32px; text-align: center; }
+.cta-box h2 { font-family: var(--ff-serif); font-weight: 700; font-size: 1.6rem; }
+.cta-box p { color: var(--c-text-secondary); margin: 8px 0 20px; font-size: 0.9rem; }
+
+/* Footer */
+footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid var(--c-border); display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--c-text-secondary); }
+footer a { color: var(--c-accent); }
+footer a:hover { text-decoration: underline; }
+
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px; }
+  .sources-grid { grid-template-columns: 1fr; }
+  .voice-features { columns: 1; }
+}
+@media (max-width: 560px) {
+  .hero h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+
+<div class="sidebar">
+<a href="#" class="logo">Vigil<span>.</span></a>
+<nav>
+<div class="nav-section">
+<div class="nav-section-title">Getting Started</div>
+<a href="#" class="active">Overview</a>
+<a href="#how">Architecture</a>
+<a href="#sources">Source Integrations</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Core Features</div>
+<a href="#voice">Voice Alerts</a>
+<a href="#">AI Classification</a>
+<a href="#">On-Chain Attestation</a>
+</div>
+<div class="nav-section">
+<div class="nav-section-title">Resources</div>
+<a href="#">API Reference</a>
+<a href="#">CLI Guide</a>
+<a href="#">GitHub</a>
+</div>
+</nav>
+<a href="#" class="sidebar-cta">Try Vigil →</a>
+</div>
+
+<div class="main">
+
+<section class="hero">
+<div class="breadcrumb">vigil / <span>getting-started</span></div>
+<h1>Multi-Source <span>Message Monitor</span></h1>
+<p>Vigil connects to WhatsApp, Telegram, Twitter, and Gmail. AI classification filters noise. Voice alerts keep you informed. On-chain attestation on Monad testnet provides immutable proof.</p>
+<div class="hero-actions">
+<button class="btn-primary">Quick Start →</button>
+<button class="btn-secondary">View on GitHub</button>
+</div>
+
+<div class="code-block">
+<span class="comment"># Install Vigil and start monitoring</span><br>
+<span class="keyword">npx</span> vigil init<br>
+<span class="comment"># Connecting to 4 sources...</span><br>
+<span class="string">✓</span> WhatsApp connected<br>
+<span class="string">✓</span> Telegram connected<br>
+<span class="string">✓</span> Twitter connected<br>
+<span class="string">✓</span> Gmail connected<br>
+<span class="comment"># Classifier active. Voice alerts armed.</span>
+</div>
+</section>
+
+<section class="content-section" id="how">
+<div class="section-header">
+<h2>Architecture</h2>
+<p>How Vigil processes messages from ingestion to on-chain proof.</p>
+</div>
+
+<table class="steps-table">
+<tr class="step-row">
+<td class="step-cell step-num">01</td>
+<td class="step-cell step-desc">
+<h3>Connect</h3>
+<p>OAuth-authenticated connections establish persistent WebSocket listeners on each messaging platform. Auto-reconnect with exponential backoff.</p>
+</td>
+</tr>
+<tr class="step-row">
+<td class="step-cell step-num">02</td>
+<td class="step-cell step-desc">
+<h3>Classify</h3>
+<p>Messages pass through the AI classifier — urgency scoring, spam detection, sender reputation. Each message receives a priority label: Low, Medium, High, or Critical.</p>
+</td>
+</tr>
+<tr class="step-row">
+<td class="step-cell step-num">03</td>
+<td class="step-cell step-desc">
+<h3>Alert</h3>
+<p>High and Critical priority messages trigger the voice alert system. The "check messages" voice command triggers a queue readout of unread priority items.</p>
+</td>
+</tr>
+<tr class="step-row">
+<td class="step-cell step-num">04</td>
+<td class="step-cell step-desc">
+<h3>Attest</h3>
+<p>Critical messages are hashed (SHA-256) and attested on the Monad testnet. Each attestation includes timestamp, source, and message fingerprint.</p>
+</td>
+</tr>
+</table>
+</section>
+
+<section class="content-section" id="sources">
+<div class="section-header">
+<h2>Source Integrations</h2>
+<p>Platforms currently supported by Vigil.</p>
+</div>
+
+<div class="sources-grid">
+<div class="source-card">
+<div class="source-name">WhatsApp <code>v1</code></div>
+<p>Personal and group chat monitoring via WebSocket. Encrypted session handling with persistent sync.</p>
+</div>
+<div class="source-card">
+<div class="source-name">Telegram <code>v2</code></div>
+<p>Full MTProto API — channels, supergroups, and private conversations. Real-time update streaming.</p>
+</div>
+<div class="source-card">
+<div class="source-name">Twitter / X <code>v1</code></div>
+<p>DMs, mentions, keyword-based tracking, and list monitoring via the streaming API.</p>
+</div>
+<div class="source-card">
+<div class="source-name">Gmail <code>v1</code></div>
+<p>PubSub push notifications for priority inbox. Custom label routing and sender-based priority rules.</p>
+</div>
+</div>
+</section>
+
+<section class="content-section" id="voice">
+<div class="section-header">
+<h2>Voice Alerts</h2>
+<p>Audio notifications that demand your attention when it matters.</p>
+</div>
+
+<ul class="voice-features">
+<li>Priority-based voice alerting</li>
+<li>"Check messages" voice command</li>
+<li>AI reads high-urgency content aloud</li>
+<li>Multi-language TTS support</li>
+<li>Configurable quiet hours</li>
+<li>Emergency bypass mode</li>
+<li>Custom alert keywords</li>
+</ul>
+
+<div class="code-block">
+<span class="comment"># Voice alert output example</span><br>
+<span class="keyword">[ALERT]</span> Priority: <span class="string">HIGH</span><br>
+<span class="keyword">[SOURCE]</span> Gmail — "Production outage"<br>
+<span class="keyword">[ACTION]</span> Speaking alert via default device
+</div>
+</section>
+
+<section class="content-section">
+<div class="cta-box">
+<h2>Try Vigil in 30 Seconds</h2>
+<p>No signup required. Connect a source and hear your first alert.</p>
+<div class="hero-actions" style="justify-content: center;">
+<button class="btn-primary">Quick Start →</button>
+<button class="btn-secondary">Read Full Docs</button>
+</div>
+</div>
+</section>
+
+<footer>
+<span>© 2026 Vigil — Spark Hackathon on Monad Testnet</span>
+<span><a href="#">GitHub</a> · <a href="#">API</a> · <a href="#">Contact</a></span>
+</footer>
+
+</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — 50 Design Variations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a0a0b;
+      color: #f0efed;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+    .container { max-width: 1000px; margin: 0 auto; padding: 48px 24px; }
+    h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 48px; max-width: 560px; }
+
+    .platform-section { margin-bottom: 48px; }
+    .platform-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e1e1e;
+    }
+    .platform-header h2 { font-size: 22px; font-weight: 600; }
+    .platform-header .count { font-size: 13px; color: #555; font-weight: 500; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .card {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      padding: 20px;
+      transition: border-color 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+    .card:hover { border-color: #444; }
+    .card .num { font-size: 11px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .card h3 { font-size: 16px; font-weight: 600; margin-bottom: 2px; }
+    .card .palette { display: flex; gap: 4px; margin-top: 10px; }
+    .card .swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid #222; }
+    .card .fonts { font-size: 11px; color: #555; margin-top: 6px; }
+    .card .origin { font-size: 10px; color: #444; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+
+    .back-link { display: inline-block; color: #555; font-size: 14px; margin-bottom: 24px; }
+    .back-link:hover { color: #f0efed; }
+
+    @media (max-width: 640px) {
+      .grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="../index.html" class="back-link">&larr; Back to main page</a>
+    <h1>50 Design Variations</h1>
+    <p class="subtitle">
+      Same product (Vigil). 50 completely different classic website designs across 5 platforms.
+      10 Impeccable-style, 10 8B-inspired, 10 Kombai-inspired, 10 Rifframe-inspired, 10 Lokuma-inspired.
+    </p>
+
+    <!-- SECTION: Impeccable (Original) -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <h2>Impeccable</h2>
+        <span class="count">10 designs</span>
+      </div>
+      <div class="grid">
+        <a href="01-editorial.html" class="card"><span class="origin">Impeccable</span><div class="num">01</div><h3>Editorial</h3><div class="fonts">Playfair Display + Source Serif</div><div class="palette"><span class="swatch" style="background:#1a1a1a"></span><span class="swatch" style="background:#c4a97d"></span><span class="swatch" style="background:#f5f2ec"></span></div></a>
+        <a href="02-swiss.html" class="card"><span class="origin">Impeccable</span><div class="num">02</div><h3>Swiss</h3><div class="fonts">IBM Plex Sans</div><div class="palette"><span class="swatch" style="background:#111"></span><span class="swatch" style="background:#e63946"></span><span class="swatch" style="background:#f8f8f8"></span></div></a>
+        <a href="03-bold.html" class="card"><span class="origin">Impeccable</span><div class="num">03</div><h3>Bold</h3><div class="fonts">DM Sans</div><div class="palette"><span class="swatch" style="background:#0a0a0b"></span><span class="swatch" style="background:#ff4d4d"></span><span class="swatch" style="background:#f0efed"></span></div></a>
+        <a href="04-technical.html" class="card"><span class="origin">Impeccable</span><div class="num">04</div><h3>Technical</h3><div class="fonts">JetBrains Mono + Outfit</div><div class="palette"><span class="swatch" style="background:#1a1a2e"></span><span class="swatch" style="background:#7c3aed"></span><span class="swatch" style="background:#fafafa"></span></div></a>
+        <a href="05-luxury.html" class="card"><span class="origin">Impeccable</span><div class="num">05</div><h3>Luxury</h3><div class="fonts">Cormorant Garamond + Inter</div><div class="palette"><span class="swatch" style="background:#2c2416"></span><span class="swatch" style="background:#c4b69e"></span><span class="swatch" style="background:#f7f4ef"></span></div></a>
+        <a href="06-playful.html" class="card"><span class="origin">Impeccable</span><div class="num">06</div><h3>Playful</h3><div class="fonts">Fredoka + Outfit</div><div class="palette"><span class="swatch" style="background:#e85d3a"></span><span class="swatch" style="background:#fef7ed"></span><span class="swatch" style="background:#2d2a24"></span></div></a>
+        <a href="07-corporate.html" class="card"><span class="origin">Impeccable</span><div class="num">07</div><h3>Corporate</h3><div class="fonts">IBM Plex Serif + Sans</div><div class="palette"><span class="swatch" style="background:#1e3a5f"></span><span class="swatch" style="background:#f0f2f5"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="08-dark-magazine.html" class="card"><span class="origin">Impeccable</span><div class="num">08</div><h3>Dark Magazine</h3><div class="fonts">Fraunces + Inter</div><div class="palette"><span class="swatch" style="background:#0c0c0c"></span><span class="swatch" style="background:#c4b69e"></span><span class="swatch" style="background:#e8e4dd"></span></div></a>
+        <a href="09-retro.html" class="card"><span class="origin">Impeccable</span><div class="num">09</div><h3>Retro</h3><div class="fonts">Bitter + DM Sans</div><div class="palette"><span class="swatch" style="background:#2c2416"></span><span class="swatch" style="background:#c4a97d"></span><span class="swatch" style="background:#f5efe6"></span></div></a>
+        <a href="10-modern-asymmetric.html" class="card"><span class="origin">Impeccable</span><div class="num">10</div><h3>Modern Asymmetric</h3><div class="fonts">Sora + DM Sans</div><div class="palette"><span class="swatch" style="background:#0057ff"></span><span class="swatch" style="background:#1a1a1a"></span><span class="swatch" style="background:#f9f9f7"></span></div></a>
+      </div>
+    </div>
+
+    <!-- SECTION: 8B -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <h2>8B</h2>
+        <span class="count">10 designs</span>
+      </div>
+      <div class="grid">
+        <a href="8b/01-split-editorial.html" class="card"><span class="origin">8B</span><div class="num">01</div><h3>Split Editorial</h3><div class="fonts">Playfair Display + Onest</div><div class="palette"><span class="swatch" style="background:#6b7d5a"></span><span class="swatch" style="background:#f5f0e8"></span><span class="swatch" style="background:#2d2d2d"></span></div></a>
+        <a href="8b/02-terminal-cli.html" class="card"><span class="origin">8B</span><div class="num">02</div><h3>Terminal CLI</h3><div class="fonts">IBM Plex Mono</div><div class="palette"><span class="swatch" style="background:#0d0d0d"></span><span class="swatch" style="background:#00ff41"></span><span class="swatch" style="background:#ffb000"></span></div></a>
+        <a href="8b/03-asymmetrical-magazine.html" class="card"><span class="origin">8B</span><div class="num">03</div><h3>Asym Magazine</h3><div class="fonts">DM Serif Display + DM Sans</div><div class="palette"><span class="swatch" style="background:#c2654a"></span><span class="swatch" style="background:#e8dcc8"></span><span class="swatch" style="background:#1e2a3a"></span></div></a>
+        <a href="8b/04-color-block.html" class="card"><span class="origin">8B</span><div class="num">04</div><h3>Color Block</h3><div class="fonts">Fraunces + Manrope</div><div class="palette"><span class="swatch" style="background:#1a1a2e"></span><span class="swatch" style="background:#d4a853"></span><span class="swatch" style="background:#c4beb6"></span></div></a>
+        <a href="8b/05-narrative-story.html" class="card"><span class="origin">8B</span><div class="num">05</div><h3>Narrative</h3><div class="fonts">Newsreader + Figtree</div><div class="palette"><span class="swatch" style="background:#3a5a40"></span><span class="swatch" style="background:#a68b6e"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="8b/06-brutalist-raw.html" class="card"><span class="origin">8B</span><div class="num">06</div><h3>Brutalist</h3><div class="fonts">Rubik + Rubik Mono One</div><div class="palette"><span class="swatch" style="background:#000"></span><span class="swatch" style="background:#ffd700"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="8b/07-multi-column.html" class="card"><span class="origin">8B</span><div class="num">07</div><h3>Multi Column</h3><div class="fonts">Sora</div><div class="palette"><span class="swatch" style="background:#7a1e2e"></span><span class="swatch" style="background:#d4a853"></span><span class="swatch" style="background:#f5efe6"></span></div></a>
+        <a href="8b/08-cinematic-dark.html" class="card"><span class="origin">8B</span><div class="num">08</div><h3>Cinematic Dark</h3><div class="fonts">Cinzel + Barlow</div><div class="palette"><span class="swatch" style="background:#0a0a1a"></span><span class="swatch" style="background:#d4a853"></span><span class="swatch" style="background:#f5f0e8"></span></div></a>
+        <a href="8b/09-card-lattice.html" class="card"><span class="origin">8B</span><div class="num">09</div><h3>Card Lattice</h3><div class="fonts">Literata + Jost</div><div class="palette"><span class="swatch" style="background:#7a9a7a"></span><span class="swatch" style="background:#c4a87a"></span><span class="swatch" style="background:#f5f0e8"></span></div></a>
+        <a href="8b/10-data-dashboard.html" class="card"><span class="origin">8B</span><div class="num">10</div><h3>Data Dashboard</h3><div class="fonts">Prata + Urbanist</div><div class="palette"><span class="swatch" style="background:#4a5a6a"></span><span class="swatch" style="background:#c2653a"></span><span class="swatch" style="background:#f5f0e8"></span></div></a>
+      </div>
+    </div>
+
+    <!-- SECTION: Kombai -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <h2>Kombai</h2>
+        <span class="count">10 designs</span>
+      </div>
+      <div class="grid">
+        <a href="kombai/01-urban.html" class="card"><span class="origin">Kombai</span><div class="num">01</div><h3>Urban</h3><div class="fonts">Archivo + Lora</div><div class="palette"><span class="swatch" style="background:#2d2d2d"></span><span class="swatch" style="background:#c73e3e"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="kombai/02-terminal.html" class="card"><span class="origin">Kombai</span><div class="num">02</div><h3>Terminal</h3><div class="fonts">IBM Plex Mono + Sans</div><div class="palette"><span class="swatch" style="background:#0a0a0a"></span><span class="swatch" style="background:#00ff41"></span><span class="swatch" style="background:#ffb000"></span></div></a>
+        <a href="kombai/03-editorial.html" class="card"><span class="origin">Kombai</span><div class="num">03</div><h3>Editorial</h3><div class="fonts">Source Serif + Sans</div><div class="palette"><span class="swatch" style="background:#1b2838"></span><span class="swatch" style="background:#8b3a3a"></span><span class="swatch" style="background:#f5f0e1"></span></div></a>
+        <a href="kombai/04-dashboard.html" class="card"><span class="origin">Kombai</span><div class="num">04</div><h3>Dashboard</h3><div class="fonts">Manrope + Fraunces</div><div class="palette"><span class="swatch" style="background:#4a5568"></span><span class="swatch" style="background:#2f855a"></span><span class="swatch" style="background:#63b3ed"></span></div></a>
+        <a href="kombai/05-brutal.html" class="card"><span class="origin">Kombai</span><div class="num">05</div><h3>Brutal</h3><div class="fonts">Bebas Neue + Roboto Cond</div><div class="palette"><span class="swatch" style="background:#000"></span><span class="swatch" style="background:#ffd700"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="kombai/06-swiss.html" class="card"><span class="origin">Kombai</span><div class="num">06</div><h3>Swiss</h3><div class="fonts">Work Sans + DM Serif Display</div><div class="palette"><span class="swatch" style="background:#6b7280"></span><span class="swatch" style="background:#0d9488"></span><span class="swatch" style="background:#f87171"></span></div></a>
+        <a href="kombai/07-industrial.html" class="card"><span class="origin">Kombai</span><div class="num">07</div><h3>Industrial</h3><div class="fonts">Chivo + Chivo Mono</div><div class="palette"><span class="swatch" style="background:#8b7d6b"></span><span class="swatch" style="background:#b87333"></span><span class="swatch" style="background:#1b2838"></span></div></a>
+        <a href="kombai/08-scandinavian.html" class="card"><span class="origin">Kombai</span><div class="num">08</div><h3>Scandinavian</h3><div class="fonts">Noto Sans Display + Playfair</div><div class="palette"><span class="swatch" style="background:#7a9a7a"></span><span class="swatch" style="background:#8b7355"></span><span class="swatch" style="background:#f5f5f0"></span></div></a>
+        <a href="kombai/09-techdocs.html" class="card"><span class="origin">Kombai</span><div class="num">09</div><h3>Tech Docs</h3><div class="fonts">Atkinson Hyperlegible + Tinos</div><div class="palette"><span class="swatch" style="background:#4f6f8f"></span><span class="swatch" style="background:#6b7280"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="kombai/10-editorial-dark.html" class="card"><span class="origin">Kombai</span><div class="num">10</div><h3>Editorial Dark</h3><div class="fonts">Sora + PT Serif</div><div class="palette"><span class="swatch" style="background:#121212"></span><span class="swatch" style="background:#8b1a1a"></span><span class="swatch" style="background:#b8963e"></span></div></a>
+      </div>
+    </div>
+
+    <!-- SECTION: Rifframe -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <h2>Rifframe</h2>
+        <span class="count">10 designs</span>
+      </div>
+      <div class="grid">
+        <a href="rifframe/01-conversion.html" class="card"><span class="origin">Rifframe</span><div class="num">01</div><h3>Conversion</h3><div class="fonts">DM Sans + Playfair Display</div><div class="palette"><span class="swatch" style="background:#0f172a"></span><span class="swatch" style="background:#d97706"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="rifframe/02-testimonial-heavy.html" class="card"><span class="origin">Rifframe</span><div class="num">02</div><h3>Testimonial Heavy</h3><div class="fonts">Outfit + Lora</div><div class="palette"><span class="swatch" style="background:#1a3c34"></span><span class="swatch" style="background:#c9a84c"></span><span class="swatch" style="background:#f5f0e8"></span></div></a>
+        <a href="rifframe/03-metric-driven.html" class="card"><span class="origin">Rifframe</span><div class="num">03</div><h3>Metric Driven</h3><div class="fonts">Figtree + Newsreader</div><div class="palette"><span class="swatch" style="background:#1e293b"></span><span class="swatch" style="background:#0d9488"></span><span class="swatch" style="background:#f8fafc"></span></div></a>
+        <a href="rifframe/04-comparison.html" class="card"><span class="origin">Rifframe</span><div class="num">04</div><h3>Comparison</h3><div class="fonts">Sora + Fraunces</div><div class="palette"><span class="swatch" style="background:#2d2d2d"></span><span class="swatch" style="background:#e85d5d"></span><span class="swatch" style="background:#fafaf9"></span></div></a>
+        <a href="rifframe/05-editorial.html" class="card"><span class="origin">Rifframe</span><div class="num">05</div><h3>Editorial</h3><div class="fonts">IBM Plex Serif + Sans</div><div class="palette"><span class="swatch" style="background:#3d3529"></span><span class="swatch" style="background:#c5513a"></span><span class="swatch" style="background:#faf6f0"></span></div></a>
+        <a href="rifframe/06-dashboard-preview.html" class="card"><span class="origin">Rifframe</span><div class="num">06</div><h3>Dashboard Preview</h3><div class="fonts">Plus Jakarta Sans + Prata</div><div class="palette"><span class="swatch" style="background:#1e3a5f"></span><span class="swatch" style="background:#7ab7d8"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="rifframe/07-minimal-trust.html" class="card"><span class="origin">Rifframe</span><div class="num">07</div><h3>Minimal Trust</h3><div class="fonts">Montserrat + Merriweather</div><div class="palette"><span class="swatch" style="background:#1a1a2e"></span><span class="swatch" style="background:#d4a853"></span><span class="swatch" style="background:#fff"></span></div></a>
+        <a href="rifframe/08-step-by-step.html" class="card"><span class="origin">Rifframe</span><div class="num">08</div><h3>Step by Step</h3><div class="fonts">Raleway + Cormorant Garamond</div><div class="palette"><span class="swatch" style="background:#4a5d3e"></span><span class="swatch" style="background:#d4c4a8"></span><span class="swatch" style="background:#b85c4a"></span></div></a>
+        <a href="rifframe/09-video-demo.html" class="card"><span class="origin">Rifframe</span><div class="num">09</div><h3>Video Demo</h3><div class="fonts">Nunito Sans + Spectral</div><div class="palette"><span class="swatch" style="background:#0a0a1a"></span><span class="swatch" style="background:#4a7dff"></span><span class="swatch" style="background:#f8f9fc"></span></div></a>
+        <a href="rifframe/10-pricing-comparison.html" class="card"><span class="origin">Rifframe</span><div class="num">10</div><h3>Pricing Comparison</h3><div class="fonts">Poppins + Cinzel</div><div class="palette"><span class="swatch" style="background:#0c0c1d"></span><span class="swatch" style="background:#e8a87c"></span><span class="swatch" style="background:#fffff0"></span></div></a>
+      </div>
+    </div>
+
+    <!-- SECTION: Lokuma -->
+    <div class="platform-section">
+      <div class="platform-header">
+        <h2>Lokuma</h2>
+        <span class="count">10 designs</span>
+      </div>
+      <div class="grid">
+        <a href="lokuma/01-editorial.html" class="card"><span class="origin">Lokuma</span><div class="num">01</div><h3>Editorial</h3><div class="fonts">Playfair Display + DM Sans</div><div class="palette"><span class="swatch" style="background:#0a1628"></span><span class="swatch" style="background:#c9a84c"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="lokuma/02-premium.html" class="card"><span class="origin">Lokuma</span><div class="num">02</div><h3>Premium</h3><div class="fonts">Cormorant Garamond + Montserrat</div><div class="palette"><span class="swatch" style="background:#0d0d0d"></span><span class="swatch" style="background:#b8860b"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="lokuma/03-brand-first.html" class="card"><span class="origin">Lokuma</span><div class="num">03</div><h3>Brand First</h3><div class="fonts">Fraunces + Work Sans</div><div class="palette"><span class="swatch" style="background:#1b4332"></span><span class="swatch" style="background:#bc6c25"></span><span class="swatch" style="background:#fefae0"></span></div></a>
+        <a href="lokuma/04-minimal.html" class="card"><span class="origin">Lokuma</span><div class="num">04</div><h3>Minimal</h3><div class="fonts">EB Garamond + Jost</div><div class="palette"><span class="swatch" style="background:#2b2b2b"></span><span class="swatch" style="background:#8b7e74"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="lokuma/05-industrial.html" class="card"><span class="origin">Lokuma</span><div class="num">05</div><h3>Industrial</h3><div class="fonts">DM Serif Display + DM Mono</div><div class="palette"><span class="swatch" style="background:#475569"></span><span class="swatch" style="background:#d97706"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="lokuma/06-editorial-grid.html" class="card"><span class="origin">Lokuma</span><div class="num">06</div><h3>Editorial Grid</h3><div class="fonts">Libre Baskerville + Barlow</div><div class="palette"><span class="swatch" style="background:#0d9488"></span><span class="swatch" style="background:#e11d48"></span><span class="swatch" style="background:#f5f0eb"></span></div></a>
+        <a href="lokuma/07-cinematic.html" class="card"><span class="origin">Lokuma</span><div class="num">07</div><h3>Cinematic</h3><div class="fonts">Antonio + Barlow Condensed</div><div class="palette"><span class="swatch" style="background:#020617"></span><span class="swatch" style="background:#dc2626"></span><span class="swatch" style="background:#94a3b8"></span></div></a>
+        <a href="lokuma/08-architectural.html" class="card"><span class="origin">Lokuma</span><div class="num">08</div><h3>Architectural</h3><div class="fonts">Unbounded + Rubik</div><div class="palette"><span class="swatch" style="background:#d4d4d4"></span><span class="swatch" style="background:#1e1b4b"></span><span class="swatch" style="background:#d97706"></span></div></a>
+        <a href="lokuma/09-editorial-color.html" class="card"><span class="origin">Lokuma</span><div class="num">09</div><h3>Editorial Color</h3><div class="fonts">Prata + Manrope</div><div class="palette"><span class="swatch" style="background:#831843"></span><span class="swatch" style="background:#fce7f3"></span><span class="swatch" style="background:#1a1a1a"></span></div></a>
+        <a href="lokuma/10-swiss.html" class="card"><span class="origin">Lokuma</span><div class="num">10</div><h3>Swiss</h3><div class="fonts">Syne + Outfit</div><div class="palette"><span class="swatch" style="background:#2563eb"></span><span class="swatch" style="background:#fbbf24"></span><span class="swatch" style="background:#000"></span></div></a>
+      </div>
+    </div>
+
+  </div>
+</body>
+</html>

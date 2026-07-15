@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Message Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Onest:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --olive: #5B6C4B;
+  --cream: #F0EBE0;
+  --charcoal: #2D2D2D;
+  --warm-light: #F7F4EE;
+  --border: #D4CAB8;
+  --accent: #8B7D6B;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: 'Onest', sans-serif;
+  font-weight: 400;
+  color: var(--charcoal);
+  background: var(--warm-light);
+  line-height: 1.6;
+}
+h1, h2, h3, blockquote { font-family: 'Playfair Display', serif; font-weight: 600; }
+h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; }
+h2 { font-size: clamp(2rem, 3.5vw, 3rem); line-height: 1.2; }
+h3 { font-size: 1.5rem; line-height: 1.25; }
+p { margin-bottom: 1rem; }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  background: var(--warm-light);
+  border-bottom: 1px solid var(--border);
+}
+nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 72px;
+}
+.logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; }
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a { font-size: 0.875rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); transition: color 0.2s; }
+.nav-links a:hover { color: var(--charcoal); }
+.cta-nav {
+  background: var(--charcoal); color: var(--cream); padding: 0.5rem 1.25rem;
+  border-radius: 0; font-size: 0.8rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+.hero-split {
+  display: flex; min-height: 100vh; padding-top: 72px;
+}
+.hero-text {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  padding: 4rem 4rem 4rem calc((100vw - 1200px) / 2 + 2rem);
+  background: var(--cream);
+}
+.hero-visual {
+  flex: 1; background: var(--olive);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.hero-visual::before {
+  content: ''; position: absolute;
+  width: 600px; height: 600px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+  top: -200px; right: -200px;
+}
+.hero-visual::after {
+  content: ''; position: absolute;
+  width: 400px; height: 400px; border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 50%; bottom: -100px; left: -100px;
+}
+.hero-shape {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+  position: relative; z-index: 1; padding: 2rem;
+}
+.hero-shape > div {
+  width: 120px; height: 120px; background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+.hero-shape > div:nth-child(2) { margin-top: 2rem; }
+.hero-shape > div:nth-child(3) { margin-bottom: 2rem; }
+.hero-shape > div:nth-child(4) { margin-top: -2rem; }
+
+.hero-text h1 { margin-bottom: 1.5rem; }
+.hero-text .subtitle { font-size: 1.125rem; color: var(--accent); line-height: 1.7; margin-bottom: 2rem; max-width: 480px; }
+.hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; }
+.btn-primary {
+  background: var(--charcoal); color: var(--cream); padding: 0.875rem 2rem;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
+  border: none; cursor: pointer; font-size: 0.8rem; transition: opacity 0.2s;
+}
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary {
+  background: transparent; color: var(--charcoal); padding: 0.875rem 2rem;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em;
+  border: 1px solid var(--border); cursor: pointer; font-size: 0.8rem; transition: background 0.2s;
+}
+.btn-secondary:hover { background: var(--cream); }
+
+.section { padding: 6rem 0; }
+.section-alt { background: var(--cream); }
+
+.section-header { margin-bottom: 4rem; }
+.section-header p { font-size: 1.125rem; color: var(--accent); max-width: 560px; }
+
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; counter-reset: step; }
+.step-card {
+  counter-increment: step;
+}
+.step-card::before {
+  content: counter(step, decimal-leading-zero); font-family: 'Playfair Display', serif;
+  font-size: 3rem; color: var(--olive); display: block; margin-bottom: 1rem;
+  line-height: 1;
+}
+.step-card h3 { margin-bottom: 0.75rem; }
+.step-card p { font-size: 0.9375rem; color: var(--accent); line-height: 1.6; }
+
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+.source-card {
+  background: var(--warm-light); border: 1px solid var(--border);
+  padding: 2rem; transition: transform 0.3s, box-shadow 0.3s;
+}
+.source-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.06); }
+.source-icon { font-size: 2rem; margin-bottom: 1rem; display: block; }
+.source-card h3 { font-size: 1.125rem; margin-bottom: 0.5rem; }
+.source-card p { font-size: 0.875rem; color: var(--accent); }
+
+.voice-block {
+  display: flex; gap: 4rem; align-items: center;
+}
+.voice-content { flex: 1; }
+.voice-content h2 { margin-bottom: 1.5rem; }
+.voice-content p { color: var(--accent); font-size: 1.125rem; max-width: 500px; }
+.voice-demo {
+  flex: 1; background: var(--charcoal); color: var(--cream);
+  padding: 3rem; min-height: 280px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.voice-demo .cmd { font-family: monospace; font-size: 1.25rem; }
+.voice-demo .cmd::before { content: '$ '; color: var(--olive); }
+.voice-demo .response { font-family: monospace; font-size: 0.9375rem; color: rgba(255,255,255,0.6); margin-top: 0.5rem; }
+
+.cta-section {
+  text-align: center; padding: 8rem 0;
+  background: var(--charcoal); color: var(--cream);
+}
+.cta-section h2 { margin-bottom: 1.5rem; }
+.cta-section p { color: rgba(255,255,255,0.6); max-width: 440px; margin: 0 auto 2rem; }
+.cta-section .btn-primary { background: var(--cream); color: var(--charcoal); }
+
+footer { background: var(--charcoal); border-top: 1px solid rgba(255,255,255,0.08); padding: 3rem 0; color: rgba(255,255,255,0.4); }
+footer .container { display: flex; justify-content: space-between; align-items: center; }
+footer a { color: rgba(255,255,255,0.6); }
+.footer-links { display: flex; gap: 1.5rem; font-size: 0.875rem; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeInUp 0.8s ease-out both; }
+.fade-in-d1 { animation-delay: 0.1s; }
+.fade-in-d2 { animation-delay: 0.2s; }
+.fade-in-d3 { animation-delay: 0.3s; }
+.fade-in-d4 { animation-delay: 0.4s; }
+
+@media (max-width: 900px) {
+  .hero-split { flex-direction: column; }
+  .hero-text { padding: 3rem 2rem; }
+  .hero-visual { min-height: 300px; }
+  .steps-grid, .sources-grid { grid-template-columns: repeat(2, 1fr); }
+  .voice-block { flex-direction: column; gap: 2rem; }
+  footer .container { flex-direction: column; gap: 1rem; text-align: center; }
+}
+@media (max-width: 600px) {
+  .steps-grid, .sources-grid { grid-template-columns: 1fr; }
+  .nav-links a:not(.cta-nav) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <span class="logo">Vigil</span>
+    <div class="nav-links">
+      <a href="#how">How It Works</a>
+      <a href="#sources">Sources</a>
+      <a href="#voice">Voice</a>
+      <a href="#cta" class="cta-nav">Try Demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-split">
+  <div class="hero-text">
+    <h1 class="fade-in">Listen to<br>every channel.</h1>
+    <p class="subtitle fade-in fade-in-d1">Vigil monitors WhatsApp, Telegram, Twitter and Gmail in one place. AI classifies what matters. Voice alerts keep you hands-free. Attestations land on Monad testnet.</p>
+    <div class="hero-buttons fade-in fade-in-d2">
+      <a href="#cta" class="btn-primary">Launch Demo</a>
+      <a href="#how" class="btn-secondary">How It Works</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-shape">
+      <div></div><div></div>
+      <div></div><div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-header">
+      <h2>Four moves,<br>one system.</h2>
+      <p>From channel to chain in four deliberate steps.</p>
+    </div>
+    <div class="steps-grid fade-in fade-in-d1">
+      <div class="step-card">
+        <h3>Connect</h3>
+        <p>Link your accounts once. OAuth flows for WhatsApp Business, Telegram bot, Twitter API, and Gmail. Zero config required.</p>
+      </div>
+      <div class="step-card">
+        <h3>Classify</h3>
+        <p>AI reads every incoming message and tags it by intent, sender, and priority. Training is optional — the model works out of the box.</p>
+      </div>
+      <div class="step-card">
+        <h3>Alert</h3>
+        <p>High-priority messages trigger voice alerts on your device. Say "check messages" to hear summaries without touching a screen.</p>
+      </div>
+      <div class="step-card">
+        <h3>Attest</h3>
+        <p>Selected messages are hashed and attested on Monad testnet. A permanent record with no per-message gas cost.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section section-alt" id="sources">
+  <div class="container">
+    <div class="section-header">
+      <h2>From four fronts.</h2>
+      <p>Aggregate, tag, and act on messages from every major channel.</p>
+    </div>
+    <div class="sources-grid">
+      <div class="source-card">
+        <span class="source-icon">\u2610</span>
+        <h3>WhatsApp</h3>
+        <p>Monitor group chats and direct messages through the Business API. Thread-aware classification.</p>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">\u25B3</span>
+        <h3>Telegram</h3>
+        <p>Read channels, groups, and private chats via bot integration. Supports media caption analysis.</p>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">\u2606</span>
+        <h3>Twitter / X</h3>
+        <p>Track accounts, keywords, and lists. Real-time stream filtering with AI priority scoring.</p>
+      </div>
+      <div class="source-card">
+        <span class="source-icon">\u2709</span>
+        <h3>Gmail</h3>
+        <p>Watch labels and filters. Inbound email summarization with urgency detection and smart routing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="voice">
+  <div class="container">
+    <div class="voice-block">
+      <div class="voice-content">
+        <h2>Your voice is<br>the remote.</h2>
+        <p>Priority alerts read messages aloud. The "check messages" command catches you up by voice. No screen, no scroll.</p>
+      </div>
+      <div class="voice-demo">
+        <div class="cmd">check messages</div>
+        <div class="response">3 new high-priority messages. One from Legal, two marked urgent. Heard: "contract signed" and "server down."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="cta">
+  <div class="container">
+    <h2>Try in 30 seconds.<br>No signup.</h2>
+    <p>Spin up a sandbox instance connected to a demo Telegram bot. Full classification pipeline visible before you commit.</p>
+    <a href="#" class="btn-primary">Launch Sandbox</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>Vigil \u2014 Built for Spark Hackathon</span>
+    <div class="footer-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">Monad Testnet</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

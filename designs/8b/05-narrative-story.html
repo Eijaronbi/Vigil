@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — The Watchtower</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500;6..72,600&family=Figtree:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest: #2E5A3B;
+  --clay: #C4695A;
+  --off-white: #F4F0E9;
+  --moss: #6B8C6B;
+  --charcoal: #2C2C2C;
+  --warm: #FAF6F0;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 17px; scroll-behavior: smooth; }
+body {
+  font-family: 'Figtree', sans-serif;
+  color: var(--charcoal); background: var(--warm);
+  line-height: 1.7;
+}
+h1, h2, h3, blockquote { font-family: 'Newsreader', serif; font-weight: 400; letter-spacing: -0.01em; }
+h1 { font-size: clamp(2.5rem, 4.5vw, 4rem); line-height: 1.1; font-weight: 500; }
+h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); line-height: 1.2; font-weight: 400; }
+h3 { font-size: 1.35rem; }
+p { margin-bottom: 1rem; color: #4A4A4A; }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  background: var(--warm); border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 68px;
+}
+.logo { font-family: 'Newsreader', serif; font-size: 1.5rem; font-weight: 500; color: var(--forest); }
+.nav-links { display: flex; gap: 2rem; align-items: center; }
+.nav-links a { font-size: 0.875rem; color: #666; transition: color 0.2s; }
+.nav-links a:hover { color: var(--charcoal); }
+.cta-nav {
+  background: var(--forest); color: var(--warm);
+  padding: 0.5rem 1.5rem; font-size: 0.8125rem; font-weight: 500;
+  transition: opacity 0.2s;
+}
+.cta-nav:hover { opacity: 0.85; }
+
+.hero-narrative {
+  padding-top: 68px; min-height: 90vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; background: var(--warm);
+  position: relative;
+}
+.hero-narrative::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(46, 90, 59, 0.08) 0%, transparent 60%);
+}
+.hero-narrative-inner { position: relative; z-index: 1; max-width: 720px; padding: 4rem 2rem; }
+.hero-narrative-inner h1 { margin-bottom: 1.5rem; }
+.hero-narrative-inner .sub { font-size: 1.125rem; color: #666; line-height: 1.8; margin-bottom: 2.5rem; }
+.hero-narrative-inner .attribution {
+  font-size: 0.8125rem; color: var(--moss); text-transform: uppercase;
+  letter-spacing: 0.15em; margin-bottom: 1.5rem;
+}
+.btn-narrative {
+  display: inline-block; background: var(--forest); color: var(--warm);
+  padding: 0.875rem 2.5rem; font-family: 'Figtree', sans-serif;
+  font-weight: 500; font-size: 0.875rem; border: none; cursor: pointer;
+  transition: opacity 0.2s;
+}
+.btn-narrative:hover { opacity: 0.85; }
+.btn-narrative-outline {
+  background: transparent; color: var(--forest); border: 1px solid var(--moss);
+  margin-left: 1rem;
+}
+.btn-narrative-outline:hover { border-color: var(--forest); opacity: 1; }
+
+.section-narrative {
+  padding: 7rem 0;
+}
+.s-narrow { padding: 7rem 0; }
+
+.section-narrative:nth-child(even) { background: var(--off-white); }
+
+.story-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center;
+}
+.story-grid-reverse { direction: rtl; }
+.story-grid-reverse > * { direction: ltr; }
+.story-text { max-width: 480px; }
+.story-text h2 { margin-bottom: 1.5rem; }
+.story-text p { font-size: 1rem; color: #555; line-height: 1.8; }
+.story-visual {
+  background: var(--forest); min-height: 320px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--warm); position: relative; overflow: hidden;
+}
+.story-visual .v-num {
+  font-family: 'Newsreader', serif; font-size: 8rem; font-weight: 300;
+  opacity: 0.15; position: absolute;
+}
+.story-visual .v-label {
+  font-family: 'Newsreader', serif; font-size: 1.5rem;
+  position: relative; z-index: 1;
+}
+.story-visual-alt { background: var(--clay); }
+
+.pull-quote {
+  font-family: 'Newsreader', serif; font-size: 1.75rem; line-height: 1.4;
+  color: var(--forest); max-width: 600px; margin: 3rem auto;
+  text-align: center; padding: 2rem 0;
+}
+.pull-quote .attr { font-family: 'Figtree', sans-serif; font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.12em; color: #888; display: block; margin-top: 1rem; }
+
+.sources-narrative { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.source-narrative {
+  background: var(--warm); border: none; padding: 2rem;
+  border-left: 3px solid var(--forest);
+}
+.source-narrative .icon { font-size: 1.5rem; margin-bottom: 0.75rem; display: block; }
+.source-narrative h3 { font-size: 1.125rem; font-family: 'Figtree', sans-serif; font-weight: 600; margin-bottom: 0.5rem; }
+.source-narrative p { font-size: 0.9375rem; color: #666; }
+
+.voice-narrative {
+  background: var(--forest); color: var(--warm); padding: 4rem;
+  text-align: center;
+}
+.voice-narrative h2 { margin-bottom: 1.5rem; }
+.voice-narrative p { color: rgba(255,255,255,0.65); max-width: 520px; margin: 0 auto 2rem; }
+.voice-narrative .cmd-badge {
+  display: inline-block; font-family: 'Newsreader', serif;
+  font-size: 1.5rem; font-style: italic; color: var(--clay);
+  border: 1px solid rgba(255,255,255,0.15); padding: 0.5rem 2rem;
+}
+
+.cta-narrative {
+  text-align: center; padding: 7rem 0;
+}
+.cta-narrative h2 { margin-bottom: 1.5rem; }
+.cta-narrative p { max-width: 420px; margin: 0 auto 2.5rem; color: #666; }
+
+footer { background: var(--charcoal); color: rgba(255,255,255,0.4); padding: 2.5rem 0; font-size: 0.875rem; }
+footer .container { display: flex; justify-content: space-between; align-items: center; }
+footer a { color: rgba(255,255,255,0.55); }
+.footer-links { display: flex; gap: 1.5rem; }
+
+@keyframes fadeInNarrative {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-n { animation: fadeInNarrative 0.8s ease-out both; }
+
+@media (max-width: 900px) {
+  .story-grid { grid-template-columns: 1fr; gap: 2rem; }
+  .story-grid-reverse { direction: ltr; }
+  .sources-narrative { grid-template-columns: 1fr; }
+  footer .container { flex-direction: column; gap: 1rem; text-align: center; }
+  .voice-narrative { padding: 3rem 2rem; }
+}
+@media (max-width: 600px) {
+  .hero-narrative-inner .sub { font-size: 1rem; }
+  .nav-links a:not(.cta-nav) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <span class="logo">Vigil</span>
+    <div class="nav-links">
+      <a href="#how">How It Works</a>
+      <a href="#sources">Sources</a>
+      <a href="#voice">Voice</a>
+      <a href="#cta" class="cta-nav">Demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-narrative">
+  <div class="hero-narrative-inner">
+    <div class="attribution">Spark Hackathon 2026</div>
+    <h1>The watchtower<br>for your messages.</h1>
+    <p class="sub">Vigil monitors WhatsApp, Telegram, Twitter and Gmail. AI classifies urgency. Voice delivers alerts. Monad anchors attestations on-chain.</p>
+    <div>
+      <a href="#cta" class="btn-narrative">Try the Demo</a>
+      <a href="#how" class="btn-narrative btn-narrative-outline">Read the Story</a>
+    </div>
+  </div>
+</section>
+
+<section class="section-narrative" id="how">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-text">
+        <h2>Connect your channels.</h2>
+        <p>Link WhatsApp Business, Telegram bots, Twitter API, and Gmail in one place. OAuth handles authentication. Once connected, Vigil starts listening silently in the background. No configuration files to edit, no servers to provision.</p>
+      </div>
+      <div class="story-visual">
+        <span class="v-num">01</span>
+        <span class="v-label">Connect</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-narrative s-narrow">
+  <div class="container">
+    <div class="story-grid story-grid-reverse">
+      <div class="story-text">
+        <h2>Classify at the edge.</h2>
+        <p>Incoming messages pass through an AI classifier that assigns a priority score and content category. The model runs on-device or in the cloud. Training data is optional for common use cases. Every classification includes a confidence measure.</p>
+      </div>
+      <div class="story-visual story-visual-alt">
+        <span class="v-num">02</span>
+        <span class="v-label">Classify</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="pull-quote">
+  "The most important messages find you. Everything else waits."
+  <span class="attr">Vigil voice mode</span>
+</div>
+
+<section class="section-narrative s-narrow">
+  <div class="container">
+    <div class="story-grid">
+      <div class="story-text">
+        <h2>Voice alerts. No screen.</h2>
+        <p>High-priority messages trigger voice alerts through your device speakers. Say "check messages" to hear a summary of everything that arrived while you were away. Commands like "attest last urgent" work hands-free.</p>
+      </div>
+      <div class="story-visual story-visual-alt">
+        <span class="v-num">03</span>
+        <span class="v-label">Alert</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-narrative s-narrow">
+  <div class="container">
+    <div class="story-grid story-grid-reverse">
+      <div class="story-text">
+        <h2>Attest on Monad.</h2>
+        <p>Selected messages are hashed and submitted to Monad testnet. Each batch creates a permanent, verifiable record. No per-message gas cost at this stage. Attestations are public and can be referenced from any explorer.</p>
+      </div>
+      <div class="story-visual">
+        <span class="v-num">04</span>
+        <span class="v-label">Attest</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-narrative" id="sources">
+  <div class="container">
+    <div class="section-header">
+      <h2>Four channels monitored.</h2>
+      <p style="color: #666; max-width: 500px;">Each source gets its own adapter. All feed into the same classification and alerting pipeline.</p>
+    </div>
+    <div class="sources-narrative">
+      <div class="source-narrative">
+        <span class="icon">\u2610</span>
+        <h3>WhatsApp</h3>
+        <p>Groups and DMs via Business API. Thread context preserved across messages.</p>
+      </div>
+      <div class="source-narrative">
+        <span class="icon">\u25B3</span>
+        <h3>Telegram</h3>
+        <p>Bot API covers channels, groups, and private chats. Poll and media support.</p>
+      </div>
+      <div class="source-narrative">
+        <span class="icon">\u2606</span>
+        <h3>Twitter / X</h3>
+        <p>Real-time keyword and account tracking. AI scoring before any alert triggers.</p>
+      </div>
+      <div class="source-narrative">
+        <span class="icon">\u2709</span>
+        <h3>Gmail</h3>
+        <p>Label watchers with smart summarization and sender priority routing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section-narrative" id="voice">
+  <div class="container">
+    <div class="voice-narrative">
+      <h2>"Check messages."</h2>
+      <p>Three words that catch you up on everything urgent across every channel. Voice alerts, voice commands, voice attestation.</p>
+      <div class="cmd-badge">\u201Ccheck messages\u201D</div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-narrative" id="cta">
+  <div class="container">
+    <h2>30 seconds. No signup.</h2>
+    <p>Sandbox connects to a demo Telegram bot in your browser. See the full pipeline before deciding.</p>
+    <a href="#" class="btn-narrative">Launch Sandbox \u2192</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>Vigil \u2014 Spark Hackathon 2026</span>
+    <div class="footer-links">
+      <a href="#">Docs</a>
+      <a href="#">GitHub</a>
+      <a href="#">Monad</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

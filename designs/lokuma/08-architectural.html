@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Architectural</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@300;400;500;600;700&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --concrete: #d4d4d4;
+  --concrete-light: #e8e8e8;
+  --ink: #1e1b4b;
+  --ink-light: #312e81;
+  --ochre: #d97706;
+  --ochre-light: #f59e0b;
+  --white: #ffffff;
+  --display: 'Unbounded', sans-serif;
+  --sans: 'Rubik', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--sans); color: var(--ink); background: var(--concrete-light); line-height: 1.6; }
+a { color: inherit; text-decoration: none; }
+
+/* Nav */
+nav {
+  padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center;
+  background: var(--white); border-bottom: 3px solid var(--ink);
+  position: sticky; top: 0; z-index: 100;
+}
+.logo { font-family: var(--display); font-size: 1.3rem; font-weight: 700; letter-spacing: 0.02em; }
+.logo span { color: var(--ochre); }
+.nav-links { display: flex; gap: 2rem; align-items: center; font-size: 0.8rem; font-weight: 500; }
+.nav-cta {
+  background: var(--ink); color: var(--white); padding: 0.6rem 1.5rem;
+  font-size: 0.8rem; font-weight: 500; transition: background 0.3s;
+}
+.nav-cta:hover { background: var(--ochre); }
+
+/* Hero - structural blocks */
+.hero {
+  display: grid; grid-template-columns: 1fr 1fr; min-height: 85vh;
+}
+.hero-content {
+  padding: 5rem 3rem; display: flex; flex-direction: column; justify-content: center;
+  background: var(--white);
+}
+.hero h1 {
+  font-family: var(--display); font-size: clamp(2.2rem, 4.5vw, 3.5rem);
+  font-weight: 600; line-height: 1.1; letter-spacing: -0.01em;
+}
+.hero h1 .block { display: block; }
+.hero h1 .highlight { color: var(--ochre); }
+.hero p {
+  font-size: 0.95rem; color: #6b6b6b; line-height: 1.7;
+  max-width: 400px; margin: 1.5rem 0 2rem;
+}
+.hero-buttons { display: flex; gap: 0.8rem; }
+.btn-primary {
+  background: var(--ink); color: var(--white); padding: 0.85rem 2rem;
+  font-size: 0.85rem; font-weight: 500; border: none; cursor: pointer;
+  transition: background 0.3s;
+}
+.btn-primary:hover { background: var(--ochre); }
+.btn-secondary {
+  background: transparent; color: var(--ink); padding: 0.85rem 2rem;
+  font-size: 0.85rem; font-weight: 500; border: 2px solid var(--ink);
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-secondary:hover { background: var(--ink); color: var(--white); }
+.hero-structure {
+  background: var(--ink); display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; padding: 0;
+}
+.hero-struct-block {
+  background: var(--ink); padding: 2rem; display: flex;
+  flex-direction: column; justify-content: center;
+  border: 1px solid rgba(255,255,255,0.04);
+  min-height: 200px;
+}
+.hero-struct-block .num {
+  font-family: var(--display); font-size: 0.7rem; font-weight: 500;
+  color: var(--ochre); margin-bottom: 0.5rem; letter-spacing: 0.1em;
+}
+.hero-struct-block h3 { font-family: var(--display); font-size: 1rem; font-weight: 500; color: var(--white); margin-bottom: 0.3rem; }
+.hero-struct-block p { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+
+/* Section */
+.section { padding: 5rem 3rem; }
+.section.gray { background: var(--concrete-light); }
+.section.white { background: var(--white); }
+.section.dark { background: var(--ink); color: var(--white); }
+.section-header { margin-bottom: 3rem; }
+.section-tag {
+  display: inline-block; font-family: var(--display); font-size: 0.65rem;
+  font-weight: 500; text-transform: uppercase; letter-spacing: 0.15em;
+  color: var(--ochre); margin-bottom: 0.8rem;
+}
+.section-title {
+  font-family: var(--display); font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 600; line-height: 1.1;
+}
+.section-title span { color: var(--ochre); }
+.section-sub { font-size: 0.9rem; color: #6b6b6b; margin-top: 0.5rem; }
+.dark .section-sub { color: rgba(255,255,255,0.5); }
+
+/* How - 2x2 blocks */
+.how-blocks { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--concrete); }
+.step {
+  background: var(--white); padding: 3rem; position: relative;
+}
+.step-number {
+  font-family: var(--display); font-size: 4rem; font-weight: 600;
+  color: var(--concrete-light); line-height: 0.8; margin-bottom: 1rem;
+}
+.step h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.4rem; }
+.step p { font-size: 0.85rem; color: #6b6b6b; }
+
+/* Sources as columns */
+.sources-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.source-block {
+  padding: 3rem 2rem; border-left: 1px solid rgba(255,255,255,0.08);
+}
+.source-block:first-child { border-left: none; }
+.source-icon { font-size: 2rem; margin-bottom: 1rem; }
+.source-block h3 { font-family: var(--display); font-size: 1rem; font-weight: 500; margin-bottom: 0.3rem; }
+.source-block p { font-size: 0.8rem; opacity: 0.6; }
+
+/* Voice */
+.voice-stack { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+.voice-card {
+  border: 2px solid var(--concrete); padding: 2.5rem;
+  transition: border-color 0.3s;
+}
+.voice-card:hover { border-color: var(--ochre); }
+.voice-card .label {
+  font-family: var(--display); font-size: 0.65rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--ochre); margin-bottom: 0.8rem;
+}
+.voice-card h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 600; margin-bottom: 0.3rem; }
+.voice-card p { font-size: 0.85rem; color: #6b6b6b; }
+
+/* CTA as solid block */
+.cta-section {
+  background: var(--ochre); color: var(--ink); text-align: center;
+  padding: 5rem 3rem;
+}
+.cta-section .section-title { font-size: clamp(2rem, 4vw, 3rem); }
+.cta-section .section-title span { color: var(--white); }
+.cta-section p { font-size: 0.95rem; opacity: 0.8; margin: 1rem 0 2rem; }
+.cta-section .btn-primary { background: var(--ink); color: var(--white); }
+.cta-section .btn-primary:hover { background: var(--ink-light); }
+
+/* Footer */
+footer {
+  padding: 2rem 3rem; background: var(--white);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.8rem; color: #8a8a8a;
+  border-top: 3px solid var(--ink);
+}
+.footer-links { display: flex; gap: 2rem; }
+.footer-links a:hover { color: var(--ochre); }
+
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-structure { grid-template-columns: 1fr; }
+  .how-blocks { grid-template-columns: 1fr; }
+  .sources-strip { grid-template-columns: 1fr 1fr; }
+  .source-block { border-left: none; border-top: 1px solid rgba(255,255,255,0.08); }
+  .voice-stack { grid-template-columns: 1fr; }
+  .section { padding: 3rem 1.5rem; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Vigil<span>.</span></div>
+  <div class="nav-links">
+    <a href="#">Process</a>
+    <a href="#">Sources</a>
+    <a href="#">Voice</a>
+    <a href="#" class="nav-cta">Demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>
+      <span class="block">Monitor.</span>
+      <span class="block">Classify.</span>
+      <span class="block highlight">Respond.</span>
+    </h1>
+    <p>AI-classified message monitoring across WhatsApp, Telegram, Twitter, and Gmail. Voice alerts. On-chain attestation on Monad testnet.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary">Try demo</button>
+      <button class="btn-secondary">Learn more</button>
+    </div>
+  </div>
+  <div class="hero-structure">
+    <div class="hero-struct-block"><div class="num">01</div><h3>Connect</h3><p>Link all your accounts in seconds.</p></div>
+    <div class="hero-struct-block"><div class="num">02</div><h3>Classify</h3><p>AI sorts every message in real time.</p></div>
+    <div class="hero-struct-block"><div class="num">03</div><h3>Alert</h3><p>Voice alerts for urgent messages.</p></div>
+    <div class="hero-struct-block"><div class="num">04</div><h3>Attest</h3><p>On-chain proof on Monad testnet.</p></div>
+  </div>
+</section>
+
+<section class="section gray">
+  <div class="section-header">
+    <div class="section-tag">Process</div>
+    <h2 class="section-title">How it <span>works</span></h2>
+    <p class="section-sub">Four steps from connection to on-chain attestation.</p>
+  </div>
+  <div class="how-blocks">
+    <div class="step">
+      <div class="step-number">01</div>
+      <h3>Connect Sources</h3>
+      <p>Link your WhatsApp, Telegram, Twitter, and Gmail accounts securely in one dashboard.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">02</div>
+      <h3>AI Classification</h3>
+      <p>Every message is processed by AI — categorized by urgency, topic, and sentiment.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">03</div>
+      <h3>Voice Alerts</h3>
+      <p>Priority messages trigger voice alerts. Say "check messages" for full readout.</p>
+    </div>
+    <div class="step">
+      <div class="step-number">04</div>
+      <h3>On-Chain Attestation</h3>
+      <p>Critical messages attested on Monad testnet. Permanent and verifiable records.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section dark">
+  <div class="section-header">
+    <div class="section-tag">Sources</div>
+    <h2 class="section-title">Every channel.<br><span>One structure.</span></h2>
+    <p class="section-sub">All your platforms in a single classified feed.</p>
+  </div>
+  <div class="sources-strip">
+    <div class="source-block"><div class="source-icon">💬</div><h3>WhatsApp</h3><p>Groups, broadcasts, and DMs unified.</p></div>
+    <div class="source-block"><div class="source-icon">📱</div><h3>Telegram</h3><p>Channels, groups, private messages.</p></div>
+    <div class="source-block"><div class="source-icon">🐦</div><h3>Twitter / X</h3><p>DMs, mentions, list monitoring.</p></div>
+    <div class="source-block"><div class="source-icon">✉️</div><h3>Gmail</h3><p>AI-powered inbox filtering.</p></div>
+  </div>
+</section>
+
+<section class="section white">
+  <div class="section-header">
+    <div class="section-tag">Voice</div>
+    <h2 class="section-title">Voice <span>interface</span></h2>
+    <p class="section-sub">Hear what matters. Speak to check.</p>
+  </div>
+  <div class="voice-stack">
+    <div class="voice-card">
+      <div class="label">Priority</div>
+      <h3>Urgent alerts</h3>
+      <p>Critical messages break through immediately. You hear them wherever you are — no screen required.</p>
+    </div>
+    <div class="voice-card">
+      <div class="label">Command</div>
+      <h3>"Check messages"</h3>
+      <p>Voice command reads your latest classified messages aloud. Hands-free monitoring.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="section-tag" style="color:rgba(30,27,75,0.5);">Get started</div>
+  <h2 class="section-title">Try Vigil.<br>30 seconds. <span>No signup.</span></h2>
+  <p>Connect a source and see your first AI classification instantly.</p>
+  <button class="btn-primary">Launch demo</button>
+</section>
+
+<footer>
+  <div class="logo" style="font-size:1rem;">Vigil<span>.</span></div>
+  <div class="footer-links">
+    <a href="#">Documentation</a>
+    <a href="#">GitHub</a>
+    <a href="#">Monad Explorer</a>
+  </div>
+  <div>&copy; 2026 Vigil</div>
+</footer>
+</body>
+</html>

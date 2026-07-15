@@ -3,3 +3,12 @@ __pycache__/
 .env
 *.db
 .pytest_cache/
+*.log
+*.mp3
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+node_modules/
+flutter_app/build/
+flutter_app/.dart_tool/

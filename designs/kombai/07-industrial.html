@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Industrial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chivo:wght@400;700;900&family=Chivo+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg: #F2EFEC;
+  --c-surface: #E8E4DF;
+  --c-text: #1E1B18;
+  --c-text-secondary: #6B6258;
+  --c-copper: #B87333;
+  --c-copper-light: #D48A4A;
+  --c-midnight: #1B2838;
+  --c-midnight-light: #2A3F52;
+  --c-border: #D4CDC4;
+  --c-card: #F8F6F4;
+  --ff-heading: 'Chivo', sans-serif;
+  --ff-mono: 'Chivo Mono', monospace;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-heading); color: var(--c-text); background: var(--c-bg); line-height: 1.5; }
+.container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+a { text-decoration: none; color: inherit; }
+
+/* Nav */
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: var(--c-bg); border-bottom: 2px solid var(--c-border); }
+nav .container { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.logo { font-weight: 900; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--c-midnight); }
+.logo span { color: var(--c-copper); }
+.nav-links { display: flex; gap: 24px; font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--c-text-secondary); }
+.nav-links a { transition: color 0.2s; }
+.nav-links a:hover { color: var(--c-copper); }
+.nav-cta { background: var(--c-midnight); color: white; padding: 10px 24px; font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; border: 2px solid var(--c-midnight); cursor: pointer; transition: all 0.2s; }
+.nav-cta:hover { background: var(--c-copper); border-color: var(--c-copper); }
+
+/* Hero */
+.hero { padding: 150px 0 80px; position: relative; }
+.hero::before { content: ''; position: absolute; top: 0; right: 0; width: 40%; height: 100%; background: var(--c-midnight); z-index: -1; }
+.hero-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+.hero h1 { font-weight: 900; font-size: 3.2rem; line-height: 1.05; text-transform: uppercase; letter-spacing: -0.02em; color: var(--c-midnight); }
+.hero h1 span { color: var(--c-copper); }
+.hero p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); margin: 16px 0 28px; line-height: 1.6; max-width: 440px; }
+.hero-actions { display: flex; gap: 12px; }
+.btn-primary { background: var(--c-copper); color: white; padding: 14px 32px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: 2px solid var(--c-copper); cursor: pointer; transition: all 0.2s; }
+.btn-primary:hover { background: var(--c-copper-light); border-color: var(--c-copper-light); }
+.btn-secondary { background: transparent; color: var(--c-midnight); padding: 14px 32px; font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: 2px solid var(--c-midnight); cursor: pointer; transition: all 0.2s; }
+.btn-secondary:hover { background: var(--c-midnight); color: white; }
+
+/* Spec panel */
+.spec-panel { background: var(--c-card); border: 2px solid var(--c-border); padding: 24px; font-family: var(--ff-mono); font-size: 0.78rem; }
+.spec-panel .spec-header { font-weight: 700; color: var(--c-copper); text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.7rem; margin-bottom: 12px; }
+.spec-panel .spec-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--c-border); }
+.spec-panel .spec-row:last-child { border-bottom: none; }
+.spec-panel .spec-label { color: var(--c-text-secondary); }
+.spec-panel .spec-value { font-weight: 500; color: var(--c-midnight); }
+
+/* Section */
+.section { padding: 80px 0; border-top: 2px solid var(--c-border); }
+.section-header { margin-bottom: 48px; }
+.section-header .kicker { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-copper); text-transform: uppercase; letter-spacing: 0.15em; font-weight: 500; margin-bottom: 4px; }
+.section-header h2 { font-weight: 900; font-size: 2.5rem; text-transform: uppercase; letter-spacing: -0.02em; color: var(--c-midnight); }
+.section-header p { font-family: var(--ff-mono); font-size: 0.82rem; color: var(--c-text-secondary); margin-top: 6px; }
+
+/* Steps */
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.step { background: var(--c-card); border: 2px solid var(--c-border); padding: 28px 20px; }
+.step .num { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-copper); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px; }
+.step h3 { font-weight: 700; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 6px; }
+.step p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); line-height: 1.5; }
+
+/* Sources */
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.source-card { background: var(--c-card); border: 2px solid var(--c-border); padding: 24px; text-align: center; }
+.source-card .protocol { font-family: var(--ff-mono); font-size: 0.65rem; color: var(--c-copper); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+.source-card h3 { font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.source-card p { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); margin-top: 6px; }
+
+/* Voice */
+.voice-section { background: var(--c-midnight); color: white; }
+.voice-section .section-header h2 { color: white; }
+.voice-section .section-header p { color: rgba(255,255,255,0.5); }
+.voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.voice-features { list-style: none; }
+.voice-features li { padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.1); font-family: var(--ff-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+.voice-features li:last-child { border-bottom: none; }
+.voice-features li::before { content: '▹'; color: var(--c-copper); }
+.voice-console { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); padding: 24px; font-family: var(--ff-mono); font-size: 0.78rem; }
+.voice-console .line { margin-bottom: 6px; }
+.voice-console .line:last-child { margin-bottom: 0; }
+.voice-console .hl { color: var(--c-copper); }
+.voice-console .dim { color: rgba(255,255,255,0.4); }
+
+/* CTA */
+.cta-section { text-align: center; background: var(--c-surface); }
+.cta-section h2 { font-weight: 900; font-size: 2.5rem; text-transform: uppercase; letter-spacing: -0.02em; }
+.cta-section p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); max-width: 400px; margin: 8px auto 28px; }
+
+/* Footer */
+footer { background: var(--c-midnight); color: rgba(255,255,255,0.5); padding: 48px 0; }
+footer .container { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+footer h4 { font-weight: 700; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--c-copper); margin-bottom: 16px; }
+footer a { display: block; font-family: var(--ff-mono); font-size: 0.78rem; color: rgba(255,255,255,0.5); margin-bottom: 8px; transition: color 0.2s; }
+footer a:hover { color: var(--c-copper); }
+footer .logo { font-weight: 900; margin-bottom: 12px; }
+footer .logo span { color: var(--c-copper); }
+footer p { font-family: var(--ff-mono); font-size: 0.78rem; }
+.footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); margin-top: 32px; padding-top: 20px; text-align: center; font-family: var(--ff-mono); font-size: 0.75rem; }
+
+@media (max-width: 900px) {
+  .hero-grid { grid-template-columns: 1fr; }
+  .hero::before { display: none; }
+  .steps, .sources-grid { grid-template-columns: 1fr 1fr; }
+  .voice-grid { grid-template-columns: 1fr; }
+  footer .container { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2.2rem; }
+}
+@media (max-width: 560px) {
+  .steps, .sources-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.8rem; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+<div class="container">
+<a href="#" class="logo">VIGIL<span>.</span></a>
+<div class="nav-links">
+<a href="#">Home</a>
+<a href="#how">System</a>
+<a href="#sources">Channels</a>
+<a href="#voice">Audio</a>
+</div>
+<button class="nav-cta">Deploy</button>
+</div>
+</nav>
+
+<section class="hero">
+<div class="container">
+<div class="hero-grid">
+<div>
+<h1>Industrial-grade <span>monitoring.</span></h1>
+<p>Vigil runs as a persistent daemon across WhatsApp, Telegram, Twitter, and Gmail. AI classification, voice alerts, on-chain attestation on Monad testnet.</p>
+<div class="hero-actions">
+<button class="btn-primary">Install →</button>
+<button class="btn-secondary">Specs</button>
+</div>
+</div>
+<div class="spec-panel">
+<div class="spec-header">System Specification</div>
+<div class="spec-row"><span class="spec-label">Sources</span><span class="spec-value">4 active</span></div>
+<div class="spec-row"><span class="spec-label">Classifier</span><span class="spec-value">AI v2.1 (99.2%)</span></div>
+<div class="spec-row"><span class="spec-label">Alert Latency</span><span class="spec-value">&lt; 1.8s avg</span></div>
+<div class="spec-row"><span class="spec-label">Attestation</span><span class="spec-value">Monad Testnet</span></div>
+<div class="spec-row"><span class="spec-label">Voice Engine</span><span class="spec-value">TTS v3 (12 voices)</span></div>
+<div class="spec-row"><span class="spec-label">Uptime</span><span class="spec-value">99.97%</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="how">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Pipeline</div>
+<h2>System Flow</h2>
+<p>Four stages from ingestion to proof.</p>
+</div>
+<div class="steps">
+<div class="step">
+<div class="num">01 :: Connect</div>
+<h3>Connect</h3>
+<p>OAuth-secured connections to all messaging platforms. WebSocket keep-alive with auto-reconnect.</p>
+</div>
+<div class="step">
+<div class="num">02 :: Classify</div>
+<h3>Classify</h3>
+<p>Real-time AI urgency scoring. Spam filtering. Sender reputation lookup. Multi-label classification.</p>
+</div>
+<div class="step">
+<div class="num">03 :: Alert</div>
+<h3>Alert</h3>
+<p>Priority messages routed to voice engine. "Check messages" voice command triggers queue readout.</p>
+</div>
+<div class="step">
+<div class="num">04 :: Attest</div>
+<h3>Attest</h3>
+<p>SHA-256 hash stored on Monad testnet. Permanent timestamp. Tamper-proof record.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="sources">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Integrations</div>
+<h2>Connected Channels</h2>
+<p>Protocol-level monitoring for each source.</p>
+</div>
+<div class="sources-grid">
+<div class="source-card">
+<div class="protocol">Protocol v2.4</div>
+<h3>WhatsApp</h3>
+<p>Personal and group message streams with E2E session handling.</p>
+</div>
+<div class="source-card">
+<div class="protocol">Protocol v3.1</div>
+<h3>Telegram</h3>
+<p>Full MTProto API. Channels, groups, and private chats.</p>
+</div>
+<div class="source-card">
+<div class="protocol">Protocol v2.0</div>
+<h3>Twitter / X</h3>
+<p>Streaming API for DMs, mentions, and keyword tracking.</p>
+</div>
+<div class="source-card">
+<div class="protocol">Protocol v1.8</div>
+<h3>Gmail</h3>
+<p>Push-based PubSub inbox monitoring with label routing.</p>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section voice-section" id="voice">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Audio System</div>
+<h2>Voice Engine</h2>
+<p>When you can't look at the screen.</p>
+</div>
+<div class="voice-grid">
+<div>
+<ul class="voice-features">
+<li>Real-time priority voice alerts</li>
+<li>"Check messages" voice command</li>
+<li>AI reads high-urgency content aloud</li>
+<li>Configurable quiet hours</li>
+<li>Emergency override with custom keyword</li>
+</ul>
+</div>
+<div class="voice-console">
+<div class="line"><span class="dim">[VOICE]</span> engine initialized</div>
+<div class="line"><span class="dim">[ALERT]</span> priority: <span class="hl">HIGH</span></div>
+<div class="line"><span class="dim">[SOURCE]</span> gmail — "Server failure"</div>
+<div class="line"><span class="hl">◆ speaking alert...</span></div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section cta-section">
+<div class="container">
+<h2>Try in 30 Seconds</h2>
+<p>No signup. No credit card. Connect a source and hear your first alert.</p>
+<div class="hero-actions" style="justify-content: center;">
+<button class="btn-primary">Install →</button>
+<button class="btn-secondary">Read Docs</button>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<div>
+<a href="#" class="logo">VIGIL<span>.</span></a>
+<p>Multi-source message monitoring with AI classification, voice alerts, and on-chain attestation on Monad testnet.</p>
+</div>
+<div>
+<h4>Product</h4>
+<a href="#how">System</a>
+<a href="#sources">Channels</a>
+<a href="#voice">Audio</a>
+<a href="#">Pricing</a>
+</div>
+<div>
+<h4>Resources</h4>
+<a href="#">Documentation</a>
+<a href="#">API</a>
+<a href="#">Status</a>
+<a href="#">GitHub</a>
+</div>
+<div>
+<h4>Company</h4>
+<a href="#">About</a>
+<a href="#">Blog</a>
+<a href="#">Contact</a>
+<a href="#">Privacy</a>
+</div>
+</div>
+<div class="container"><div class="footer-bottom">© 2026 Vigil — Spark Hackathon on Monad Testnet</div></div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Swiss</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+      background: #f8f8f8;
+      color: #111;
+      line-height: 1.5;
+      font-size: 16px;
+    }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; }
+
+    .container { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+
+    nav {
+      background: #111;
+      color: #f8f8f8;
+      padding: 0;
+    }
+    .nav-inner {
+      max-width: 960px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 56px;
+    }
+    .logo { font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 0.15em; }
+    .nav-links { display: flex; gap: 24px; }
+    .nav-links a { font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a.active { color: #e63946; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 70vh;
+    }
+    .hero-left {
+      background: #111;
+      color: #f8f8f8;
+      padding: 80px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero-right {
+      background: #e63946;
+      color: #f8f8f8;
+      padding: 80px 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .hero h1 {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 700;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      margin-bottom: 20px;
+    }
+    .hero p {
+      font-size: 15px;
+      color: rgba(255,255,255,0.7);
+      line-height: 1.6;
+      max-width: 320px;
+    }
+    .hero-right p { color: rgba(255,255,255,0.85); }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-family: inherit;
+      border: 2px solid;
+      transition: all 0.15s;
+      margin-top: 28px;
+    }
+    .btn-white { border-color: #f8f8f8; color: #f8f8f8; }
+    .btn-white:hover { background: #f8f8f8; color: #111; }
+    .btn-dark { border-color: #111; color: #111; }
+    .btn-dark:hover { background: #111; color: #f8f8f8; }
+
+    .section { padding: 80px 0; border-top: 2px solid #ddd; }
+    .section h2 {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 32px;
+      color: #e63946;
+    }
+
+    .steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+    .step-card { border-top: 3px solid #111; padding-top: 16px; }
+    .step-card .num { font-size: 12px; font-weight: 600; letter-spacing: 0.15em; color: #e63946; margin-bottom: 8px; }
+    .step-card h3 { font-size: 16px; font-weight: 600; margin-bottom: 8px; }
+    .step-card p { font-size: 14px; color: #555; line-height: 1.5; }
+
+    .source-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; border-top: 2px solid #111; }
+    .source-cell { padding: 24px; border-bottom: 2px solid #ddd; border-right: 2px solid #ddd; }
+    .source-cell:nth-child(4n) { border-right: none; }
+    .source-cell strong { display: block; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 4px; }
+    .source-cell span { font-size: 13px; color: #666; }
+
+    .cta-section { background: #111; color: #f8f8f8; text-align: center; padding: 80px 0; }
+    .cta-section h2 { font-size: 28px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; color: #f8f8f8; }
+    .cta-section p { color: #888; font-size: 15px; margin-bottom: 28px; }
+
+    footer { padding: 24px 0; text-align: center; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #888; border-top: 2px solid #ddd; }
+
+    @media (max-width: 720px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-left, .hero-right { padding: 48px 24px; }
+      .steps-grid { grid-template-columns: 1fr 1fr; }
+      .source-grid { grid-template-columns: 1fr 1fr; }
+      .source-cell:nth-child(2n) { border-right: none; }
+      .nav-links { display: none; }
+    }
+    @media (max-width: 480px) {
+      .steps-grid { grid-template-columns: 1fr; }
+      .source-grid { grid-template-columns: 1fr; }
+      .source-cell:nth-child(n) { border-right: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Vigil</a>
+    <div class="nav-links">
+      <a href="#" class="active">Monitor</a>
+      <a href="#how">How</a>
+      <a href="#sources">Sources</a>
+      <a href="#demo">Demo</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-left">
+    <h1>Never miss<br>what matters</h1>
+    <p>WhatsApp, Telegram, Twitter, and Gmail in one system. AI classification. Four alert channels. On-chain verification.</p>
+    <a href="#demo" class="btn btn-white">Try the Demo</a>
+  </div>
+  <div class="hero-right">
+    <h1>Four sources.<br>One feed.</h1>
+    <p>Read-only integrations. Your accounts stay yours. Zero risk.</p>
+    <a href="#how" class="btn btn-dark">How It Works</a>
+  </div>
+</div>
+
+<section class="section" id="how">
+  <div class="container">
+    <h2>How It Works</h2>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="num">01</div>
+        <h3>Connect</h3>
+        <p>Link WhatsApp via extension, add Telegram bot, or connect a Twitter handle.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">02</div>
+        <h3>Set Rules</h3>
+        <p>Keywords, senders, topics. Or let the AI decide what matters to you.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">03</div>
+        <h3>Get Alerts</h3>
+        <p>Telegram push, email digest, or voice readout. Pick your channel.</p>
+      </div>
+      <div class="step-card">
+        <div class="num">04</div>
+        <h3>Verify</h3>
+        <p>Alert hashes stored on Monad. Public and permanent.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container">
+    <h2>Supported Sources</h2>
+    <div class="source-grid">
+      <div class="source-cell"><strong>WhatsApp</strong><span>Chrome extension, live session</span></div>
+      <div class="source-cell"><strong>Telegram</strong><span>Bot API, zero risk</span></div>
+      <div class="source-cell"><strong>Twitter / X</strong><span>Jina Reader, no login</span></div>
+      <div class="source-cell"><strong>Gmail</strong><span>Google OAuth 2.0</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section" id="demo">
+  <div class="container">
+    <h2>Start Monitoring</h2>
+    <p>No signup. No credit card. Connect one source and see alerts immediately.</p>
+    <a href="#" class="btn btn-white">Try the Demo</a>
+  </div>
+</section>
+
+<footer>
+  Spark Hackathon &middot; Monad Testnet
+</footer>
+
+</body>
+</html>

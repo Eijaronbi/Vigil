@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Luxury</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Helvetica Neue', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.7;
+      color: #2c2416;
+      background: #f7f4ef;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .container { max-width: 820px; margin: 0 auto; padding: 0 28px; }
+    .narrow { max-width: 660px; }
+
+    nav {
+      padding: 28px 0;
+    }
+    .nav-inner {
+      max-width: 820px; margin: 0 auto; padding: 0 28px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: #8a7e6b; }
+    .nav-links a:hover { color: #2c2416; }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 32px;
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-family: inherit;
+      transition: all 0.3s;
+      border: 1px solid;
+    }
+    .btn-primary { background: #2c2416; color: #f7f4ef; border-color: #2c2416; }
+    .btn-primary:hover { background: #4a3f2c; }
+    .btn-outline { border-color: #c4b69e; color: #6b5e4a; }
+    .btn-outline:hover { border-color: #2c2416; color: #2c2416; }
+
+    .hero {
+      padding: 120px 0 80px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(52px, 8vw, 80px);
+      font-weight: 500;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+    }
+    .hero .sub {
+      font-size: 18px;
+      font-weight: 300;
+      color: #6b5e4a;
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.6;
+    }
+    .hero .accent-line {
+      width: 40px; height: 1px; background: #c4b69e;
+      margin: 0 auto 24px;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-bottom: 60px; }
+
+    .hero-metrics {
+      display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+    }
+    .metric { text-align: center; }
+    .metric .num { font-family: 'Cormorant Garamond', serif; font-size: 36px; font-weight: 500; color: #2c2416; }
+    .metric .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.12em; color: #8a7e6b; margin-top: 4px; }
+
+    .section { padding: 100px 0; }
+    .section.alt { background: #f0ece4; }
+    .section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(34px, 5vw, 46px);
+      font-weight: 500;
+      line-height: 1.1;
+      margin-bottom: 16px;
+    }
+    .section .desc { color: #6b5e4a; margin-bottom: 48px; font-size: 17px; }
+
+    .steps { display: flex; flex-direction: column; gap: 0; }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      padding: 28px 0;
+    }
+    .step + .step { border-top: 1px solid #e2d9cd; }
+    .step-num {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      font-weight: 500;
+      color: #c4b69e;
+      min-width: 48px;
+    }
+    .step-body { flex: 1; }
+    .step-body strong { display: block; font-size: 18px; font-weight: 500; margin-bottom: 4px; font-family: 'Cormorant Garamond', serif; }
+    .step-body span { color: #6b5e4a; font-weight: 300; }
+
+    .source-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+    .source-card {
+      padding: 28px;
+      border: 1px solid #e2d9cd;
+      margin: -1px 0 0 -1px;
+    }
+    .source-card strong { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 500; display: block; margin-bottom: 6px; }
+    .source-card span { font-size: 14px; color: #6b5e4a; font-weight: 300; }
+
+    .voice-section { text-align: center; background: #2c2416; color: #f7f4ef; }
+    .voice-section h2 { color: #f7f4ef; }
+    .voice-section p { color: #a89880; font-size: 17px; max-width: 480px; margin: 0 auto 32px; }
+    .voice-section .btn-primary { background: #c4b69e; color: #2c2416; border-color: #c4b69e; }
+
+    .cta-section { text-align: center; }
+    .cta-section h2 { font-size: 38px; }
+
+    footer { padding: 28px 0; text-align: center; font-size: 13px; color: #8a7e6b; font-weight: 300; border-top: 1px solid #e2d9cd; }
+
+    @media (max-width: 640px) {
+      .hero { padding: 80px 0 48px; }
+      .section { padding: 60px 0; }
+      .source-grid { grid-template-columns: 1fr; }
+      .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Vigil</a>
+    <div class="nav-links">
+      <a href="#how">Approach</a>
+      <a href="#sources">Sources</a>
+      <a href="#voice">Voice</a>
+    </div>
+    <a href="#demo" class="btn btn-outline" style="padding: 10px 24px;">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container narrow">
+    <div class="accent-line"></div>
+    <h1>Never miss what matters</h1>
+    <p class="sub">A system that watches WhatsApp, Telegram, Twitter, and Gmail. Filters the noise with quiet intelligence. Alerts you through the channel you prefer.</p>
+    <div class="hero-actions">
+      <a href="#demo" class="btn btn-primary">Try the Demo</a>
+      <a href="#how" class="btn btn-outline">Our Approach</a>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric"><div class="num">4</div><div class="label">Sources</div></div>
+      <div class="metric"><div class="num">3</div><div class="label">Alert Channels</div></div>
+      <div class="metric"><div class="num">AI</div><div class="label">Classifier</div></div>
+      <div class="metric"><div class="num">&loz;</div><div class="label">Monad Testnet</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="how">
+  <div class="container narrow">
+    <h2>How it works</h2>
+    <p class="desc">Connect once. Set your preferences. The system handles the rest.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">I</div>
+        <div class="step-body">
+          <strong>Connect your sources</strong>
+          <span>WhatsApp via Chrome extension. Telegram via bot. Twitter and Gmail through their APIs. Each integration is read-only.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">II</div>
+        <div class="step-body">
+          <strong>Define what matters</strong>
+          <span>Set keyword rules, priority senders, or topic filters. The AI scores the rest.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">III</div>
+        <div class="step-body">
+          <strong>Receive alerts</strong>
+          <span>Telegram for immediate push. Email for daily digest. Voice for priority items.</span>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">IV</div>
+        <div class="step-body">
+          <strong>Verified on Monad</strong>
+          <span>Every alert hash is stored immutably. Anyone can verify.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container narrow">
+    <h2>Sources</h2>
+    <p class="desc">Read-only connections. Zero risk to your accounts.</p>
+    <div class="source-grid">
+      <div class="source-card"><strong>WhatsApp</strong><span>Chrome extension uses your live session. No separate login.</span></div>
+      <div class="source-card"><strong>Telegram</strong><span>Official Bot API. Add the bot to any group.</span></div>
+      <div class="source-card"><strong>Twitter / X</strong><span>Jina Reader polls accounts. No API key required.</span></div>
+      <div class="source-card"><strong>Gmail</strong><span>Google OAuth 2.0. Watches for important mail.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section voice-section" id="voice">
+  <div class="container narrow">
+    <h2>Voice alerts</h2>
+    <p>Mark a group or person as priority. When they send an important message, Vigil reads it aloud. Or say "check messages" for a spoken summary.</p>
+    <a href="#demo" class="btn btn-primary">Try It</a>
+  </div>
+</section>
+
+<section class="section" id="demo">
+  <div class="container narrow" style="text-align: center;">
+    <h2>Start monitoring</h2>
+    <p class="desc">No signup. No credit card. Connect one source and see alerts immediately.</p>
+    <a href="#" class="btn btn-primary">Try the Demo</a>
+    <a href="#" class="btn btn-outline" style="margin-left: 12px;">View on GitHub</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">Spark Hackathon &middot; Monad Testnet</div>
+</footer>
+
+</body>
+</html>

@@ -28,7 +28,10 @@ async def classify_message(db: Session, msg: Message, message_in: MessageIn):
     msg.importance_score = rule_result["score"]
 
     if rule_result["score"] >= settings.importance_threshold:
-        scorer = LLMScorer(api_key=settings.openrouter_api_key, model=settings.openrouter_model)
+        llm_key = settings.groq_api_key or settings.openrouter_api_key
+        llm_model = settings.groq_model if settings.groq_api_key else settings.openrouter_model
+        llm_url = "https://api.groq.com/openai/v1" if settings.groq_api_key else None
+        scorer = LLMScorer(api_key=llm_key, model=llm_model, base_url=llm_url)
         llm_result = await scorer.score(
             text=message_in.text,
             sender=message_in.sender,
@@ -52,9 +55,13 @@ async def classify_message(db: Session, msg: Message, message_in: MessageIn):
             )
             msg.notified = True
 
+            group = db.query(Group).filter(Group.id == msg.group_id).first()
+            is_priority = group.is_priority if group else False
+
             from backend.websocket_manager import ws_manager
+            alert_type = "priority_alert" if is_priority else "alert"
             await ws_manager.broadcast({
-                "type": "alert",
+                "type": alert_type,
                 "group": message_in.group_name,
                 "sender": message_in.sender,
                 "summary": msg.summary,

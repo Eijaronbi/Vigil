@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Before & after message monitoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #fafaf9;
+  --bg-alt: #f2f0ed;
+  --fg: #2d2d2d;
+  --fg-muted: #6b6b6b;
+  --primary: #e85d5d;
+  --primary-hover: #d94a4a;
+  --border: #d9d6d0;
+  --radius: 6px;
+  --font-sans: 'Sora', system-ui, sans-serif;
+  --font-serif: 'Fraunces', Georgia, serif;
+  --max-w: 1200px;
+  --space: 1rem;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-sans); color: var(--fg); background: var(--bg); line-height: 1.6; }
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 calc(var(--space) * 2); }
+a { color: inherit; text-decoration: none; }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: calc(var(--space) * 1.5) calc(var(--space) * 2); max-width: var(--max-w); margin: 0 auto; }
+.logo { font-family: var(--font-serif); font-weight: 700; font-size: 1.35rem; }
+.nav-links { display: flex; gap: calc(var(--space) * 2); }
+.nav-links a { font-size: 0.9rem; color: var(--fg-muted); }
+.nav-cta { background: var(--primary); color: #fff; padding: 0.55rem 1.4rem; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; }
+
+.hero { padding: calc(var(--space) * 5) 0; display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: center; max-width: var(--max-w); margin: 0 auto; padding-left: calc(var(--space) * 2); padding-right: calc(var(--space) * 2); }
+.hero-text h1 { font-family: var(--font-serif); font-size: clamp(2.25rem, 4vw, 3.25rem); line-height: 1.15; }
+.hero-text h1 span { color: var(--primary); }
+.hero-text p { font-size: 1rem; color: var(--fg-muted); margin-top: var(--space); max-width: 440px; }
+.hero-actions { display: flex; gap: var(--space); margin-top: calc(var(--space) * 2); }
+.btn { padding: 0.75rem 1.75rem; border-radius: var(--radius); font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; font-family: inherit; display: inline-flex; align-items: center; gap: 0.4rem; }
+.btn-primary { background: var(--fg); color: #fff; }
+.btn-secondary { background: transparent; color: var(--fg); border: 1px solid var(--border); }
+.compare-card { background: var(--bg-alt); border-radius: var(--radius); padding: calc(var(--space) * 2); }
+.compare-card .row { display: flex; justify-content: space-between; padding: 0.75rem 0; border-bottom: 1px solid var(--border); }
+.compare-card .row:last-child { border-bottom: none; }
+.compare-card .label { font-size: 0.85rem; }
+.compare-card .before { font-size: 0.85rem; color: var(--fg-muted); }
+.compare-card .after { font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+
+.section { padding: calc(var(--space) * 5) 0; }
+.section-title { font-family: var(--font-serif); font-size: 2rem; text-align: center; margin-bottom: calc(var(--space) * 3); }
+
+.steps-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--space) * 2); text-align: center; }
+.step-item { position: relative; }
+.step-item .step-num { display: inline-block; font-family: var(--font-serif); font-size: 3rem; font-weight: 700; line-height: 1; color: var(--primary); opacity: 0.3; margin-bottom: 0.5rem; }
+.step-item h3 { font-size: 1.05rem; margin-bottom: 0.35rem; }
+.step-item p { font-size: 0.85rem; color: var(--fg-muted); }
+
+.source-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space); }
+.source-item { padding: calc(var(--space) * 1.5); border: 1px solid var(--border); border-radius: var(--radius); text-align: center; }
+.source-item .icon { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.source-item h3 { font-size: 1rem; }
+.source-item .tag { display: inline-block; background: var(--bg-alt); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 999px; margin-top: 0.5rem; color: var(--fg-muted); }
+
+.compare-section { background: var(--bg-alt); }
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th, .compare-table td { text-align: left; padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+.compare-table th { font-family: var(--font-serif); font-size: 0.95rem; }
+.compare-table .check { color: var(--primary); font-weight: 700; }
+.compare-table .x { color: var(--fg-muted); }
+
+.voice-cols { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: center; }
+.voice-cols h2 { font-family: var(--font-serif); font-size: 1.75rem; }
+.voice-cols p { color: var(--fg-muted); margin: var(--space) 0 calc(var(--space) * 1.5); font-size: 0.95rem; }
+.voice-features { list-style: none; }
+.voice-features li { font-size: 0.9rem; padding: 0.4rem 0; display: flex; gap: 0.5rem; align-items: flex-start; }
+.voice-features li::before { content: "✓"; color: var(--primary); font-weight: 700; }
+
+.cta-block { text-align: center; padding: calc(var(--space) * 5) 0; }
+.cta-block h2 { font-family: var(--font-serif); font-size: 2rem; }
+.cta-block p { color: var(--fg-muted); max-width: 480px; margin: var(--space) auto calc(var(--space) * 2); }
+
+footer { padding: calc(var(--space) * 3) 0; border-top: 1px solid var(--border); }
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: calc(var(--space) * 2); }
+.footer-grid h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: var(--space); }
+.footer-grid a { display: block; font-size: 0.85rem; color: var(--fg-muted); margin-bottom: 0.35rem; }
+.footer-bottom { margin-top: calc(var(--space) * 2); padding-top: calc(var(--space) * 2); border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--fg-muted); display: flex; justify-content: space-between; }
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .steps-row { grid-template-columns: repeat(2, 1fr); }
+  .source-grid { grid-template-columns: repeat(2, 1fr); }
+  .voice-cols { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .compare-table { font-size: 0.8rem; }
+}
+@media (max-width: 480px) {
+  .steps-row { grid-template-columns: 1fr; }
+  .source-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Vigil</span>
+  <div class="nav-links">
+    <a href="#">Compare</a>
+    <a href="#">Sources</a>
+    <a href="#">Voice</a>
+    <a href="#">Attestation</a>
+  </div>
+  <a href="#" class="nav-cta">Start free</a>
+</nav>
+
+<section class="hero">
+  <div class="hero-text">
+    <h1>Monitoring: <span>before</span> and <span>after</span></h1>
+    <p>Vigil replaces the chaos of multi-channel monitoring with one AI-powered dashboard. See the difference.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Try Vigil →</a>
+      <a href="#" class="btn btn-secondary">Compare features</a>
+    </div>
+  </div>
+  <div class="compare-card">
+    <div class="row"><span class="label">Response time</span><span class="before">~45 min</span><span class="after">~3 sec</span></div>
+    <div class="row"><span class="label">Channels monitored</span><span class="before">1-2</span><span class="after">4+</span></div>
+    <div class="row"><span class="label">Missed alerts / week</span><span class="before">12-18</span><span class="after">&lt;1</span></div>
+    <div class="row"><span class="label">Setup time</span><span class="before">Hours</span><span class="after">30 seconds</span></div>
+    <div class="row"><span class="label">Audit trail</span><span class="before">None</span><span class="after">On-chain</span></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">How the shift works</h2>
+    <div class="steps-row">
+      <div class="step-item">
+        <div class="step-num">01</div>
+        <h3>Connect</h3>
+        <p>Link WhatsApp, Telegram, Twitter, Gmail. OAuth in one click.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">02</div>
+        <h3>Classify</h3>
+        <p>AI reads and tags: urgent, action, info, noise.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">03</div>
+        <h3>Alert</h3>
+        <p>Voice alerts for priority. Say "check messages" for summary.</p>
+      </div>
+      <div class="step-item">
+        <div class="step-num">04</div>
+        <h3>Attest</h3>
+        <p>Critical messages hashed to Monad testnet.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <h2 class="section-title">Sources we monitor</h2>
+    <div class="source-grid">
+      <div class="source-item">
+        <div class="icon">💬</div>
+        <h3>WhatsApp</h3>
+        <div class="tag">Chats + Groups</div>
+      </div>
+      <div class="source-item">
+        <div class="icon">✈️</div>
+        <h3>Telegram</h3>
+        <div class="tag">Channels + DMs</div>
+      </div>
+      <div class="source-item">
+        <div class="icon">🐦</div>
+        <h3>Twitter / X</h3>
+        <div class="tag">Accounts + Search</div>
+      </div>
+      <div class="source-item">
+        <div class="icon">📧</div>
+        <h3>Gmail</h3>
+        <div class="tag">Inbox + Labels</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section compare-section">
+  <div class="container">
+    <h2 class="section-title">With vs. without Vigil</h2>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Capability</th>
+          <th>Manual monitoring</th>
+          <th>With Vigil</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Channel count</td><td>1-2 apps checked manually</td><td class="check">4+ sources unified</td></tr>
+        <tr><td>Alert speed</td><td>Check intervals of 15-60 min</td><td class="check">Sub-3 second voice alert</td></tr>
+        <tr><td>Classification</td><td class="x">Manual triage</td><td class="check">AI-sorted priority queue</td></tr>
+        <tr><td>Voice access</td><td class="x">None</td><td class="check">Hands-free with wake word</td></tr>
+        <tr><td>Audit trail</td><td class="x">Screenshots or nothing</td><td class="check">On-chain on Monad testnet</td></tr>
+        <tr><td>Setup</td><td>Ongoing manual effort</td><td class="check">30 seconds, no signup</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="voice-cols">
+      <div>
+        <h2>Hands-free with voice</h2>
+        <p>Priority messages trigger spoken alerts. Say "check messages" anytime to hear your classified queue read aloud. Works with headphones, speakers, or in the car.</p>
+        <a href="#" class="btn btn-primary">See voice features</a>
+      </div>
+      <div>
+        <ul class="voice-features">
+          <li>Priority messages read aloud instantly</li>
+          <li>"Check messages" command reads queue</li>
+          <li>Per-source volume controls</li>
+          <li>Do-not-disturb scheduling</li>
+          <li>Multi-language support</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-block">
+  <div class="container">
+    <h2>Try Vigil in 30 seconds</h2>
+    <p>No signup, no credit card. Connect a source and get your first classified message immediately.</p>
+    <a href="#" class="btn btn-primary">Start monitoring →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <span class="logo">Vigil</span>
+        <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0.5rem;">Multi-source message monitoring with AI classification and on-chain attestation on Monad testnet.</p>
+      </div>
+      <div>
+        <h4>Product</h4>
+        <a href="#">Compare</a>
+        <a href="#">Sources</a>
+        <a href="#">Voice</a>
+        <a href="#">Attestation</a>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Vigil. Spark Hackathon.</span>
+      <span>Monad testnet</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,323 +1,517 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vigil — Intelligent Message Monitoring</title>
-  <meta name="description" content="Monitor WhatsApp, Telegram, Twitter, and Gmail for important messages. Get alerts via Telegram, email, or voice. On-chain attestation on Monad.">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Never miss what matters</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --c-bg: #0A0A0A;
+  --c-surface: #111111;
+  --c-surface-2: #1A1A1A;
+  --c-text: #E0E0E0;
+  --c-text-secondary: #707070;
+  --c-accent: #00FF41;
+  --c-accent-dim: rgba(0,255,65,0.15);
+  --c-amber: #FFB000;
+  --c-red: #FF4444;
+  --c-border: #222222;
+  --ff-mono: 'IBM Plex Mono', monospace;
+  --ff-sans: 'IBM Plex Sans', sans-serif;
+}
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--ff-sans); background: var(--c-bg); color: var(--c-text); line-height: 1.6; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+a { text-decoration: none; color: inherit; }
+body::after { content: ''; position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,65,0.015) 2px, rgba(0,255,65,0.015) 4px); z-index: 9999; }
+
+nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; border-bottom: 1px solid var(--c-border); background: var(--c-bg); }
+nav .container { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.logo { font-family: var(--ff-mono); font-weight: 600; font-size: 1rem; color: var(--c-accent); letter-spacing: 0.05em; }
+.logo::before { content: '> '; color: var(--c-text-secondary); }
+.nav-links { display: flex; gap: 24px; font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.1em; }
+.nav-links a { position: relative; transition: color 0.15s; }
+.nav-links a:hover { color: var(--c-accent); }
+.nav-links a::before { content: '[ '; color: var(--c-text-secondary); }
+.nav-links a::after { content: ' ]'; color: var(--c-text-secondary); }
+.nav-cta { background: transparent; color: var(--c-accent); border: 1px solid var(--c-accent); padding: 8px 20px; font-family: var(--ff-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; transition: all 0.15s; }
+.nav-cta:hover { background: var(--c-accent); color: var(--c-bg); }
+
+.hero { padding: 150px 0 80px; }
+.hero-content { max-width: 800px; }
+.hero .cursor-line { font-family: var(--ff-mono); font-size: 0.8rem; color: var(--c-text-secondary); margin-bottom: 20px; }
+.hero .cursor-line span { color: var(--c-accent); }
+.hero h1 { font-family: var(--ff-mono); font-weight: 500; font-size: 2.8rem; line-height: 1.2; letter-spacing: -0.02em; color: var(--c-text); }
+.hero h1 span { color: var(--c-accent); }
+.hero p { font-family: var(--ff-mono); font-size: 0.9rem; color: var(--c-text-secondary); margin: 20px 0 32px; max-width: 560px; line-height: 1.7; }
+.hero-actions { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--c-accent); color: var(--c-bg); padding: 12px 28px; font-family: var(--ff-mono); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: none; cursor: pointer; transition: opacity 0.15s; }
+.btn-primary:hover { opacity: 0.85; }
+.btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--c-text); padding: 12px 28px; font-family: var(--ff-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid var(--c-border); cursor: pointer; transition: border-color 0.15s; }
+.btn-secondary:hover { border-color: var(--c-accent); color: var(--c-accent); }
+.btn-download { display: inline-flex; align-items: center; gap: 8px; background: var(--c-surface-2); color: var(--c-text); padding: 12px 28px; font-family: var(--ff-mono); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; border: 1px solid var(--c-amber); cursor: pointer; transition: all 0.15s; }
+.btn-download:hover { background: var(--c-amber); color: var(--c-bg); }
+.terminal-block { margin-top: 48px; background: var(--c-surface); border: 1px solid var(--c-border); padding: 20px 24px; font-family: var(--ff-mono); font-size: 0.8rem; }
+.terminal-block .line { margin-bottom: 6px; }
+.terminal-block .line:last-child { margin-bottom: 0; }
+.terminal-block .prompt { color: var(--c-text-secondary); }
+.terminal-block .prompt::before { content: '$ '; color: var(--c-accent); }
+.terminal-block .highlight { color: var(--c-accent); }
+.terminal-block .warn { color: var(--c-amber); }
+.terminal-block .error { color: var(--c-red); }
+
+.section { padding: 80px 0; border-top: 1px solid var(--c-border); }
+.section-header { margin-bottom: 48px; }
+.section-header .kicker { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; }
+.section-header .kicker::before { content: '# '; color: var(--c-accent); }
+.section-header h2 { font-family: var(--ff-sans); font-weight: 600; font-size: 2.2rem; letter-spacing: -0.02em; color: var(--c-text); }
+.section-header p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); margin-top: 8px; }
+
+.steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--c-border); }
+.step { background: var(--c-surface-2); padding: 28px 24px; }
+.step .num { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-accent); margin-bottom: 8px; }
+.step h3 { font-family: var(--ff-sans); font-weight: 600; font-size: 1rem; margin-bottom: 8px; }
+.step p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); line-height: 1.6; }
+
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--c-border); }
+.source-card { background: var(--c-surface-2); padding: 28px 24px; }
+.source-card h3 { font-family: var(--ff-sans); font-weight: 600; font-size: 1rem; margin-bottom: 6px; }
+.source-card p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); }
+.source-protocol { font-family: var(--ff-mono); font-size: 0.7rem; color: var(--c-accent); margin-bottom: 10px; }
+
+.platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+.platform-card { background: var(--c-surface-2); border: 1px solid var(--c-border); padding: 32px; }
+.platform-card .platform-icon { font-size: 1.5rem; margin-bottom: 12px; }
+.platform-card h3 { font-family: var(--ff-sans); font-weight: 600; font-size: 1.1rem; margin-bottom: 8px; }
+.platform-card p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); margin-bottom: 20px; line-height: 1.6; }
+.platform-card .badge { display: inline-block; padding: 3px 10px; font-family: var(--ff-mono); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid var(--c-border); margin-bottom: 12px; }
+.platform-card .badge.pc { color: var(--c-accent); border-color: var(--c-accent); }
+.platform-card .badge.android { color: var(--c-amber); border-color: var(--c-amber); }
+
+.voice-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+.voice-list { list-style: none; }
+.voice-list li { padding: 14px 0; border-bottom: 1px solid var(--c-border); font-family: var(--ff-mono); font-size: 0.85rem; display: flex; align-items: center; gap: 10px; }
+.voice-list li:last-child { border-bottom: none; }
+.voice-list li::before { content: '>'; color: var(--c-accent); font-family: var(--ff-mono); }
+.demo-input-group { display: flex; gap: 8px; margin-bottom: 16px; }
+.demo-input-group input { flex: 1; padding: 12px 16px; background: var(--c-surface); border: 1px solid var(--c-border); color: var(--c-text); font-family: var(--ff-mono); font-size: 0.8rem; border-radius: 0; }
+.demo-input-group input:focus { outline: none; border-color: var(--c-accent); }
+.demo-log { background: var(--c-surface); border: 1px solid var(--c-border); padding: 16px; max-height: 200px; overflow-y: auto; font-family: var(--ff-mono); font-size: 0.75rem; }
+.demo-log .entry { padding: 6px 0; border-bottom: 1px solid var(--c-border); }
+.demo-log .entry:last-child { border-bottom: none; }
+.demo-log .time { color: var(--c-text-secondary); }
+.demo-log .text { color: var(--c-accent); }
+
+.dashboard-preview { background: var(--c-surface); border: 1px solid var(--c-border); padding: 24px; font-family: var(--ff-mono); }
+.msg-row { display: grid; grid-template-columns: 80px 100px 1fr 60px; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--c-border); font-size: 0.75rem; }
+.msg-row.header { color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.65rem; }
+.msg-row:last-child { border-bottom: none; }
+.msg-row .source { color: var(--c-accent); }
+.msg-row .sender { color: var(--c-text); }
+.msg-row .text { color: var(--c-text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg-row .score { text-align: right; }
+.msg-row .score.high { color: var(--c-red); }
+.msg-row .score.medium { color: var(--c-amber); }
+.msg-row .score.low { color: var(--c-text-secondary); }
+.query-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+.query-bar input { flex: 1; padding: 10px 16px; background: var(--c-surface-2); border: 1px solid var(--c-border); color: var(--c-text); font-family: var(--ff-mono); font-size: 0.8rem; }
+.query-bar input:focus { outline: none; border-color: var(--c-accent); }
+
+/* Dashboard session panel */
+.session-panel { display: none; margin-top: 40px; }
+.session-panel.active { display: block; }
+.session-status { display: flex; align-items: center; gap: 12px; padding: 16px 20px; background: var(--c-surface); border: 1px solid var(--c-border); margin-bottom: 24px; font-family: var(--ff-mono); font-size: 0.8rem; }
+.session-status .dot { width: 10px; height: 10px; border-radius: 50%; }
+.session-status .dot.online { background: var(--c-accent); }
+.session-status .dot.offline { background: var(--c-text-secondary); }
+.source-status-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+.source-status { background: var(--c-surface-2); border: 1px solid var(--c-border); padding: 16px; text-align: center; font-family: var(--ff-mono); }
+.source-status .indicator { font-size: 1.2rem; margin-bottom: 4px; }
+.source-status .name { font-size: 0.7rem; color: var(--c-text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+.source-status .status-text { font-size: 0.65rem; margin-top: 4px; }
+.source-status .status-text.connected { color: var(--c-accent); }
+.source-status .status-text.disconnected { color: var(--c-text-secondary); }
+
+.cta-section { text-align: center; border-top: 1px solid var(--c-border); }
+.cta-section h2 { font-family: var(--ff-sans); font-weight: 600; font-size: 2rem; letter-spacing: -0.02em; }
+.cta-section p { font-family: var(--ff-mono); font-size: 0.85rem; color: var(--c-text-secondary); max-width: 440px; margin: 10px auto 28px; }
+
+footer { border-top: 1px solid var(--c-border); padding: 48px 0; }
+footer .container { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; }
+footer h4 { font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-accent); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 16px; }
+footer a { display: block; font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); margin-bottom: 8px; transition: color 0.15s; }
+footer a:hover { color: var(--c-text); }
+footer .logo { font-size: 1rem; margin-bottom: 12px; }
+footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); }
+.footer-bottom { border-top: 1px solid var(--c-border); margin-top: 32px; padding-top: 20px; text-align: center; font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); }
+
+@media (max-width: 900px) {
+  .steps, .sources-grid { grid-template-columns: 1fr 1fr; }
+  .voice-grid, .platform-grid { grid-template-columns: 1fr; }
+  .source-status-grid { grid-template-columns: 1fr 1fr; }
+  footer .container { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+  .hero h1 { font-size: 2rem; }
+  .msg-row { grid-template-columns: 60px 80px 1fr 40px; font-size: 0.65rem; }
+}
+@media (max-width: 560px) {
+  .steps, .sources-grid, .source-status-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.6rem; }
+}
+</style>
 </head>
 <body>
-  <div class="bg-grid"></div>
 
-  <nav>
-    <div class="nav-inner">
-      <div class="logo">
-        <span class="logo-icon">&#9670;</span>
-        <span class="logo-text">Vigil</span>
-      </div>
-      <div class="nav-links">
-        <a href="#problem">Problem</a>
-        <a href="#solution">Solution</a>
-        <a href="#how">How It Works</a>
-        <a href="#chain">On-Chain</a>
-      </div>
-      <a href="https://github.com" class="btn btn-outline" target="_blank">GitHub</a>
-    </div>
-  </nav>
+<nav>
+<div class="container">
+<a href="#" class="logo">vigil</a>
+<div class="nav-links">
+<a href="#">home</a>
+<a href="#how">how it works</a>
+<a href="#download">download</a>
+<a href="#dashboard">dashboard</a>
+<a href="#voice">demo</a>
+</div>
+<button class="nav-cta" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">_open session</button>
+</div>
+</nav>
 
-  <main>
-    <section class="hero">
-      <div class="container">
-        <div class="hero-badge">
-          <span class="dot live"></span>
-          Hackathon Submission — Spark
-        </div>
-        <h1>
-          Never miss what matters<br>
-          across every channel
-        </h1>
-        <p class="hero-sub">
-          One system that watches WhatsApp, Telegram, Twitter, and Gmail.
-          Filters the noise with AI. Alerts you instantly.
-          Every important alert attested on-chain.
-        </p>
-        <div class="hero-actions">
-          <a href="#how" class="btn btn-primary">See How It Works</a>
-          <a href="https://github.com" class="btn btn-secondary">View on GitHub &rarr;</a>
-        </div>
-        <div class="hero-stats">
-          <div class="stat">
-            <span class="stat-num">4</span>
-            <span class="stat-label">Monitored Sources</span>
-          </div>
-          <div class="stat">
-            <span class="stat-num">3</span>
-            <span class="stat-label">Alert Channels</span>
-          </div>
-          <div class="stat">
-            <span class="stat-num">AI</span>
-            <span class="stat-label">Hybrid Classifier</span>
-          </div>
-          <div class="stat">
-            <span class="stat-num">&#9670;</span>
-            <span class="stat-label">Monad Testnet</span>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="hero">
+<div class="container">
+<div class="hero-content">
+<div class="cursor-line"><span>●</span> vigil v1.0 — cross-platform message monitor</div>
+<h1>Never miss <span>what matters.</span></h1>
+<p>You can't read every message. Vigil reads them for you — aloud. It listens across WhatsApp, Telegram, Twitter, and Gmail. When it detects messages you classify as important, it speaks up. Hands-free awareness, always on.</p>
+<div class="hero-actions">
+<button class="btn-primary" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">download now →</button>
+<button class="btn-secondary" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">open dashboard</button>
+<button class="btn-download" onclick="document.getElementById('demoSection').scrollIntoView({behavior:'smooth'})">▶ live demo</button>
+</div>
+<div class="terminal-block">
+<div class="line"><span class="prompt">vigil --platform</span> detecting environment...</div>
+<div class="line"><span class="prompt">✓</span> PC <span class="highlight">chrome extension ready</span></div>
+<div class="line"><span class="prompt">✓</span> Android <span class="highlight">notification listener available</span></div>
+<div class="line"><span class="prompt">✓</span> Telegram bot <span class="highlight">active</span></div>
+<div class="line"><span class="prompt">✓</span> Gmail OAuth <span class="highlight">configured</span></div>
+<div class="line"><span class="prompt">✓</span> Twitter/X <span class="highlight">jina reader online</span></div>
+<div class="line"><span class="prompt">●</span> classifier <span class="highlight">active</span> | alerts <span class="highlight">armed</span> | chain <span class="warn">monad-testnet</span></div>
+</div>
+</div>
+</div>
+</section>
 
-    <section id="problem" class="section">
-      <div class="container narrow">
-        <div class="section-label">The Problem</div>
-        <h2>Your important messages are buried in noise</h2>
-        <p class="section-desc">
-          You're in 10+ group chats across WhatsApp and Telegram. You follow key accounts on Twitter.
-          Your inbox is full. Somewhere in the noise is a message that matters.
-          A deal. A deadline. An opportunity. You can't watch everything at once.
-        </p>
-        <div class="pain-points">
-          <div class="pain-card">
-            <div class="pain-icon">&#9888;</div>
-            <h3>Information Overload</h3>
-            <p>Hundreds of messages daily across groups. The signal-to-noise ratio is impossible to manage manually.</p>
-          </div>
-          <div class="pain-card">
-            <div class="pain-icon">&#9203;</div>
-            <h3>Delayed Response</h3>
-            <p>By the time you scroll back to find that important message, the opportunity has passed.</p>
-          </div>
-          <div class="pain-card">
-            <div class="pain-icon">&#128273;</div>
-            <h3>Fragmented Monitoring</h3>
-            <p>No single tool watches WhatsApp, Telegram, Twitter, and email together. You tab-hop constantly.</p>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="how">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Protocol</div>
+<h2>How It Works</h2>
+<p>One system. Every channel.</p>
+</div>
+<div class="steps">
+<div class="step">
+<div class="num">01_choose</div>
+<h3>Choose Platform</h3>
+<p>Install the Chrome extension on PC or the Vigil app on Android. Or use the browser dashboard directly. One account across all devices.</p>
+</div>
+<div class="step">
+<div class="num">02_connect</div>
+<h3>Connect Sources</h3>
+<p>Link WhatsApp Web (via extension), add Telegram bot, authenticate Gmail, or set up Twitter tracking. Each source connects independently.</p>
+</div>
+<div class="step">
+<div class="num">03_listen</div>
+<h3>AI Listens</h3>
+<p>All messages flow into the classifier — keyword rules, sender reputation, LLM urgency scoring. Only important alerts reach you.</p>
+</div>
+<div class="step">
+<div class="num">04_alert</div>
+<h3>Voice Alert</h3>
+<p>Priority messages trigger TTS on your PC or phone. Screen off or busy — you hear it. Say "check messages" to catch up.</p>
+</div>
+</div>
+</div>
+</section>
 
-    <section id="solution" class="section alt">
-      <div class="container narrow">
-        <div class="section-label">The Solution</div>
-        <h2>Vigil watches everything so you don't have to</h2>
-        <p class="section-desc">
-          A unified monitoring engine that plugs into your existing accounts.
-          It classifies every message with AI and routes important ones to you
-          however you want. Telegram, email, or spoken aloud.
-        </p>
-        <div class="solution-grid">
-          <div class="source-cards">
-            <div class="source-card">
-              <div class="source-icon wa">&#128172;</div>
-              <div>
-                <strong>WhatsApp</strong>
-                <span>Via Chrome extension — uses your live session. No separate login.</span>
-              </div>
-            </div>
-            <div class="source-card">
-              <div class="source-icon tg">&#128172;</div>
-              <div>
-                <strong>Telegram</strong>
-                <span>Bot API — official, zero risk. Add bot to any group.</span>
-              </div>
-            </div>
-            <div class="source-card">
-              <div class="source-icon tw">&#120143;</div>
-              <div>
-                <strong>Twitter / X</strong>
-                <span>Jina Reader — poll accounts without logging in. No API key needed.</span>
-              </div>
-            </div>
-            <div class="source-card">
-              <div class="source-icon gm">&#9993;</div>
-              <div>
-                <strong>Gmail</strong>
-                <span>OAuth 2.0 — official Google API. Polls for new important mail.</span>
-              </div>
-            </div>
-          </div>
-          <div class="pipeline">
-            <div class="pipeline-step">
-              <span class="step-num">1</span>
-              <div>
-                <strong>Collect</strong>
-                <span>Messages stream in from all sources in real-time</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">&darr;</div>
-            <div class="pipeline-step">
-              <span class="step-num">2</span>
-              <div>
-                <strong>Classify</strong>
-                <span>Hybrid AI: keyword rules catch instantly, LLM scores for nuance</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">&darr;</div>
-            <div class="pipeline-step">
-              <span class="step-num">3</span>
-              <div>
-                <strong>Alert</strong>
-                <span>Telegram push, email digest, or TTS via Chrome extension</span>
-              </div>
-            </div>
-            <div class="pipeline-arrow">&darr;</div>
-            <div class="pipeline-step">
-              <span class="step-num">4</span>
-              <div>
-                <strong>Attest</strong>
-                <span>Every important alert hash stored immutably on Monad testnet</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="download">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Install</div>
+<h2>Get Vigil on Your Devices</h2>
+<p>PC, Android, or browser — pick your platform.</p>
+</div>
+<div class="platform-grid">
+<div class="platform-card">
+<div class="platform-icon">🖥</div>
+<div class="badge pc">PC / DESKTOP</div>
+<h3>Chrome Extension</h3>
+<p>Reads WhatsApp Web directly from the DOM — same as a human reading messages. No protocol hacking, no ban risk. Watches Telegram, Gmail and Twitter via the backend. Session stays live as long as Chrome is open with keepalive.</p>
+<button class="btn-primary" onclick="downloadExtension()">download extension →</button>
+</div>
+<div class="platform-card">
+<div class="platform-icon">📱</div>
+<div class="badge android">ANDROID</div>
+<h3>Android App</h3>
+<p>Uses Android's Notification Listener Service — capture WhatsApp, Telegram, Gmail, SMS notifications in real time. One permission grant, zero ToS risk. Foreground service keeps TTS alive with screen off. Reads alerts aloud instantly.</p>
+<button class="btn-primary" onclick="downloadApk()">download apk →</button>
+</div>
+</div>
+</div>
+</section>
 
-    <section id="how" class="section">
-      <div class="container narrow">
-        <div class="section-label">How It Works</div>
-        <h2>Architecture</h2>
-        <p class="section-desc">
-          Python monolith with Chrome extension sidecar. Deployable in minutes.
-        </p>
-        <div class="arch-diagram">
-          <div class="arch-layer">
-            <div class="arch-title">Data Sources</div>
-            <div class="arch-items">
-              <span class="arch-item">WhatsApp Web</span>
-              <span class="arch-item">Telegram Groups</span>
-              <span class="arch-item">Twitter / X</span>
-              <span class="arch-item">Gmail Inbox</span>
-            </div>
-          </div>
-          <div class="arch-connector">&darr;</div>
-          <div class="arch-layer primary">
-            <div class="arch-title">AI Classification Engine</div>
-            <div class="arch-items">
-              <span class="arch-item">Keyword Rules</span>
-              <span class="arch-item">Sender Priority</span>
-              <span class="arch-item">Topic Matching</span>
-              <span class="arch-item">LLM Scorer</span>
-            </div>
-          </div>
-          <div class="arch-connector">&darr;</div>
-          <div class="arch-layer">
-            <div class="arch-title">Alert Channels</div>
-            <div class="arch-items">
-              <span class="arch-item">Telegram Bot</span>
-              <span class="arch-item">Email (Gmail OAuth)</span>
-              <span class="arch-item">TTS (Chrome Extension)</span>
-            </div>
-          </div>
-          <div class="arch-connector">&darr;</div>
-          <div class="arch-layer accent">
-            <div class="arch-title">On-Chain (Monad Testnet)</div>
-            <div class="arch-items">
-              <span class="arch-item">AlertAttestation.sol</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="sources">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Integrations</div>
+<h2>Supported Sources</h2>
+<p>Every channel, one interface.</p>
+</div>
+<div class="sources-grid">
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: WHATSAPP</div>
+<h3>WhatsApp</h3>
+<p>PC via Chrome extension (DOM reader). Android via Notification Listener. Full message text on PC, notification preview on Android.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: TELEGRAM</div>
+<h3>Telegram</h3>
+<p>Official Bot API — channels, groups, DMs. Real-time streaming via webhook. Add the bot and it watches instantly.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: TWITTER</div>
+<h3>Twitter / X</h3>
+<p>Jina Reader polls configured accounts. DMs, mentions, keyword tracking. No API key needed, read-only.</p>
+</div>
+<div class="source-card">
+<div class="source-protocol">PROTOCOL: GMAIL</div>
+<h3>Gmail</h3>
+<p>OAuth 2.0 — full inbox access. Fetches complete message bodies, not just subject lines. Priority inbox and label-based rules.</p>
+</div>
+</div>
+</div>
+</section>
 
-    <section id="chain" class="section alt">
-      <div class="container narrow">
-        <div class="section-label">On-Chain Component</div>
-        <h2>Every alert is attested,<br>not just sent</h2>
-        <p class="section-desc">
-          When an important alert fires, its fingerprint is permanently recorded on Monad testnet. 
-          Anyone can verify that you were alerted about a specific message at a specific time.
-        </p>
-        <div class="chain-card">
-          <div class="chain-header">
-            <span class="chain-contract">AlertAttestation.sol</span>
-            <span class="chain-badge">Monad Testnet</span>
-          </div>
-          <div class="chain-body">
-            <div class="chain-row">
-              <span class="chain-key">messageHash</span>
-              <span class="chain-val">keccak256(text | group | timestamp)</span>
-            </div>
-            <div class="chain-row">
-              <span class="chain-key">groupName</span>
-              <span class="chain-val">string — e.g. "Deals Group"</span>
-            </div>
-            <div class="chain-row">
-              <span class="chain-key">timestamp</span>
-              <span class="chain-val">block.timestamp when attested</span>
-            </div>
-            <div class="chain-row">
-              <span class="chain-key">importanceScore</span>
-              <span class="chain-val">uint8 — 0 to 10</span>
-            </div>
-          </div>
-          <div class="chain-footer">
-            <code>function verify(bytes32 messageHash) returns (bool)</code>
-          </div>
-        </div>
-        <div class="chain-features">
-          <div class="chain-feature">
-            <strong>Tamper-Proof</strong>
-            <span>Once written, attestations are immutable. The blockchain is your receipt.</span>
-          </div>
-          <div class="chain-feature">
-            <strong>Publicly Verifiable</strong>
-            <span>Anyone can call verify() with a message hash to confirm it was flagged.</span>
-          </div>
-          <div class="chain-feature">
-            <strong>No Token Required</strong>
-            <span>Owner-only attest function. No user wallets or gas fees for monitored users.</span>
-          </div>
-        </div>
-      </div>
-    </section>
+<section class="section" id="dashboard">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Session</div>
+<h2>Your Dashboard</h2>
+<p>Log in to monitor sources, query messages, and test alerts.</p>
+</div>
 
-    <section class="section">
-      <div class="container narrow center">
-        <div class="section-label">Demo</div>
-        <h2>See it in action</h2>
-        <p class="section-desc">Coming soon — demo video showing the full flow from message detection to on-chain attestation.</p>
-        <div class="demo-placeholder">
-          <div class="demo-play">&#9654;</div>
-          <span>Demo Video (max 3 min)</span>
-        </div>
-      </div>
-    </section>
+<div id="loginPanel">
+<div class="terminal-block" style="max-width:400px;margin:0 auto;">
+<div class="line" style="text-align:center;margin-bottom:16px;"><span class="highlight">// vigil session login</span></div>
+<div class="line"><span class="prompt">username</span></div>
+<div class="line"><input type="text" id="uname" value="demo" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:8px;"><span class="prompt">password</span></div>
+<div class="line"><input type="password" id="upass" value="demo" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:16px;text-align:center;"><button class="btn-primary" onclick="login()">connect →</button></div>
+<div class="line" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-text-secondary);">demo: demo / demo</div>
+</div>
+</div>
 
-    <section class="section alt cta-section">
-      <div class="container narrow center">
-        <h2>Built for Spark,<br>powered by Monad</h2>
-        <p class="section-desc">
-          This project solves a real personal problem: staying on top of important messages 
-          across fragmented channels. Built with Python, Solidity, and a Chrome extension.
-        </p>
-        <div class="cta-actions">
-          <a href="https://github.com" class="btn btn-primary">GitHub Repo</a>
-          <a href="#" class="btn btn-secondary">Contract on Monadscan &rarr;</a>
-        </div>
-      </div>
-    </section>
-  </main>
+<div class="session-panel" id="sessionPanel">
+<div class="session-status">
+<span class="dot online" id="sessionDot"></span>
+<span id="sessionUser">demo</span>
+<span style="color:var(--c-text-secondary);"> — session active</span>
+<span style="flex:1;"></span>
+<button class="btn-secondary" style="padding:4px 12px;font-size:0.7rem;" onclick="logout()">disconnect</button>
+</div>
 
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-left">
-        <span class="logo-icon">&#9670;</span>
-        <span class="logo-text">Vigil</span>
-      </div>
-      <div class="footer-center">
-        Built for <a href="https://buildanything.so/hackathons/spark" target="_blank">Spark Hackathon</a> 
-        &middot; Deployed on Monad Testnet
-      </div>
-      <div class="footer-right">
-        <a href="https://github.com" target="_blank">GitHub</a>
-        <a href="#" target="_blank">Monadscan</a>
-      </div>
-    </div>
-  </footer>
+<div class="source-status-grid">
+<div class="source-status"><div class="indicator" id="waIndicator">⬤</div><div class="name">WhatsApp</div><div class="status-text" id="waStatus">waiting...</div></div>
+<div class="source-status"><div class="indicator" id="tgIndicator">⬤</div><div class="name">Telegram</div><div class="status-text" id="tgStatus">waiting...</div></div>
+<div class="source-status"><div class="indicator" id="twIndicator">⬤</div><div class="name">Twitter</div><div class="status-text" id="twStatus">waiting...</div></div>
+<div class="source-status"><div class="indicator" id="gmIndicator">⬤</div><div class="name">Gmail</div><div class="status-text" id="gmStatus">waiting...</div></div>
+</div>
 
-  <script src="script.js"></script>
+<div class="query-bar">
+<input type="text" id="queryInput" placeholder="query: e.g. sender:joy, source:whatsapp, group:deals, date:2026-06-15" onkeydown="if(event.key==='Enter')queryMessages()">
+<button class="btn-primary" style="padding:10px 20px;" onclick="queryMessages()">search</button>
+</div>
+
+<div class="dashboard-preview" id="msgList">
+<div class="msg-row header">
+<span>source</span><span>sender</span><span>message</span><span>score</span>
+</div>
+<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;">
+<span colspan="4">— connect sources to see messages —</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section" id="demoSection">
+<div class="container">
+<div class="section-header">
+<div class="kicker">Audio</div>
+<h2>Voice Demo</h2>
+<p>Hear how alerts sound.</p>
+</div>
+<div class="voice-grid">
+<div>
+<ul class="voice-list">
+<li>Real-time TTS on priority messages — PC speakers or phone</li>
+<li>"check messages" voice command</li>
+<li>AI reads full message content</li>
+<li>Quiet hours with emergency bypass</li>
+<li>Works with screen off on Android</li>
+</ul>
+</div>
+<div>
+<div class="demo-input-group">
+<input type="text" id="demoInput" value="Deal alert from Deals Group. Price target at forty five hundred.">
+<button class="btn-primary" onclick="speakDemo()">speak →</button>
+</div>
+<div class="demo-log" id="demoLog">
+<div class="entry"><span class="time">● </span><span class="text">ready — enter text and click speak</span></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<section class="section cta-section">
+<div class="container">
+<h2>Try Vigil in 30 Seconds</h2>
+<p>No account. No credit card. Connect a source and hear your first alert.</p>
+<div class="hero-actions" style="justify-content: center;">
+<button class="btn-primary" onclick="document.getElementById('download').scrollIntoView({behavior:'smooth'})">download →</button>
+<button class="btn-secondary" onclick="document.getElementById('dashboard').scrollIntoView({behavior:'smooth'})">open dashboard</button>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container">
+<div>
+<div class="logo">vigil</div>
+<p>Multi-source message monitoring with AI classification, voice alerts, and on-chain attestation on Monad testnet. PC extension + Android app + browser dashboard.</p>
+</div>
+<div>
+<h4>Product</h4>
+<a href="#how">How It Works</a>
+<a href="#download">Downloads</a>
+<a href="#sources">Sources</a>
+<a href="#dashboard">Dashboard</a>
+</div>
+<div>
+<h4>Platform</h4>
+<a href="#" onclick="downloadExtension()">Chrome Extension</a>
+<a href="#" onclick="downloadApk()">Android App</a>
+<a href="live-demo.html">Live Demo</a>
+</div>
+<div>
+<h4>Connect</h4>
+<a href="#">Documentation</a>
+<a href="#">GitHub</a>
+<a href="#">Status</a>
+<a href="#">Contact</a>
+</div>
+</div>
+<div class="container"><div class="footer-bottom">© 2026 Vigil — Spark Hackathon on Monad Testnet</div></div>
+</footer>
+
+<script>
+(function(){
+  // ── Demo TTS ──
+  window.speakDemo = function() {
+    var text = document.getElementById('demoInput').value.trim();
+    if (!text) return;
+    var log = document.getElementById('demoLog');
+    var entry = document.createElement('div');
+    entry.className = 'entry';
+    var time = new Date().toLocaleTimeString();
+    entry.innerHTML = '<span class="time">' + time + ' </span><span class="text">speaking: "' + text.substring(0, 60) + '..."</span>';
+    log.insertBefore(entry, log.firstChild);
+    var API = 'http://localhost:8080';
+    fetch(API + '/api/tts?text=' + encodeURIComponent(text), {cache:'no-store'})
+      .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
+      .then(function(blob){
+        var url = URL.createObjectURL(blob);
+        var audio = new Audio(url);
+        audio.onended = function(){ URL.revokeObjectURL(url); };
+        audio.play();
+      })
+      .catch(function(){
+        if(window.speechSynthesis){
+          var u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9;
+          window.speechSynthesis.speak(u);
+        }
+      });
+  };
+
+  window.downloadExtension = function() {
+    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\\n\\n1. Open chrome://extensions\\n2. Enable Developer mode\\n3. Load unpacked → select the extension/ folder\\n4. Navigate to web.whatsapp.com');
+  };
+  window.downloadApk = function() {
+    alert('Android app: Flutter build in progress.\\n\\nOnce built, APK will be available for sideload.\\nFor now, use the browser dashboard to test.');
+  };
+
+  // ── Login / Session ──
+  window.login = function() {
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('sessionPanel').classList.add('active');
+    loadSampleMessages();
+    // simulate source connections
+    setTimeout(function(){ document.getElementById('waStatus').textContent = 'connected'; document.getElementById('waIndicator').style.color = '#00FF41'; }, 500);
+    setTimeout(function(){ document.getElementById('tgStatus').textContent = 'connected'; document.getElementById('tgIndicator').style.color = '#00FF41'; }, 800);
+    setTimeout(function(){ document.getElementById('twStatus').textContent = 'active'; document.getElementById('twIndicator').style.color = '#FFB000'; }, 1200);
+    setTimeout(function(){ document.getElementById('gmStatus').textContent = 'connected'; document.getElementById('gmIndicator').style.color = '#00FF41'; }, 1500);
+  };
+  window.logout = function() {
+    document.getElementById('sessionPanel').classList.remove('active');
+    document.getElementById('loginPanel').style.display = 'block';
+    document.getElementById('waStatus').textContent = 'waiting...';
+    document.getElementById('tgStatus').textContent = 'waiting...';
+    document.getElementById('twStatus').textContent = 'waiting...';
+    document.getElementById('gmStatus').textContent = 'waiting...';
+    document.getElementById('waIndicator').style.color = '';
+    document.getElementById('tgIndicator').style.color = '';
+    document.getElementById('twIndicator').style.color = '';
+    document.getElementById('gmIndicator').style.color = '';
+  };
+
+  var sampleMessages = [
+    { source:'whatsapp', sender:'Joy', text:'Deal alert — price target at 4500. Let\'s move on this.', score:9 },
+    { source:'telegram', sender:'Ops Team', text:'Server load at 92% in us-east-1. Need to scale.', score:8 },
+    { source:'gmail', sender:'alerts@company.com', text:'SUBJECT: Production database failing — connection timeout errors', score:10 },
+    { source:'twitter', sender:'@crypto_whale', text:'Breaking: Major protocol upgrade scheduled for tomorrow', score:6 },
+    { source:'whatsapp', sender:'Deals Group', text:'New lead: Acme Corp, budget 50k, decision by Friday', score:7 },
+    { source:'telegram', sender:'Joy', text:'Meeting confirmed for tomorrow 2pm with the investors', score:5 },
+    { source:'gmail', sender:'noreply@github.com', text:'[org/repo] Critical vulnerability found — CVE-2026-1234', score:8 },
+    { source:'whatsapp', sender:'Mom', text:'Call me when you get a chance. Nothing urgent ❤️', score:2 }
+  ];
+  function renderMessages(msgs) {
+    var list = document.getElementById('msgList');
+    var html = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>';
+    var i = 0;
+    for(i=0; i<msgs.length; i++){
+      var m = msgs[i];
+      var cls = 'score ' + (m.score >= 8 ? 'high' : m.score >= 5 ? 'medium' : 'low');
+      html += '<div class="msg-row"><span class="source">' + m.source + '</span><span class="sender">' + m.sender + '</span><span class="text">' + m.text + '</span><span class="' + cls + '">' + m.score + '</span></div>';
+    }
+    list.innerHTML = html;
+  }
+  window.loadSampleMessages = function() { renderMessages(sampleMessages); };
+  window.queryMessages = function() {
+    var q = document.getElementById('queryInput').value.toLowerCase().trim();
+    if (!q) { renderMessages(sampleMessages); return; }
+    var filtered = sampleMessages.filter(function(m){
+      return (q.includes('source:') ? m.source.includes(q.split('source:')[1]) : true)
+        && (q.includes('sender:') ? m.sender.toLowerCase().includes(q.split('sender:')[1]) : true)
+        && (q.includes('group:') ? m.text.toLowerCase().includes(q.split('group:')[1]) : true)
+        && (m.text.toLowerCase().includes(q) || m.sender.toLowerCase().includes(q));
+    });
+    renderMessages(filtered.length > 0 ? filtered : [{ source:'—', sender:'—', text:'no results for "'+q+'"', score:0 }]);
+  };
+})();
+</script>
 </body>
 </html>

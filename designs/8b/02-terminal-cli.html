@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Terminal Monitor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0D0F13;
+  --fg: #D1D5DB;
+  --green: #34D399;
+  --amber: #FBBF24;
+  --red: #F87171;
+  --dim: #6B7280;
+  --border: #1F2937;
+  --highlight: #10B981;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 15px; scroll-behavior: smooth; }
+body {
+  font-family: 'IBM Plex Mono', monospace;
+  background: var(--bg); color: var(--fg);
+  line-height: 1.6;
+}
+h1, h2, h3 { font-weight: 500; letter-spacing: -0.01em; }
+h1 { font-size: clamp(1.75rem, 3vw, 2.5rem); line-height: 1.25; font-weight: 600; }
+h2 { font-size: clamp(1.4rem, 2.5vw, 1.875rem); line-height: 1.3; }
+h3 { font-size: 1.125rem; }
+p { margin-bottom: 1rem; color: var(--dim); }
+a { color: inherit; text-decoration: none; }
+.container { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+nav {
+  position: fixed; top: 0; width: 100%; z-index: 100;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+}
+nav .container {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.logo { font-weight: 600; color: var(--green); font-size: 1.125rem; }
+.logo span { color: var(--dim); }
+.nav-links { display: flex; gap: 1.5rem; align-items: center; }
+.nav-links a { font-size: 0.8125rem; color: var(--dim); transition: color 0.2s; }
+.nav-links a:hover { color: var(--fg); }
+.cta-nav {
+  background: transparent; border: 1px solid var(--green); color: var(--green);
+  padding: 0.4rem 1rem; font-size: 0.8125rem; font-family: inherit;
+  cursor: pointer; transition: background 0.2s;
+}
+.cta-nav:hover { background: rgba(52, 211, 153, 0.1); }
+
+.hero-terminal {
+  min-height: 100vh; padding-top: 60px;
+  display: flex; align-items: center; justify-content: center;
+}
+.terminal-window {
+  width: 100%; max-width: 800px;
+  border: 1px solid var(--border); background: #07080C;
+  margin: 2rem 0;
+}
+.terminal-header {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
+}
+.terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+.terminal-dot:nth-child(1) { background: var(--red); }
+.terminal-dot:nth-child(2) { background: var(--amber); }
+.terminal-dot:nth-child(3) { background: var(--green); }
+.terminal-title { margin-left: auto; font-size: 0.75rem; color: var(--dim); }
+.terminal-body { padding: 2rem; }
+.line { margin-bottom: 0.75rem; font-size: 0.9375rem; }
+.line-prompt { color: var(--green); }
+.line-prompt::before { content: '\u276F '; }
+.line-output { color: var(--fg); padding-left: 1.25rem; }
+.line-output .hl { color: var(--green); }
+.line-output .hl-a { color: var(--amber); }
+.line-output .hl-r { color: var(--red); }
+.line-cursor::after {
+  content: '\u258C'; color: var(--green);
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hero-cta { margin-top: 2rem; display: flex; gap: 1rem; }
+.btn-terminal {
+  background: transparent; border: 1px solid var(--green); color: var(--green);
+  padding: 0.75rem 2rem; font-family: inherit; font-size: 0.875rem;
+  cursor: pointer; transition: background 0.2s;
+}
+.btn-terminal:hover { background: rgba(52, 211, 153, 0.1); }
+.btn-terminal-outline {
+  border-color: var(--dim); color: var(--dim);
+}
+.btn-terminal-outline:hover { border-color: var(--fg); color: var(--fg); background: transparent; }
+
+.section { padding: 5rem 0; border-top: 1px solid var(--border); }
+.section-header { margin-bottom: 3rem; }
+.section-header p { max-width: 500px; }
+
+.steps-cli { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; }
+.step-cli {
+  border: 1px solid var(--border); padding: 1.5rem;
+}
+.step-cli-header { font-size: 0.75rem; color: var(--dim); margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.step-cli-code { font-size: 0.875rem; color: var(--green); margin-bottom: 0.75rem; }
+.step-cli-desc { font-size: 0.8125rem; color: var(--dim); }
+
+.sources-cli { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.source-cli {
+  border: 1px solid var(--border); padding: 1.5rem; text-align: center;
+  transition: border-color 0.2s;
+}
+.source-cli:hover { border-color: var(--green); }
+.source-cli-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+.source-cli h3 { font-size: 0.9375rem; margin-bottom: 0.5rem; }
+.source-cli .stat { font-size: 0.75rem; color: var(--dim); }
+
+.voice-terminal {
+  background: #07080C; border: 1px solid var(--border);
+  padding: 2rem; display: flex; gap: 3rem; align-items: center;
+}
+.voice-terminal-left { flex: 1; }
+.voice-terminal-right { flex: 1; font-size: 0.875rem; }
+.voice-cmd-block { margin-bottom: 1rem; }
+.voice-cmd { color: var(--green); }
+.voice-cmd::before { content: '$ '; color: var(--dim); }
+.voice-out { color: var(--dim); padding-left: 1.5rem; margin-top: 0.25rem; }
+
+.cta-terminal {
+  text-align: center; padding: 6rem 0; border-top: 1px solid var(--border);
+}
+.cta-terminal h2 { margin-bottom: 1rem; }
+.cta-terminal p { max-width: 400px; margin: 0 auto 2rem; color: var(--dim); }
+.cta-terminal .btn-terminal { border-width: 2px; }
+
+footer {
+  padding: 2rem 0; border-top: 1px solid var(--border);
+  font-size: 0.8125rem; color: var(--dim);
+}
+footer .container { display: flex; justify-content: space-between; align-items: center; }
+.footer-links { display: flex; gap: 1.5rem; font-size: 0.75rem; }
+.footer-links a { color: var(--dim); }
+.footer-links a:hover { color: var(--fg); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.6s ease-out both; }
+
+@media (max-width: 900px) {
+  .steps-cli { grid-template-columns: 1fr; }
+  .sources-cli { grid-template-columns: repeat(2, 1fr); }
+  .voice-terminal { flex-direction: column; gap: 1.5rem; }
+  footer .container { flex-direction: column; gap: 0.75rem; text-align: center; }
+}
+@media (max-width: 600px) {
+  .sources-cli { grid-template-columns: 1fr; }
+  .nav-links a:not(.cta-nav) { display: none; }
+  .hero-cta { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container">
+    <span class="logo">vigil<span>$</span></span>
+    <div class="nav-links">
+      <a href="#how">/how</a>
+      <a href="#sources">/sources</a>
+      <a href="#voice">/voice</a>
+      <a href="#cta" class="cta-nav">demo</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero-terminal">
+  <div class="container">
+    <div class="terminal-window fade-up">
+      <div class="terminal-header">
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-dot"></span>
+        <span class="terminal-title">vigil --monitor</span>
+      </div>
+      <div class="terminal-body">
+        <div class="line line-prompt">vigil init --sources=all</div>
+        <div class="line line-output"><span class="hl">Connected:</span> whatsapp, telegram, twitter, gmail</div>
+        <div class="line line-prompt">vigil status</div>
+        <div class="line line-output">Monitoring <span class="hl">14</span> channels | <span class="hl-a">3 urgent</span> | <span class="hl-r">1 critical</span></div>
+        <div class="line line-prompt">vigil listen --voice</div>
+        <div class="line line-output">Voice mode active. Say <span class="hl">"check messages"</span> for audio summary.</div>
+        <div class="line line-prompt">vigil attest --last 5 --chain=monad-testnet</div>
+        <div class="line line-output">Attested 5 messages. Tx: <span class="hl">0x8a3f...c9b2</span></div>
+        <div class="line line-cursor line-prompt"></div>
+      </div>
+    </div>
+    <div class="hero-cta fade-up">
+      <a href="#cta" class="btn-terminal">Try in browser</a>
+      <a href="#how" class="btn-terminal btn-terminal-outline">Read docs</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-header">
+      <h2>Four commands.</h2>
+      <p>Each maps to a distinct phase of the pipeline. No hidden state.</p>
+    </div>
+    <div class="steps-cli">
+      <div class="step-cli">
+        <div class="step-cli-header">connect</div>
+        <div class="step-cli-code">$ vigil connect --all</div>
+        <div class="step-cli-desc">Authenticate with each source via OAuth or bot token. Credentials stay local.</div>
+      </div>
+      <div class="step-cli">
+        <div class="step-cli-header">classify</div>
+        <div class="step-cli-code">$ vigil classify --model=fast</div>
+        <div class="step-cli-desc">AI scans incoming messages and assigns priority tags. On-device inference available.</div>
+      </div>
+      <div class="step-cli">
+        <div class="step-cli-header">alert</div>
+        <div class="step-cli-code">$ vigil alert --mode=voice</div>
+        <div class="step-cli-desc">High-priority messages trigger spoken alerts. Hands-free mode for desk or mobile.</div>
+      </div>
+      <div class="step-cli">
+        <div class="step-cli-header">attest</div>
+        <div class="step-cli-code">$ vigil attest --chain=monad</div>
+        <div class="step-cli-desc">Hash and submit selected messages to Monad testnet. Verifiable on-chain records.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container">
+    <div class="section-header">
+      <h2>Connected sources.</h2>
+      <p>All channels, one stream.</p>
+    </div>
+    <div class="sources-cli">
+      <div class="source-cli">
+        <div class="source-cli-icon">\u2610</div>
+        <h3>whatsapp</h3>
+        <div class="stat">groups + DMs</div>
+      </div>
+      <div class="source-cli">
+        <div class="source-cli-icon">\u25B3</div>
+        <h3>telegram</h3>
+        <div class="stat">channels + bots</div>
+      </div>
+      <div class="source-cli">
+        <div class="source-cli-icon">\u2606</div>
+        <h3>twitter/x</h3>
+        <div class="stat">accounts + lists</div>
+      </div>
+      <div class="source-cli">
+        <div class="source-cli-icon">\u2709</div>
+        <h3>gmail</h3>
+        <div class="stat">labels + filters</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="voice">
+  <div class="container">
+    <div class="section-header">
+      <h2>Voice mode.</h2>
+      <p>Alerts read aloud. Commands spoken, not typed.</p>
+    </div>
+    <div class="voice-terminal">
+      <div class="voice-terminal-left">
+        <div class="voice-cmd-block">
+          <div class="voice-cmd">check messages</div>
+          <div class="voice-out">Processing voice input...</div>
+        </div>
+        <div class="voice-cmd-block">
+          <div class="voice-cmd">"summarize telegram"</div>
+        </div>
+        <div class="voice-cmd-block">
+          <div class="voice-cmd">"attest last urgent"</div>
+        </div>
+      </div>
+      <div class="voice-terminal-right">
+        <p>Vigil listens for the wake command and reads urgent messages back in natural speech. Priority threshold is adjustable per source. Voice attestation available on mobile.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-terminal" id="cta">
+  <div class="container">
+    <h2>$ vigil demo</h2>
+    <p>Launch a sandbox in 30 seconds. No email, no wallet, no setup.</p>
+    <a href="#" class="btn-terminal">Start sandbox \u2192</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <span>vigil \u2014 spark hackathon 2026</span>
+    <div class="footer-links">
+      <a href="#">source</a>
+      <a href="#">docs</a>
+      <a href="#">monad</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

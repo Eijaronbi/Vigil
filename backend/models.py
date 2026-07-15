@@ -40,6 +40,7 @@ class Group(Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     external_id: Mapped[str] = mapped_column(String(255), nullable=False)
     enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_priority: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     user: Mapped["User"] = relationship("User", back_populates="groups")
     rules: Mapped[list["Rule"]] = relationship(

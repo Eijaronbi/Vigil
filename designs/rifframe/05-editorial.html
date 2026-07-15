@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — The message monitoring platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:ital,wght@0,400;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf6f0;
+  --bg-alt: #efe8dc;
+  --fg: #3d3529;
+  --fg-muted: #7a6f5e;
+  --primary: #c5513a;
+  --primary-hover: #a94430;
+  --border: #d9cfbf;
+  --radius: 2px;
+  --font-serif: 'IBM Plex Serif', Georgia, serif;
+  --font-sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --max-w: 1120px;
+  --space: 1rem;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--font-serif); color: var(--fg); background: var(--bg); line-height: 1.7; }
+.container { max-width: var(--max-w); margin: 0 auto; padding: 0 calc(var(--space) * 2); }
+a { color: inherit; text-decoration: none; }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: calc(var(--space) * 2) calc(var(--space) * 2); max-width: var(--max-w); margin: 0 auto; border-bottom: 1px solid var(--border); }
+.logo { font-size: 1.35rem; font-weight: 600; letter-spacing: -0.01em; }
+.nav-links { display: flex; gap: calc(var(--space) * 2.5); }
+.nav-links a { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-muted); font-family: var(--font-sans); }
+.nav-cta { background: var(--fg); color: var(--bg); padding: 0.5rem 1.25rem; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; border-radius: var(--radius); font-family: var(--font-sans); }
+
+.hero { padding: calc(var(--space) * 5) 0 calc(var(--space) * 3); display: grid; grid-template-columns: 1.2fr 0.8fr; gap: calc(var(--space) * 3); align-items: start; max-width: var(--max-w); margin: 0 auto; padding-left: calc(var(--space) * 2); padding-right: calc(var(--space) * 2); }
+.hero h1 { font-size: clamp(2.5rem, 5vw, 3.75rem); line-height: 1.1; font-weight: 600; }
+.hero h1 .dropcap { font-size: 1.2em; line-height: 0.8; float: left; margin-right: 0.15em; color: var(--primary); }
+.hero .meta { font-family: var(--font-sans); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); margin-top: calc(var(--space) * 2); }
+.hero .byline { font-size: 0.9rem; font-style: italic; color: var(--fg-muted); margin-top: 0.5rem; }
+.hero-side { padding-top: 0.5rem; }
+.hero-side p { font-size: 1rem; color: var(--fg-muted); line-height: 1.6; }
+.hero-actions { display: flex; gap: var(--space); margin-top: calc(var(--space) * 2); }
+.btn { font-family: var(--font-sans); padding: 0.7rem 1.6rem; border-radius: var(--radius); font-weight: 500; font-size: 0.85rem; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em; }
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+
+.pull-quote { max-width: var(--max-w); margin: calc(var(--space) * 2) auto; padding: calc(var(--space) * 2) calc(var(--space) * 2); border-left: 3px solid var(--primary); margin-left: calc(var(--space) * 2); margin-right: calc(var(--space) * 2); font-style: italic; font-size: 1.2rem; color: var(--primary); }
+.pull-quote cite { display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--fg-muted); font-style: normal; font-family: var(--font-sans); }
+
+.section { padding: calc(var(--space) * 4) 0; }
+.section-label { font-family: var(--font-sans); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-muted); margin-bottom: calc(var(--space) * 1.5); }
+
+.story-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: calc(var(--space) * 2); }
+.story-card { border-top: 2px solid var(--border); padding-top: var(--space); }
+.story-card .num { font-family: var(--font-sans); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); margin-bottom: 0.5rem; }
+.story-card h3 { font-size: 1.1rem; margin-bottom: 0.35rem; }
+.story-card p { font-family: var(--font-sans); font-size: 0.85rem; color: var(--fg-muted); }
+
+.two-col-text { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: start; }
+.two-col-text h2 { font-size: 1.75rem; font-weight: 600; }
+.two-col-text p { font-family: var(--font-sans); color: var(--fg-muted); font-size: 0.95rem; }
+
+.source-block { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space); }
+.source-card { padding: calc(var(--space) * 1.5); border: 1px solid var(--border); border-radius: var(--radius); background: var(--bg-alt); }
+.source-card .emoji { font-size: 1.5rem; margin-bottom: 0.5rem; }
+.source-card h3 { font-size: 1rem; }
+.source-card p { font-family: var(--font-sans); font-size: 0.8rem; color: var(--fg-muted); margin-top: 0.25rem; }
+
+.interview-block { display: grid; grid-template-columns: 1fr 1fr; gap: calc(var(--space) * 3); align-items: center; padding: calc(var(--space) * 3); background: var(--fg); color: var(--bg); border-radius: var(--radius); }
+.interview-block h2 { font-size: 1.5rem; font-weight: 600; }
+.interview-block p { font-family: var(--font-sans); opacity: 0.8; font-size: 0.9rem; margin: var(--space) 0 calc(var(--space) * 1.5); }
+.interview-block .btn { border: 1px solid var(--bg); color: var(--bg); background: transparent; }
+
+.cta-section { padding: calc(var(--space) * 4) 0; text-align: center; border-top: 1px solid var(--border); }
+.cta-section h2 { font-size: 2rem; font-weight: 600; }
+.cta-section p { font-family: var(--font-sans); color: var(--fg-muted); max-width: 480px; margin: var(--space) auto calc(var(--space) * 2); }
+
+footer { padding: calc(var(--space) * 3) 0; border-top: 1px solid var(--border); }
+.footer-inner { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: calc(var(--space) * 2); font-family: var(--font-sans); }
+.footer-inner h4 { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--space); }
+.footer-inner a { display: block; font-size: 0.85rem; color: var(--fg-muted); margin-bottom: 0.3rem; }
+.footer-bottom { margin-top: calc(var(--space) * 2); padding-top: calc(var(--space) * 2); border-top: 1px solid var(--border); font-size: 0.8rem; color: var(--fg-muted); display: flex; justify-content: space-between; font-family: var(--font-sans); }
+
+@media (max-width: 768px) {
+  .hero { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .story-grid { grid-template-columns: repeat(2, 1fr); }
+  .two-col-text { grid-template-columns: 1fr; }
+  .source-block { grid-template-columns: repeat(2, 1fr); }
+  .interview-block { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 480px) {
+  .story-grid { grid-template-columns: 1fr; }
+  .source-block { grid-template-columns: 1fr; }
+  .footer-inner { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">Vigil</span>
+  <div class="nav-links">
+    <a href="#">How it works</a>
+    <a href="#">Sources</a>
+    <a href="#">Voice</a>
+    <a href="#">Attestation</a>
+  </div>
+  <a href="#" class="nav-cta">Start trial</a>
+</nav>
+
+<section class="hero">
+  <div>
+    <h1><span class="dropcap">M</span>onitor every message that moves your business</h1>
+    <div class="meta">Feature &middot; 5 min read</div>
+    <div class="byline">WhatsApp, Telegram, Twitter, Gmail — one unified feed with AI classification, voice alerts, and on-chain attestation on Monad testnet.</div>
+  </div>
+  <div class="hero-side">
+    <p>Most teams check four apps to stay on top of messages. Vigil connects them all, classifies every message by urgency, and speaks priority alerts aloud. Built for the Spark hackathon.</p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary">Try Vigil</a>
+      <a href="#" class="btn btn-secondary">Read the story</a>
+    </div>
+  </div>
+</section>
+
+<div class="pull-quote">
+  "The average team misses 12 critical messages per week. Vigil catches them in under three seconds."
+  <cite>— Internal study, early access cohort</cite>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="section-label">The process in four acts</div>
+    <div class="story-grid">
+      <div class="story-card">
+        <div class="num">Act I</div>
+        <h3>Connect</h3>
+        <p>One-click OAuth for each source. No passwords stored on our servers.</p>
+      </div>
+      <div class="story-card">
+        <div class="num">Act II</div>
+        <h3>Classify</h3>
+        <p>AI reads every message and assigns a priority tag: urgent, action-needed, informational, or noise.</p>
+      </div>
+      <div class="story-card">
+        <div class="num">Act III</div>
+        <h3>Alert</h3>
+        <p>Priority messages trigger voice alerts. Say "check messages" to hear your queue.</p>
+      </div>
+      <div class="story-card">
+        <div class="num">Act IV</div>
+        <h3>Attest</h3>
+        <p>Critical messages are hashed and recorded on Monad testnet — tamper-proof and auditable.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="section-label">Connected sources</div>
+    <div class="source-block">
+      <div class="source-card">
+        <div class="emoji">💬</div>
+        <h3>WhatsApp</h3>
+        <p>Chats and groups monitored in real time.</p>
+      </div>
+      <div class="source-card">
+        <div class="emoji">✈️</div>
+        <h3>Telegram</h3>
+        <p>Channels, groups, and DMs with keyword filters.</p>
+      </div>
+      <div class="source-card">
+        <div class="emoji">🐦</div>
+        <h3>Twitter / X</h3>
+        <p>Accounts, lists, and search terms tracked.</p>
+      </div>
+      <div class="source-card">
+        <div class="emoji">📧</div>
+        <h3>Gmail</h3>
+        <p>Priority inbox scanning with AI routing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="two-col-text">
+      <h2>Voice alerts that respect your attention</h2>
+      <div>
+        <p>Not every message needs a notification. Vigil's AI classifies before alerting — only priority messages trigger voice alerts through your headphones or speakers. The "check messages" command reads your queue on demand, organized by source and urgency.</p>
+        <p style="margin-top:var(--space);">Quiet when you need it. Loud when it matters.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="interview-block">
+      <div>
+        <h2>Why on-chain attestation matters</h2>
+        <p>Every classified message gets a hash stored on Monad testnet. This creates a tamper-proof chain of custody — verifiable by anyone, anytime. For compliance teams, auditors, and incident response, it means provable receipts without the overhead.</p>
+        <a href="#" class="btn">Learn about attestation</a>
+      </div>
+      <div style="font-family:var(--font-sans);font-size:0.85rem;opacity:0.7;border-left:2px solid rgba(255,255,255,0.2);padding-left:calc(var(--space) * 2);">
+        <p style="margin-bottom:0.5rem;">"We needed a way to prove that a message was received at a specific time. Vigil's on-chain attestation gives us exactly that — it's like a notary for your inbox."</p>
+        <p style="font-style:italic;">— Dmitri Volkov, CISO, Nexus Protocol</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="container">
+    <h2>Start reading your messages differently</h2>
+    <p>Connect a source in 30 seconds. No signup, no credit card.</p>
+    <a href="#" class="btn btn-primary">Try Vigil free →</a>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <span class="logo">Vigil</span>
+        <p style="font-size:0.85rem;color:var(--fg-muted);margin-top:0.5rem;">Multi-source message monitoring with AI classification and on-chain attestation on Monad testnet.</p>
+      </div>
+      <div>
+        <h4>Content</h4>
+        <a href="#">How it works</a>
+        <a href="#">Sources</a>
+        <a href="#">Voice</a>
+        <a href="#">Attestation</a>
+      </div>
+      <div>
+        <h4>Info</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Vigil. Spark Hackathon.</span>
+      <span>Monad testnet</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

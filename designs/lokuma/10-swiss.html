@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vigil — Swiss</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --yellow: #fbbf24;
+  --yellow-light: #fde68a;
+  --white: #ffffff;
+  --black: #000000;
+  --gray: #6b7280;
+  --gray-light: #e5e7eb;
+  --display: 'Syne', sans-serif;
+  --sans: 'Outfit', sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: var(--sans); color: var(--black); background: var(--white); line-height: 1.5; }
+a { color: inherit; text-decoration: none; }
+
+/* Nav */
+nav {
+  padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 3px solid var(--black);
+}
+.logo { font-family: var(--display); font-size: 1.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; }
+.logo span { color: var(--blue); }
+.nav-links { display: flex; gap: 2rem; align-items: center; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+.nav-cta {
+  background: var(--blue); color: var(--white); padding: 0.5rem 1.5rem;
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600;
+  transition: background 0.2s;
+}
+.nav-cta:hover { background: var(--black); }
+
+/* Hero - asymmetric swiss grid */
+.hero {
+  display: grid; grid-template-columns: 2fr 1fr; min-height: 80vh;
+  border-bottom: 3px solid var(--black);
+}
+.hero-content {
+  padding: 4rem 2rem; display: flex; flex-direction: column; justify-content: center;
+  border-right: 1px solid var(--gray-light);
+}
+.hero h1 {
+  font-family: var(--display); font-size: clamp(3rem, 6vw, 5rem);
+  font-weight: 800; text-transform: uppercase; line-height: 0.9;
+  letter-spacing: -0.03em;
+}
+.hero h1 span { color: var(--blue); }
+.hero h1 .block { display: block; }
+.hero p {
+  font-size: 0.9rem; color: var(--gray); line-height: 1.7;
+  max-width: 380px; margin: 1.5rem 0 2rem;
+}
+.hero-buttons { display: flex; gap: 0; }
+.btn-primary {
+  background: var(--blue); color: var(--white); padding: 0.85rem 2rem;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;
+  font-weight: 600; border: none; cursor: pointer; font-family: var(--display);
+  transition: background 0.2s;
+}
+.btn-primary:hover { background: var(--blue-dark); }
+.btn-secondary {
+  background: var(--yellow); color: var(--black); padding: 0.85rem 2rem;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;
+  font-weight: 600; border: none; cursor: pointer; font-family: var(--display);
+  transition: background 0.2s;
+}
+.btn-secondary:hover { background: var(--yellow-light); }
+.hero-aside {
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 2rem; background: var(--yellow);
+}
+.hero-stat { margin-bottom: 2rem; }
+.hero-stat:last-child { margin-bottom: 0; }
+.hero-stat .num {
+  font-family: var(--display); font-size: 3rem; font-weight: 800;
+  line-height: 1; color: var(--black);
+}
+.hero-stat .label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(0,0,0,0.6); font-weight: 500; }
+
+/* Section */
+.section { padding: 4rem 2rem; border-bottom: 1px solid var(--gray-light); }
+.section-header { margin-bottom: 2.5rem; }
+.section-number {
+  font-family: var(--display); font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.15em; color: var(--blue); margin-bottom: 0.5rem;
+}
+.section-title {
+  font-family: var(--display); font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700; text-transform: uppercase; line-height: 1; letter-spacing: -0.02em;
+}
+.section-title span { color: var(--blue); }
+.section-sub { font-size: 0.85rem; color: var(--gray); margin-top: 0.5rem; }
+
+/* How - 2x2 grid */
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.step {
+  padding: 2.5rem; border: 1px solid var(--gray-light);
+  border-right: none; border-bottom: none; position: relative;
+}
+.step:nth-child(2n) { border-right: none; }
+.step:nth-last-child(-n+2) { border-bottom: 1px solid var(--gray-light); }
+.step-label {
+  font-family: var(--display); font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue); margin-bottom: 0.5rem;
+}
+.step h3 { font-family: var(--display); font-size: 1.1rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; }
+.step p { font-size: 0.85rem; color: var(--gray); }
+
+/* Sources */
+.sources-section { background: var(--black); color: var(--white); border-bottom: 3px solid var(--yellow); }
+.sources-section .section-number { color: var(--yellow); }
+.sources-section .section-sub { color: rgba(255,255,255,0.5); }
+.sources-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+.source-card {
+  padding: 2rem; border-right: 1px solid rgba(255,255,255,0.08);
+}
+.source-card:last-child { border-right: none; }
+.source-icon { font-size: 2rem; margin-bottom: 0.8rem; }
+.source-card h3 { font-family: var(--display); font-size: 1rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; }
+.source-card p { font-size: 0.8rem; opacity: 0.5; }
+
+/* Voice - split */
+.voice-split { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+.voice-box { padding: 3rem 2rem; }
+.voice-box:first-child { border-right: 1px solid var(--gray-light); }
+.voice-box .tag {
+  font-family: var(--display); font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em; color: var(--blue); margin-bottom: 0.8rem;
+}
+.voice-box h3 { font-family: var(--display); font-size: 1.2rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.3rem; }
+.voice-box p { font-size: 0.85rem; color: var(--gray); }
+
+/* CTA */
+.cta-section {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-bottom: 3px solid var(--black);
+}
+.cta-content { padding: 4rem 2rem; display: flex; flex-direction: column; justify-content: center; }
+.cta-content .section-title { font-size: clamp(2rem, 4vw, 3rem); }
+.cta-content p { font-size: 0.9rem; color: var(--gray); margin: 1rem 0 2rem; }
+.cta-stripe { background: var(--blue); display: flex; align-items: center; justify-content: center; }
+.cta-stripe div {
+  font-family: var(--display); font-size: 6rem; font-weight: 800;
+  color: rgba(255,255,255,0.1); text-transform: uppercase;
+}
+
+/* Footer */
+footer {
+  padding: 1.5rem 2rem; display: flex; justify-content: space-between; align-items: center;
+  font-size: 0.75rem; color: var(--gray); text-transform: uppercase; letter-spacing: 0.05em;
+}
+.footer-links { display: flex; gap: 2rem; }
+.footer-links a:hover { color: var(--blue); }
+
+@media (max-width: 768px) {
+  nav { padding: 1rem 1.5rem; }
+  .nav-links { display: none; }
+  .hero { grid-template-columns: 1fr; min-height: auto; }
+  .hero-content { border-right: none; }
+  .how-grid { grid-template-columns: 1fr; }
+  .step { border-right: none; }
+  .sources-grid { grid-template-columns: 1fr 1fr; }
+  .source-card { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .voice-split { grid-template-columns: 1fr; }
+  .voice-box:first-child { border-right: none; }
+  .cta-section { grid-template-columns: 1fr; }
+  .section { padding: 3rem 1.5rem; }
+  footer { flex-direction: column; gap: 1rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Vigil<span>.</span></div>
+  <div class="nav-links">
+    <a href="#">Process</a>
+    <a href="#">Sources</a>
+    <a href="#">Voice</a>
+    <a href="#" class="nav-cta">Demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-content">
+    <h1>
+      <span class="block">Monitor.</span>
+      <span class="block">Classify.</span>
+      <span class="block"><span>Alert.</span></span>
+    </h1>
+    <p>Vigil connects WhatsApp, Telegram, Twitter, and Gmail. AI classifies every message. Voice alerts for priority items. On-chain attestation on Monad testnet.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary">Try demo</button>
+      <button class="btn-secondary">30 sec</button>
+    </div>
+  </div>
+  <div class="hero-aside">
+    <div class="hero-stat"><div class="num">4</div><div class="label">Sources</div></div>
+    <div class="hero-stat"><div class="num">AI</div><div class="label">Classification</div></div>
+    <div class="hero-stat"><div class="num">🎙️</div><div class="label">Voice Alerts</div></div>
+    <div class="hero-stat"><div class="num">⛓️</div><div class="label">Monad Chain</div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">Section 01</div>
+    <h2 class="section-title">How it <span>works</span></h2>
+    <p class="section-sub">Four steps from connection to on-chain proof.</p>
+  </div>
+  <div class="how-grid">
+    <div class="step"><div class="step-label">Step 01</div><h3>Connect</h3><p>Link your WhatsApp, Telegram, Twitter, and Gmail accounts securely in one dashboard.</p></div>
+    <div class="step"><div class="step-label">Step 02</div><h3>Classify</h3><p>AI processes every message in real time — categorizes by urgency, topic, and sentiment.</p></div>
+    <div class="step"><div class="step-label">Step 03</div><h3>Alert</h3><p>Voice alerts for critical messages. Say "check messages" for hands-free readout.</p></div>
+    <div class="step"><div class="step-label">Step 04</div><h3>Attest</h3><p>Critical messages attested on-chain via Monad testnet. Permanent and verifiable.</p></div>
+  </div>
+</section>
+
+<section class="section sources-section">
+  <div class="section-header">
+    <div class="section-number">Section 02</div>
+    <h2 class="section-title">All <span>channels</span></h2>
+    <p class="section-sub">Four platforms, one AI-classified feed.</p>
+  </div>
+  <div class="sources-grid">
+    <div class="source-card"><div class="source-icon">💬</div><h3>WhatsApp</h3><p>Groups, broadcasts, and DMs unified.</p></div>
+    <div class="source-card"><div class="source-icon">📱</div><h3>Telegram</h3><p>Channels, groups, private messages.</p></div>
+    <div class="source-card"><div class="source-icon">🐦</div><h3>Twitter / X</h3><p>DMs, mentions, list monitoring.</p></div>
+    <div class="source-card"><div class="source-icon">✉️</div><h3>Gmail</h3><p>AI-powered inbox filtering.</p></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="section-header">
+    <div class="section-number">Section 03</div>
+    <h2 class="section-title">Voice <span>system</span></h2>
+    <p class="section-sub">Hear what matters. Speak to check in.</p>
+  </div>
+  <div class="voice-split">
+    <div class="voice-box"><div class="tag">Priority</div><h3>Urgent alerts</h3><p>Critical messages break through immediately. You hear them wherever you are — no screen needed.</p></div>
+    <div class="voice-box"><div class="tag">Command</div><h3>"Check messages"</h3><p>Say the phrase and hear your latest classified messages read aloud. Hands-free monitoring.</p></div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <div class="cta-content">
+    <div class="section-number">Try it</div>
+    <h2 class="section-title"><span>30 seconds.</span><br>No signup.</h2>
+    <p>Connect a source and see your first AI classification instantly.</p>
+    <div class="hero-buttons">
+      <button class="btn-primary">Launch demo</button>
+    </div>
+  </div>
+  <div class="cta-stripe"><div>V</div></div>
+</section>
+
+<footer>
+  <div class="logo" style="font-size:1rem;">Vigil<span>.</span></div>
+  <div class="footer-links">
+    <a href="#">Docs</a>
+    <a href="#">GitHub</a>
+    <a href="#">Monad</a>
+  </div>
+  <div>&copy; 2026 Vigil</div>
+</footer>
+</body>
+</html>

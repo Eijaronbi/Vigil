@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Playful</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: #fef7ed;
+      color: #2d2a24;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+
+    nav {
+      padding: 20px 0;
+    }
+    .nav-inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo {
+      font-family: 'Fredoka', sans-serif;
+      font-size: 24px;
+      font-weight: 600;
+      color: #e85d3a;
+    }
+    .nav-links { display: flex; gap: 24px; align-items: center; }
+    .nav-links a { font-size: 15px; font-weight: 500; color: #6b5e4e; }
+    .nav-links a:hover { color: #e85d3a; }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: 'Outfit', sans-serif;
+      border: none;
+      border-radius: 12px;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .btn-primary { background: #e85d3a; color: #fff; }
+    .btn-primary:hover { background: #d44a28; transform: translateY(-2px); }
+    .btn-secondary { background: #fff; color: #2d2a24; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .btn-secondary:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); transform: translateY(-2px); }
+
+    .hero {
+      padding: 80px 0 60px;
+      text-align: center;
+    }
+    .hero h1 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(40px, 6vw, 60px);
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.01em;
+      margin-bottom: 16px;
+      color: #2d2a24;
+    }
+    .hero h1 .highlight { color: #e85d3a; }
+    .hero p {
+      font-size: 18px;
+      color: #6b5e4e;
+      max-width: 520px;
+      margin: 0 auto 32px;
+    }
+    .hero-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    .hero-cards {
+      display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 48px;
+    }
+    .hero-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .hero-card .emoji { font-size: 28px; }
+    .hero-card strong { font-size: 15px; font-weight: 600; display: block; }
+    .hero-card span { font-size: 13px; color: #8a7e6e; }
+
+    .section { padding: 80px 0; }
+    .section.alt { background: #fff; }
+    .section h2 {
+      font-family: 'Fredoka', sans-serif;
+      font-size: clamp(30px, 4vw, 40px);
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: #2d2a24;
+    }
+    .section .desc { font-size: 17px; color: #6b5e4e; margin-bottom: 36px; max-width: 520px; }
+
+    .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .step {
+      background: #fff;
+      border-radius: 16px;
+      padding: 28px 20px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .step .emoji { font-size: 36px; margin-bottom: 12px; }
+    .step h3 { font-family: 'Fredoka', sans-serif; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .step p { font-size: 14px; color: #6b5e4e; line-height: 1.5; }
+
+    .sources { display: flex; flex-wrap: wrap; gap: 12px; }
+    .source-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #fff;
+      border-radius: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      font-size: 15px;
+      font-weight: 500;
+    }
+    .source-chip .emoji { font-size: 20px; }
+
+    .voice-section { background: #e85d3a; color: #fff; text-align: center; border-radius: 24px; margin: 0 24px; padding: 60px 24px; }
+    .voice-section h2 { color: #fff; }
+    .voice-section p { color: rgba(255,255,255,0.8); margin-bottom: 28px; }
+    .voice-section .btn-secondary { background: rgba(255,255,255,0.2); color: #fff; box-shadow: none; }
+    .voice-section .btn-secondary:hover { background: rgba(255,255,255,0.3); }
+
+    .cta-section { text-align: center; }
+    .cta-section .btn { margin: 0 6px; }
+
+    footer { padding: 24px 0; text-align: center; font-size: 14px; color: #8a7e6e; margin-top: 40px; }
+
+    @media (max-width: 720px) {
+      .steps { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .hero-cards { flex-direction: column; align-items: center; }
+    }
+    @media (max-width: 480px) {
+      .steps { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">Vigil</a>
+    <div class="nav-links">
+      <a href="#how">How</a>
+      <a href="#sources">Sources</a>
+      <a href="#voice">Voice</a>
+    </div>
+    <a href="#demo" class="btn btn-primary" style="padding: 10px 24px; font-size: 14px;">Try Demo</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="container">
+    <h1>Never miss <span class="highlight">what matters</span></h1>
+    <p>One friendly system watches WhatsApp, Telegram, Twitter, and Gmail. Filters noise with AI. Alerts you how you like.</p>
+    <div class="hero-actions">
+      <a href="#demo" class="btn btn-primary">Try the Demo</a>
+      <a href="#how" class="btn btn-secondary">How It Works</a>
+    </div>
+    <div class="hero-cards">
+      <div class="hero-card">
+        <span class="emoji">&#128172;</span>
+        <div><strong>4 Sources</strong><span>WhatsApp, Telegram, Twitter, Gmail</span></div>
+      </div>
+      <div class="hero-card">
+        <span class="emoji">&#129302;</span>
+        <div><strong>AI Classifier</strong><span>Rules + LLM scoring</span></div>
+      </div>
+      <div class="hero-card">
+        <span class="emoji">&#128276;</span>
+        <div><strong>3 Alert Channels</strong><span>Telegram, Email, Voice</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section alt" id="how">
+  <div class="container">
+    <h2>How it works</h2>
+    <p class="desc">Four simple steps. Set it and forget it.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="emoji">&#128279;</div>
+        <h3>Connect</h3>
+        <p>Link your sources. Each one is read-only and safe.</p>
+      </div>
+      <div class="step">
+        <div class="emoji">&#128220;</div>
+        <h3>Set Rules</h3>
+        <p>Keywords, senders, or just let AI figure it out.</p>
+      </div>
+      <div class="step">
+        <div class="emoji">&#128226;</div>
+        <h3>Get Alerts</h3>
+        <p>Telegram, email, or spoken aloud. Your choice.</p>
+      </div>
+      <div class="step">
+        <div class="emoji">&#9989;</div>
+        <h3>Verified</h3>
+        <p>Every alert hashed and stored on Monad.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="sources">
+  <div class="container">
+    <h2>Sources we support</h2>
+    <p class="desc">Read-only connections. Your accounts stay yours.</p>
+    <div class="sources">
+      <span class="source-chip"><span class="emoji">&#128172;</span> WhatsApp &mdash; Chrome extension</span>
+      <span class="source-chip"><span class="emoji">&#128172;</span> Telegram &mdash; Bot API</span>
+      <span class="source-chip"><span class="emoji">&#120143;</span> Twitter / X &mdash; Jina Reader</span>
+      <span class="source-chip"><span class="emoji">&#9993;</span> Gmail &mdash; Google OAuth</span>
+    </div>
+  </div>
+</section>
+
+<div class="voice-section" id="voice">
+  <div class="container narrow">
+    <h2>Voice alerts</h2>
+    <p>Set a group or person as priority. When they message, Vigil reads it out loud. Or say "check messages" anytime.</p>
+    <a href="#demo" class="btn btn-secondary">Try Voice Alerts</a>
+  </div>
+</div>
+
+<section class="section" id="demo">
+  <div class="container" style="text-align: center;">
+    <h2>Ready to try it?</h2>
+    <p class="desc" style="margin: 0 auto 32px;">No signup. No credit card. Connect one source and see alerts right away.</p>
+    <a href="#" class="btn btn-primary">Try the Demo</a>
+    <a href="#" class="btn btn-secondary">View on GitHub</a>
+  </div>
+</section>
+
+<footer>
+  Spark Hackathon &middot; Monad Testnet
+</footer>
+
+</body>
+</html>
