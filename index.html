@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vigil — Intelligent Message Monitoring</title>
+  <meta name="description" content="Monitor WhatsApp, Telegram, Twitter, and Gmail for important messages. Get alerts via Telegram, email, or voice. On-chain attestation on Monad.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="bg-grid"></div>
+
+  <nav>
+    <div class="nav-inner">
+      <div class="logo">
+        <span class="logo-icon">&#9670;</span>
+        <span class="logo-text">Vigil</span>
+      </div>
+      <div class="nav-links">
+        <a href="#problem">Problem</a>
+        <a href="#solution">Solution</a>
+        <a href="#how">How It Works</a>
+        <a href="#chain">On-Chain</a>
+      </div>
+      <a href="https://github.com" class="btn btn-outline" target="_blank">GitHub</a>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-badge">
+          <span class="dot live"></span>
+          Hackathon Submission — Spark
+        </div>
+        <h1>
+          Never miss what matters<br>
+          across every channel
+        </h1>
+        <p class="hero-sub">
+          One system that watches WhatsApp, Telegram, Twitter, and Gmail.
+          Filters the noise with AI. Alerts you instantly.
+          Every important alert attested on-chain.
+        </p>
+        <div class="hero-actions">
+          <a href="#how" class="btn btn-primary">See How It Works</a>
+          <a href="https://github.com" class="btn btn-secondary">View on GitHub &rarr;</a>
+        </div>
+        <div class="hero-stats">
+          <div class="stat">
+            <span class="stat-num">4</span>
+            <span class="stat-label">Monitored Sources</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">3</span>
+            <span class="stat-label">Alert Channels</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">AI</span>
+            <span class="stat-label">Hybrid Classifier</span>
+          </div>
+          <div class="stat">
+            <span class="stat-num">&#9670;</span>
+            <span class="stat-label">Monad Testnet</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="problem" class="section">
+      <div class="container narrow">
+        <div class="section-label">The Problem</div>
+        <h2>Your important messages are buried in noise</h2>
+        <p class="section-desc">
+          You're in 10+ group chats across WhatsApp and Telegram. You follow key accounts on Twitter.
+          Your inbox is full. Somewhere in the noise is a message that matters.
+          A deal. A deadline. An opportunity. You can't watch everything at once.
+        </p>
+        <div class="pain-points">
+          <div class="pain-card">
+            <div class="pain-icon">&#9888;</div>
+            <h3>Information Overload</h3>
+            <p>Hundreds of messages daily across groups. The signal-to-noise ratio is impossible to manage manually.</p>
+          </div>
+          <div class="pain-card">
+            <div class="pain-icon">&#9203;</div>
+            <h3>Delayed Response</h3>
+            <p>By the time you scroll back to find that important message, the opportunity has passed.</p>
+          </div>
+          <div class="pain-card">
+            <div class="pain-icon">&#128273;</div>
+            <h3>Fragmented Monitoring</h3>
+            <p>No single tool watches WhatsApp, Telegram, Twitter, and email together. You tab-hop constantly.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="solution" class="section alt">
+      <div class="container narrow">
+        <div class="section-label">The Solution</div>
+        <h2>Vigil watches everything so you don't have to</h2>
+        <p class="section-desc">
+          A unified monitoring engine that plugs into your existing accounts.
+          It classifies every message with AI and routes important ones to you
+          however you want. Telegram, email, or spoken aloud.
+        </p>
+        <div class="solution-grid">
+          <div class="source-cards">
+            <div class="source-card">
+              <div class="source-icon wa">&#128172;</div>
+              <div>
+                <strong>WhatsApp</strong>
+                <span>Via Chrome extension — uses your live session. No separate login.</span>
+              </div>
+            </div>
+            <div class="source-card">
+              <div class="source-icon tg">&#128172;</div>
+              <div>
+                <strong>Telegram</strong>
+                <span>Bot API — official, zero risk. Add bot to any group.</span>
+              </div>
+            </div>
+            <div class="source-card">
+              <div class="source-icon tw">&#120143;</div>
+              <div>
+                <strong>Twitter / X</strong>
+                <span>Jina Reader — poll accounts without logging in. No API key needed.</span>
+              </div>
+            </div>
+            <div class="source-card">
+              <div class="source-icon gm">&#9993;</div>
+              <div>
+                <strong>Gmail</strong>
+                <span>OAuth 2.0 — official Google API. Polls for new important mail.</span>
+              </div>
+            </div>
+          </div>
+          <div class="pipeline">
+            <div class="pipeline-step">
+              <span class="step-num">1</span>
+              <div>
+                <strong>Collect</strong>
+                <span>Messages stream in from all sources in real-time</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">&darr;</div>
+            <div class="pipeline-step">
+              <span class="step-num">2</span>
+              <div>
+                <strong>Classify</strong>
+                <span>Hybrid AI: keyword rules catch instantly, LLM scores for nuance</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">&darr;</div>
+            <div class="pipeline-step">
+              <span class="step-num">3</span>
+              <div>
+                <strong>Alert</strong>
+                <span>Telegram push, email digest, or TTS via Chrome extension</span>
+              </div>
+            </div>
+            <div class="pipeline-arrow">&darr;</div>
+            <div class="pipeline-step">
+              <span class="step-num">4</span>
+              <div>
+                <strong>Attest</strong>
+                <span>Every important alert hash stored immutably on Monad testnet</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="how" class="section">
+      <div class="container narrow">
+        <div class="section-label">How It Works</div>
+        <h2>Architecture</h2>
+        <p class="section-desc">
+          Python monolith with Chrome extension sidecar. Deployable in minutes.
+        </p>
+        <div class="arch-diagram">
+          <div class="arch-layer">
+            <div class="arch-title">Data Sources</div>
+            <div class="arch-items">
+              <span class="arch-item">WhatsApp Web</span>
+              <span class="arch-item">Telegram Groups</span>
+              <span class="arch-item">Twitter / X</span>
+              <span class="arch-item">Gmail Inbox</span>
+            </div>
+          </div>
+          <div class="arch-connector">&darr;</div>
+          <div class="arch-layer primary">
+            <div class="arch-title">AI Classification Engine</div>
+            <div class="arch-items">
+              <span class="arch-item">Keyword Rules</span>
+              <span class="arch-item">Sender Priority</span>
+              <span class="arch-item">Topic Matching</span>
+              <span class="arch-item">LLM Scorer</span>
+            </div>
+          </div>
+          <div class="arch-connector">&darr;</div>
+          <div class="arch-layer">
+            <div class="arch-title">Alert Channels</div>
+            <div class="arch-items">
+              <span class="arch-item">Telegram Bot</span>
+              <span class="arch-item">Email (Gmail OAuth)</span>
+              <span class="arch-item">TTS (Chrome Extension)</span>
+            </div>
+          </div>
+          <div class="arch-connector">&darr;</div>
+          <div class="arch-layer accent">
+            <div class="arch-title">On-Chain (Monad Testnet)</div>
+            <div class="arch-items">
+              <span class="arch-item">AlertAttestation.sol</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="chain" class="section alt">
+      <div class="container narrow">
+        <div class="section-label">On-Chain Component</div>
+        <h2>Every alert is attested,<br>not just sent</h2>
+        <p class="section-desc">
+          When an important alert fires, its fingerprint is permanently recorded on Monad testnet. 
+          Anyone can verify that you were alerted about a specific message at a specific time.
+        </p>
+        <div class="chain-card">
+          <div class="chain-header">
+            <span class="chain-contract">AlertAttestation.sol</span>
+            <span class="chain-badge">Monad Testnet</span>
+          </div>
+          <div class="chain-body">
+            <div class="chain-row">
+              <span class="chain-key">messageHash</span>
+              <span class="chain-val">keccak256(text | group | timestamp)</span>
+            </div>
+            <div class="chain-row">
+              <span class="chain-key">groupName</span>
+              <span class="chain-val">string — e.g. "Deals Group"</span>
+            </div>
+            <div class="chain-row">
+              <span class="chain-key">timestamp</span>
+              <span class="chain-val">block.timestamp when attested</span>
+            </div>
+            <div class="chain-row">
+              <span class="chain-key">importanceScore</span>
+              <span class="chain-val">uint8 — 0 to 10</span>
+            </div>
+          </div>
+          <div class="chain-footer">
+            <code>function verify(bytes32 messageHash) returns (bool)</code>
+          </div>
+        </div>
+        <div class="chain-features">
+          <div class="chain-feature">
+            <strong>Tamper-Proof</strong>
+            <span>Once written, attestations are immutable. The blockchain is your receipt.</span>
+          </div>
+          <div class="chain-feature">
+            <strong>Publicly Verifiable</strong>
+            <span>Anyone can call verify() with a message hash to confirm it was flagged.</span>
+          </div>
+          <div class="chain-feature">
+            <strong>No Token Required</strong>
+            <span>Owner-only attest function. No user wallets or gas fees for monitored users.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container narrow center">
+        <div class="section-label">Demo</div>
+        <h2>See it in action</h2>
+        <p class="section-desc">Coming soon — demo video showing the full flow from message detection to on-chain attestation.</p>
+        <div class="demo-placeholder">
+          <div class="demo-play">&#9654;</div>
+          <span>Demo Video (max 3 min)</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt cta-section">
+      <div class="container narrow center">
+        <h2>Built for Spark,<br>powered by Monad</h2>
+        <p class="section-desc">
+          This project solves a real personal problem: staying on top of important messages 
+          across fragmented channels. Built with Python, Solidity, and a Chrome extension.
+        </p>
+        <div class="cta-actions">
+          <a href="https://github.com" class="btn btn-primary">GitHub Repo</a>
+          <a href="#" class="btn btn-secondary">Contract on Monadscan &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-left">
+        <span class="logo-icon">&#9670;</span>
+        <span class="logo-text">Vigil</span>
+      </div>
+      <div class="footer-center">
+        Built for <a href="https://buildanything.so/hackathons/spark" target="_blank">Spark Hackathon</a> 
+        &middot; Deployed on Monad Testnet
+      </div>
+      <div class="footer-right">
+        <a href="https://github.com" target="_blank">GitHub</a>
+        <a href="#" target="_blank">Monadscan</a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -83,6 +83,11 @@ class Message(Base):
     notified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
 
     group: Mapped["Group"] = relationship("Group", back_populates="messages")
+
+    @property
+    def group_name(self) -> str:
+        return self.group.name if self.group else ""
+
     digest_entries: Mapped[list["DigestQueue"]] = relationship(
         "DigestQueue", back_populates="message", cascade="all, delete-orphan"
     )

@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
+from backend.classifier.classification_service import classify_message
 from backend.config import settings
 from backend.database import get_db
 from backend.models import Group, Message
@@ -13,28 +14,32 @@ router = APIRouter(prefix="/api/messages", tags=["messages"])
 
 
 @router.post("", response_model=MessageOut)
-def create_message(payload: MessageIn, db: Session = Depends(get_db)):
-    group_id = payload.group_id
+async def create_message(msg: MessageIn, db: Session = Depends(get_db)):
+    group_id = msg.group_id
     if group_id is None:
         group = db.query(Group).filter(
-            Group.source == payload.source,
-            Group.name == payload.group_name,
+            Group.source == msg.source,
+            Group.name == msg.group_name,
         ).first()
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
         group_id = group.id
 
-    message = Message(
+    db_msg = Message(
         group_id=group_id,
-        source=payload.source,
-        sender=payload.sender,
-        text=payload.text,
-        timestamp=payload.timestamp or datetime.now(),
+        source=msg.source,
+        sender=msg.sender,
+        text=msg.text,
+        timestamp=msg.timestamp or datetime.now(),
     )
-    db.add(message)
+    db.add(db_msg)
     db.commit()
-    db.refresh(message)
-    return message
+    db.refresh(db_msg)
+
+    await classify_message(db, db_msg, msg)
+
+    db.refresh(db_msg)
+    return db_msg
 
 
 @router.get("", response_model=list[MessageOut])
