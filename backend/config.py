@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+HERE = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
@@ -16,11 +20,13 @@ class Settings(BaseSettings):
     daily_report_time: str = "08:00"
     ws_port: int = 8765
     monad_rpc_url: str = "https://testnet-rpc.monad.xyz"
+    monad_explorer_url: str = "https://testnet.monadexplorer.com"
+    monad_chain_id: int = 10143
     contract_address: str = ""
     wallet_private_key: str = ""
     auth_password: str = "vigil"
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": HERE / ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 
 
 settings = Settings()

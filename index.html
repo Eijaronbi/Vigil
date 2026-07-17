@@ -6,6 +6,7 @@
 <title>Vigil — Never miss what matters</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
 <style>
 :root {
   --c-bg: #0A0A0A;
@@ -17,6 +18,7 @@
   --c-accent-dim: rgba(0,255,65,0.15);
   --c-amber: #FFB000;
   --c-red: #FF4444;
+  --c-error: #FF4444;
   --c-border: #222222;
   --ff-mono: 'IBM Plex Mono', monospace;
   --ff-sans: 'IBM Plex Sans', sans-serif;
@@ -134,6 +136,15 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 .source-status .status-text { font-size: 0.65rem; margin-top: 4px; }
 .source-status .status-text.connected { color: var(--c-accent); }
 .source-status .status-text.disconnected { color: var(--c-text-secondary); }
+
+.source-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.source-card[data-source] { background: var(--c-surface-2); border: 1px solid var(--c-border); padding: 16px; display: flex; align-items: center; gap: 12px; }
+.source-icon { font-size: 1.4rem; color: var(--c-text-secondary); flex-shrink: 0; }
+.source-info { flex: 1; min-width: 0; }
+.source-name { font-family: var(--ff-mono); font-size: 0.8rem; color: var(--c-text); }
+.source-status-text { font-size: 0.7rem; color: var(--c-text-secondary); margin-top: 2px; }
+.source-btn { padding: 6px 14px; font-size: 0.7rem; white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 700px) { .source-cards { grid-template-columns: 1fr; } }
 
 .cta-section { text-align: center; border-top: 1px solid var(--c-border); }
 .cta-section h2 { font-family: var(--ff-sans); font-weight: 600; font-size: 2rem; letter-spacing: -0.02em; }
@@ -298,39 +309,146 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="section-header">
 <div class="kicker">Session</div>
 <h2>Your Dashboard</h2>
-<p>Log in to monitor sources, query messages, and test alerts.</p>
+<p>Log in to connect sources, monitor messages, and test alerts.</p>
 </div>
 
 <div id="loginPanel">
 <div class="terminal-block" style="max-width:400px;margin:0 auto;">
 <div class="line" style="text-align:center;margin-bottom:16px;"><span class="highlight">// vigil session login</span></div>
-<div class="line"><span class="prompt">username</span></div>
-<div class="line"><input type="text" id="uname" value="demo" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
-<div class="line" style="margin-top:8px;"><span class="prompt">password</span></div>
-<div class="line"><input type="password" id="upass" value="demo" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
-<div class="line" style="margin-top:16px;text-align:center;"><button class="btn-primary" onclick="login()">connect →</button></div>
-<div class="line" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-text-secondary);">default password: vigil</div>
+<div class="line" style="text-align:center;margin-bottom:12px;font-size:0.75rem;color:var(--c-text-secondary);">connect wallet or use password</div>
+<div class="line" style="text-align:center;margin-bottom:16px;"><button class="btn-primary" id="walletConnectBtn" onclick="connectWallet()">⧄ connect wallet</button></div>
+<div class="line" style="border-top:1px solid var(--c-border);padding-top:12px;margin-bottom:8px;text-align:center;font-size:0.65rem;color:var(--c-text-secondary);">or password login</div>
+<div class="line"><span class="prompt">password</span></div>
+<div class="line"><input type="password" id="upass" value="vigil" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:8px;text-align:center;"><button class="btn-primary" onclick="login()">connect →</button></div>
+<div class="line" id="loginError" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-error);display:none;"></div>
+<div class="line" id="walletLoginError" style="margin-top:4px;text-align:center;font-size:0.7rem;color:var(--c-error);display:none;"></div>
 </div>
 </div>
 
 <div class="session-panel" id="sessionPanel">
 <div class="session-status">
 <span class="dot online" id="sessionDot"></span>
-<span id="sessionUser">demo</span>
-<span style="color:var(--c-text-secondary);"> — session active</span>
+<span id="sessionUser">authenticated</span>
+<span style="color:var(--c-text-secondary);" id="sessionWallet"></span>
 <span style="flex:1;"></span>
+<span id="networkBadge" style="font-size:0.65rem;padding:2px 8px;border:1px solid var(--c-accent);color:var(--c-accent);display:none;">testnet</span>
 <button class="btn-secondary" style="padding:4px 12px;font-size:0.7rem;" onclick="logout()">disconnect</button>
 </div>
 
-<div class="source-status-grid">
-<div class="source-status"><div class="indicator" id="waIndicator">⬤</div><div class="name">WhatsApp</div><div class="status-text" id="waStatus">waiting...</div></div>
-<div class="source-status"><div class="indicator" id="tgIndicator">⬤</div><div class="name">Telegram</div><div class="status-text" id="tgStatus">waiting...</div></div>
-<div class="source-status"><div class="indicator" id="twIndicator">⬤</div><div class="name">Twitter</div><div class="status-text" id="twStatus">waiting...</div></div>
-<div class="source-status"><div class="indicator" id="gmIndicator">⬤</div><div class="name">Gmail</div><div class="status-text" id="gmStatus">waiting...</div></div>
+<div class="sources-section">
+<h3 style="margin-bottom:16px;font-family:var(--ff-mono);font-size:0.8rem;color:var(--c-text-secondary);">// connect sources</h3>
+<div class="source-cards" id="sourceCards">
+<div class="source-card" data-source="telegram">
+<div class="source-icon">✈</div>
+<div class="source-info">
+<div class="source-name">Telegram</div>
+<div class="source-status-text" id="telegramStatus">checking...</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" id="telegramBtn" onclick="connectTelegram()">connect</button>
+</div>
+</div>
+<div class="source-card" data-source="gmail">
+<div class="source-icon">@</div>
+<div class="source-info">
+<div class="source-name">Gmail</div>
+<div class="source-status-text" id="gmailStatus">checking...</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" id="gmailBtn" onclick="connectGmail()">connect</button>
+</div>
+</div>
+<div class="source-card" data-source="discord">
+<div class="source-icon">🔊</div>
+<div class="source-info">
+<div class="source-name">Discord</div>
+<div class="source-status-text" id="discordStatus">not connected</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" id="discordBtn" onclick="connectDiscord()">connect</button>
+</div>
+</div>
+<div class="source-card" data-source="twitter">
+<div class="source-icon">𝕏</div>
+<div class="source-info">
+<div class="source-name">Twitter / X</div>
+<div class="source-status-text" id="twitterStatus">not connected</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" id="twitterBtn" onclick="connectJina('twitter')">add profile</button>
+</div>
+</div>
+<div class="source-card" data-source="facebook">
+<div class="source-icon">f</div>
+<div class="source-info">
+<div class="source-name">Facebook</div>
+<div class="source-status-text" id="facebookStatus">not connected</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" id="facebookBtn" onclick="connectJina('facebook')">add profile</button>
+</div>
+</div>
+<div class="source-card" data-source="whatsapp">
+<div class="source-icon">💬</div>
+<div class="source-info">
+<div class="source-name">WhatsApp</div>
+<div class="source-status-text" id="whatsappStatus">not connected</div>
+</div>
+<div class="source-action">
+<button class="btn-secondary source-btn" onclick="downloadExtension()">install extension</button>
+</div>
+</div>
+</div>
 </div>
 
-<div class="query-bar">
-<input type="text" id="queryInput" placeholder="query: e.g. sender:joy, source:whatsapp, group:deals, date:2026-06-15" onkeydown="if(event.key==='Enter')queryMessages()">
+<div id="telegramGroupPanel" style="display:none;margin-top:16px;">
+<div class="terminal-block">
+<div class="line"><span class="highlight">// telegram — connected groups</span></div>
+<div id="telegramGroupList" style="margin-top:8px;">
+<div class="line" style="color:var(--c-text-secondary);">loading groups...</div>
+</div>
+</div>
+</div>
+
+<div id="voicePanel" style="margin-top:16px;">
+<div class="terminal-block" style="cursor:pointer;" onclick="var n=this.nextElementSibling;n.style.display=n.style.display==='none'?'block':'none'">
+<div class="line"><span class="highlight">// voice settings</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">click to expand</span></div>
+<div class="line" style="font-size:0.75rem;color:var(--c-text-secondary);margin-top:4px;">current voice: <span id="currentVoiceLabel">en-US-JennyNeural</span></div>
+</div>
+<div style="display:none;padding:12px 0;">
+<div class="line" style="margin-bottom:8px;"><span class="prompt">select voice by region</span></div>
+<div class="line"><select id="voiceRegionSelect" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;" onchange="updateVoiceList()">
+<option value="">— loading voices —</option>
+</select></div>
+<div class="line" style="margin-top:8px;"><span class="prompt">voice</span></div>
+<div class="line"><select id="voiceSelect" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;" onchange="changeVoice()">
+<option value="">— select region first —</option>
+</select></div>
+</div>
+</div>
+
+<div id="vaultPanel" style="margin-top:16px;display:none;">
+<div class="terminal-block">
+<div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+<span><span class="highlight">// memory vault</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">on-chain message commitments</span></span>
+<span style="display:flex;gap:8px;">
+<select id="networkSelect" style="padding:4px 8px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.7rem;" onchange="switchNetwork()">
+<option value="10143">monad testnet</option>
+<option value="143">monad mainnet</option>
+</select>
+<button class="btn-primary" style="padding:4px 12px;font-size:0.7rem;" id="commitBtn" onclick="commitBatch()">commit batch</button>
+</span>
+</div>
+<div id="commitStatus" style="font-size:0.75rem;color:var(--c-text-secondary);margin-top:8px;"></div>
+<div id="batchList" style="margin-top:8px;">
+<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no batches yet. connect wallet and click "commit batch" to store important messages on-chain.</div>
+</div>
+</div>
+</div>
+
+<div class="query-bar" style="margin-top:16px;">
+<input type="text" id="queryInput" placeholder="query: e.g. source:telegram, sender:name" onkeydown="if(event.key==='Enter')queryMessages()">
 <button class="btn-primary" style="padding:10px 20px;" onclick="queryMessages()">search</button>
 </div>
 
@@ -424,7 +542,6 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   var WS = null;
   var wsReconnectTimer = null;
 
-  // ── Demo TTS ──
   window.speakDemo = function() {
     var text = document.getElementById('demoInput').value.trim();
     if (!text) return;
@@ -452,7 +569,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   };
 
   window.downloadExtension = function() {
-    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\n\n1. Open chrome://extensions\n2. Enable Developer mode\n3. Load unpacked → select the extension/ folder\n4. Navigate to web.whatsapp.com');
+    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\n\n1. Open chrome://extensions\n2. Enable Developer mode\n3. Load unpacked, select the extension/ folder\n4. Navigate to web.whatsapp.com');
   };
   window.downloadApk = function() {
     alert('Android app: Flutter build in progress.\n\nOnce built, APK will be available for sideload.\nFor now, use the browser dashboard to test.');
@@ -463,8 +580,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     var pass = document.getElementById('upass').value;
     if (!pass) return;
     var btn = document.querySelector('#loginPanel .btn-primary');
+    var err = document.getElementById('loginError');
     btn.textContent = 'connecting...';
     btn.disabled = true;
+    err.style.display = 'none';
     fetch(API + '/api/auth/login', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -478,14 +597,16 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       TOKEN = data.token;
       document.getElementById('loginPanel').style.display = 'none';
       document.getElementById('sessionPanel').classList.add('active');
-      document.getElementById('sessionUser').textContent = 'authenticated';
       connectWs();
       fetchMessages();
+      loadSourceStatus();
+      loadVoices();
     })
     .catch(function(){
       btn.textContent = 'connect →';
       btn.disabled = false;
-      alert('Login failed. Default password: vigil');
+      err.textContent = 'invalid password. default: vigil';
+      err.style.display = 'block';
     });
   };
 
@@ -497,14 +618,6 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     disconnectWs();
     document.getElementById('sessionPanel').classList.remove('active');
     document.getElementById('loginPanel').style.display = 'block';
-    document.getElementById('waStatus').textContent = 'waiting...';
-    document.getElementById('tgStatus').textContent = 'waiting...';
-    document.getElementById('twStatus').textContent = 'waiting...';
-    document.getElementById('gmStatus').textContent = 'waiting...';
-    document.getElementById('waIndicator').style.color = '';
-    document.getElementById('tgIndicator').style.color = '';
-    document.getElementById('twIndicator').style.color = '';
-    document.getElementById('gmIndicator').style.color = '';
     document.getElementById('msgList').innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— disconnected —</span></div>';
   };
 
@@ -512,7 +625,144 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
   }
 
-  // ── Real API data ──
+  // ── Source status ──
+  function loadSourceStatus() {
+    fetch(API + '/api/sources', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data || !data.sources) return;
+        data.sources.forEach(function(s){
+          var el = document.getElementById(s.id + 'Status');
+          var btn = document.getElementById(s.id + 'Btn');
+          if (el) {
+            if (s.connected) {
+              el.textContent = 'connected' + (s.bot_username ? ' — @' + s.bot_username : '') + (s.profile_count ? ' (' + s.profile_count + ')' : '');
+              el.style.color = 'var(--c-accent)';
+            } else {
+              el.textContent = s.id === 'whatsapp' ? 'install extension' : 'not connected';
+              el.style.color = 'var(--c-text-secondary)';
+            }
+          }
+          if (btn && s.connected) {
+            btn.textContent = s.id === 'twitter' || s.id === 'facebook' ? 'watching' : 'connected';
+            btn.className = 'btn-primary source-btn';
+          }
+          if (s.id === 'telegram' && s.connected && s.group_count > 0) {
+            setTimeout(loadTelegramGroups, 1500);
+          }
+        });
+      })
+      .catch(function(){});
+  }
+
+  // ── Telegram ──
+  window.connectTelegram = function() {
+    var token = prompt('Enter your Telegram bot token from @BotFather:');
+    if (!token || !token.trim()) return;
+    var btn = document.getElementById('telegramBtn');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+    fetch(API + '/api/sources/telegram/connect', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({token: token.trim()})
+    })
+    .then(function(r){
+      if (!r.ok) throw Error('Invalid token');
+      return r.json();
+    })
+    .then(function(data){
+      btn.textContent = 'connected';
+      btn.className = 'btn-primary source-btn';
+      document.getElementById('telegramStatus').textContent = 'connected — @' + data.bot_username;
+      document.getElementById('telegramStatus').style.color = 'var(--c-accent)';
+      setTimeout(loadTelegramGroups, 1500);
+    })
+    .catch(function(){
+      btn.textContent = 'connect';
+      btn.disabled = false;
+      alert('Failed. Create a bot with @BotFather first, then paste the token here.');
+    });
+  };
+
+  function loadTelegramGroups() {
+    fetch(API + '/api/sources/telegram/groups', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(groups){
+        var panel = document.getElementById('telegramGroupPanel');
+        var list = document.getElementById('telegramGroupList');
+        panel.style.display = 'block';
+        if (!groups || groups.length === 0) {
+          list.innerHTML = '<div class="line" style="color:var(--c-text-secondary);">add the bot to a Telegram group — messages will appear here</div>';
+          return;
+        }
+        var html = '';
+        groups.forEach(function(g){
+          html += '<div class="line" style="display:flex;justify-content:space-between;padding:4px 0;"><span>⬡ ' + escapeHtml(g.name) + '</span><span style="color:var(--c-text-secondary);font-size:0.7rem;">' + g.external_id + '</span></div>';
+        });
+        list.innerHTML = html;
+        fetchMessages();
+      })
+      .catch(function(){});
+  }
+
+  window.connectDiscord = function() {
+    var token = prompt('Enter your Discord bot token from https://discord.com/developers/applications:');
+    if (!token || !token.trim()) return;
+    var btn = document.getElementById('discordBtn');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+    fetch(API + '/api/sources/discord/connect', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({token: token.trim()})
+    })
+    .then(function(r){
+      if (!r.ok) throw Error('Invalid token');
+      return r.json();
+    })
+    .then(function(data){
+      btn.textContent = 'connected';
+      btn.className = 'btn-primary source-btn';
+      document.getElementById('discordStatus').textContent = 'connected';
+      document.getElementById('discordStatus').style.color = 'var(--c-accent)';
+    })
+    .catch(function(){
+      btn.textContent = 'connect';
+      btn.disabled = false;
+      alert('Failed. Create a bot at discord.com/developers, enable Message Content Intent, then paste the token.');
+    });
+  };
+
+  window.connectJina = function(platform) {
+    var handle = prompt('Enter ' + (platform === 'twitter' ? 'Twitter/X' : 'Facebook') + ' username or page handle:');
+    if (!handle || !handle.trim()) return;
+    var btn = document.getElementById(platform + 'Btn');
+    btn.textContent = 'adding...';
+    btn.disabled = true;
+    fetch(API + '/api/sources/jina/connect', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({platform: platform, handle: handle.trim()})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      btn.textContent = 'watching';
+      btn.className = 'btn-primary source-btn';
+      document.getElementById(platform + 'Status').textContent = 'watching @' + handle;
+      document.getElementById(platform + 'Status').style.color = 'var(--c-accent)';
+    })
+    .catch(function(){
+      btn.textContent = 'add profile';
+      btn.disabled = false;
+    });
+  };
+
+  window.connectGmail = function() {
+    alert('Gmail OAuth setup:\n\n1. Go to https://console.cloud.google.com\n2. Enable Gmail API\n3. Create OAuth 2.0 credentials\n4. Add redirect URI: http://localhost:8002/api/sources/gmail/callback\n5. Set GMAIL_OAUTH_CLIENT_ID and GMAIL_OAUTH_CLIENT_SECRET in .env\n6. Restart server');
+  };
+
+  // ── Messages ──
   function fetchMessages(query) {
     var url = API + '/api/messages?limit=20';
     if (query) url += '&' + query;
@@ -522,7 +772,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       .then(function(r){ if (!r.ok) throw Error(r.status); return r.json(); })
       .then(function(data){
         if (!Array.isArray(data) || data.length === 0) {
-          list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— no messages yet. connect sources to see them —</span></div>';
+          list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— no messages yet. connect sources —</span></div>';
           return;
         }
         var html = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>';
@@ -535,7 +785,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         list.innerHTML = html;
       })
       .catch(function(e){
-        list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-error);"><span colspan="4">error loading messages: ' + e.message + '</span></div>';
+        list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-error);"><span colspan="4">error: ' + e.message + '</span></div>';
       });
   }
 
@@ -559,23 +809,13 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     disconnectWs();
     try {
       WS = new WebSocket('ws://localhost:8002/ws');
-      WS.onopen = function() {
-        document.getElementById('waStatus').textContent = 'connected';
-        document.getElementById('waIndicator').style.color = '#00FF41';
-      };
       WS.onmessage = function(ev) {
         try {
           var data = JSON.parse(ev.data);
-          if (data.type === 'alert' || data.type === 'priority_alert') {
-            fetchMessages();
-          }
+          if (data.type === 'alert' || data.type === 'priority_alert') fetchMessages();
         } catch(e) {}
       };
-      WS.onclose = function() {
-        document.getElementById('waStatus').textContent = 'disconnected';
-        document.getElementById('waIndicator').style.color = '#FF4444';
-        if (TOKEN) wsReconnectTimer = setTimeout(connectWs, 5000);
-      };
+      WS.onclose = function() { if (TOKEN) wsReconnectTimer = setTimeout(connectWs, 5000); };
       WS.onerror = function() { if (WS) WS.close(); };
     } catch(e) {}
   }
@@ -585,12 +825,240 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     if (WS) { try { WS.close(); } catch(e) {} WS = null; }
   }
 
-  // ── Detect server status ──
+  // ── Voice selector ──
+  var VOICES_DATA = null;
+
+  function loadVoices() {
+    fetch(API + '/api/tts/voices', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (!data || !data.voices) return;
+        VOICES_DATA = data;
+        document.getElementById('currentVoiceLabel').textContent = data.current || 'en-US-JennyNeural';
+        var grouped = data.grouped || {};
+        var regionSelect = document.getElementById('voiceRegionSelect');
+        var regions = Object.keys(grouped).sort();
+        var html = '<option value="">— select region —</option>';
+        regions.forEach(function(locale){
+          var label = locale;
+          var parts = locale.split('-');
+          if (parts.length > 1) label = parts[1] + ' (' + parts[0] + ')';
+          var voices = grouped[locale];
+          var count = voices ? voices.length : 0;
+          html += '<option value="' + locale + '">' + label + ' (' + count + ' voices)</option>';
+        });
+        regionSelect.innerHTML = html;
+        var current = data.current || '';
+        if (current) {
+          var currLocale = current.split('-').slice(0,2).join('-');
+          regionSelect.value = currLocale;
+          updateVoiceList(currLocale, current);
+        }
+      })
+      .catch(function(){});
+  }
+
+  window.updateVoiceList = function(preferredLocale, preferredVoice) {
+    var locale = preferredLocale || document.getElementById('voiceRegionSelect').value;
+    if (!locale || !VOICES_DATA || !VOICES_DATA.grouped) return;
+    var voices = VOICES_DATA.grouped[locale] || [];
+    var voiceSelect = document.getElementById('voiceSelect');
+    if (voices.length === 0) {
+      voiceSelect.innerHTML = '<option value="">— no voices for this region —</option>';
+      return;
+    }
+    var male = voices.filter(function(v){ return v.gender === 'Male'; });
+    var female = voices.filter(function(v){ return v.gender === 'Female'; });
+    var html = '';
+    if (male.length) {
+      html += '<option disabled style="color:var(--c-text-secondary);">── male ──</option>';
+      male.forEach(function(v){
+        var sel = v.name === (preferredVoice || VOICES_DATA.current) ? ' selected' : '';
+        html += '<option value="' + v.name + '"' + sel + '>' + v.name + '</option>';
+      });
+    }
+    if (female.length) {
+      if (male.length) html += '<option disabled style="color:var(--c-text-secondary);">── female ──</option>';
+      female.forEach(function(v){
+        var sel = v.name === (preferredVoice || VOICES_DATA.current) ? ' selected' : '';
+        html += '<option value="' + v.name + '"' + sel + '>' + v.name + '</option>';
+      });
+    }
+    voiceSelect.innerHTML = html;
+    if (!preferredLocale) changeVoice();
+  };
+
+  window.changeVoice = function() {
+    var voice = document.getElementById('voiceSelect').value;
+    if (!voice) return;
+    fetch(API + '/api/tts/voice', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({voice: voice})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data.ok) {
+        document.getElementById('currentVoiceLabel').textContent = data.voice;
+      }
+    })
+    .catch(function(){});
+  };
+
+  // ── Wallet & Memory Vault ──
+  var WALLET_ADDRESS = null;
+  var WALLET_PROVIDER = null;
+  var WALLET_SIGNER = null;
+
+  window.connectWallet = function() {
+    if (!window.ethers) {
+      document.getElementById('walletLoginError').textContent = 'ethers.js not loaded';
+      document.getElementById('walletLoginError').style.display = 'block';
+      return;
+    }
+    if (!window.ethereum) {
+      document.getElementById('walletLoginError').textContent = 'no wallet detected (install MetaMask)';
+      document.getElementById('walletLoginError').style.display = 'block';
+      return;
+    }
+    var btn = document.getElementById('walletConnectBtn');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+    window.ethereum.request({method: 'eth_requestAccounts'})
+      .then(function(accounts) {
+        WALLET_ADDRESS = accounts[0].toLowerCase();
+        var provider = new ethers.BrowserProvider(window.ethereum);
+        WALLET_PROVIDER = provider;
+        return provider.getSigner();
+      })
+      .then(function(signer) {
+        WALLET_SIGNER = signer;
+        return fetch(API + '/api/auth/nonce', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({address: WALLET_ADDRESS})
+        });
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        var nonce = data.nonce;
+        var message = 'Vigil\nAddress: ' + WALLET_ADDRESS + '\nNonce: ' + nonce;
+        return WALLET_SIGNER.signMessage(message).then(function(sig) {
+          return {signature: sig, nonce: nonce};
+        });
+      })
+      .then(function(signed) {
+        return fetch(API + '/api/auth/wallet-login', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({address: WALLET_ADDRESS, signature: signed.signature, nonce: signed.nonce})
+        });
+      })
+      .then(async function(r) {
+        if (!r.ok) throw Error(await r.text());
+        return r.json();
+      })
+      .then(function(data) {
+        TOKEN = data.token;
+        document.getElementById('loginPanel').style.display = 'none';
+        document.getElementById('sessionPanel').classList.add('active');
+        document.getElementById('sessionWallet').textContent = ' — ' + WALLET_ADDRESS.substring(0,6) + '...' + WALLET_ADDRESS.substring(38);
+        document.getElementById('networkBadge').style.display = 'inline';
+        document.getElementById('vaultPanel').style.display = 'block';
+        connectWs();
+        fetchMessages();
+        loadSourceStatus();
+        loadVoices();
+        loadBatches();
+      })
+      .catch(function(e) {
+        btn.textContent = '⧄ connect wallet';
+        btn.disabled = false;
+        document.getElementById('walletLoginError').textContent = 'wallet connection failed: ' + e.message;
+        document.getElementById('walletLoginError').style.display = 'block';
+      });
+  };
+
+  window.switchNetwork = function() {
+    var chainId = document.getElementById('networkSelect').value;
+    if (!window.ethereum) return;
+    window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{chainId: '0x' + parseInt(chainId).toString(16)}]
+    }).catch(function(e) {
+      if (e.code === 4902) {
+        var config = chainId === '143'
+          ? {chainId: '0x8f', chainName: 'Monad Mainnet', rpcUrls: ['https://rpc.monad.xyz'], nativeCurrency: {name: 'MON', symbol: 'MON', decimals: 18}, blockExplorerUrls: ['https://monadscan.com']}
+          : {chainId: '0x279f', chainName: 'Monad Testnet', rpcUrls: ['https://testnet-rpc.monad.xyz'], nativeCurrency: {name: 'MON', symbol: 'MON', decimals: 18}, blockExplorerUrls: ['https://testnet.monadexplorer.com']};
+        window.ethereum.request({method: 'wallet_addEthereumChain', params: [config]});
+      }
+    });
+  };
+
+  window.commitBatch = function() {
+    var btn = document.getElementById('commitBtn');
+    var status = document.getElementById('commitStatus');
+    btn.textContent = 'committing...';
+    btn.disabled = true;
+    status.textContent = 'generating merkle tree and submitting...';
+    status.style.color = 'var(--c-text-secondary)';
+    fetch(API + '/api/vault/commit', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + TOKEN}
+    })
+    .then(function(r) {
+      if (!r.ok) throw Error('commit failed');
+      return r.json();
+    })
+    .then(function(data) {
+      status.innerHTML = 'batch #' + data.batch_id + ' committed — <a href="' + data.explorer_url + '" target="_blank" style="color:var(--c-accent);">view tx</a>';
+      status.style.color = 'var(--c-accent)';
+      btn.textContent = 'commit batch';
+      btn.disabled = false;
+      loadBatches();
+    })
+    .catch(function(e) {
+      status.textContent = 'error: ' + e.message;
+      status.style.color = 'var(--c-error)';
+      btn.textContent = 'commit batch';
+      btn.disabled = false;
+    });
+  };
+
+  function loadBatches() {
+    fetch(API + '/api/vault/batches', {headers: {'Authorization': 'Bearer ' + TOKEN}})
+      .then(function(r) {
+        if (!r.ok) throw Error('not deployed');
+        return r.json();
+      })
+      .then(function(data) {
+        var list = document.getElementById('batchList');
+        if (!data.batches || data.batches.length === 0) {
+          list.innerHTML = '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no batches yet. click "commit batch" to store important messages on-chain.</div>';
+          return;
+        }
+        var html = '<div class="line" style="display:grid;grid-template-columns:60px 1fr 80px 100px;gap:8px;font-size:0.65rem;color:var(--c-text-secondary);text-transform:uppercase;letter-spacing:0.08em;padding-bottom:6px;border-bottom:1px solid var(--c-border);"><span>batch</span><span>merkle root</span><span>messages</span><span>explorer</span></div>';
+        data.batches.forEach(function(b) {
+          var expUrl = b.explorer_url || '#';
+          html += '<div class="line" style="display:grid;grid-template-columns:60px 1fr 80px 100px;gap:8px;font-size:0.75rem;padding:4px 0;">'
+            + '<span style="color:var(--c-accent);">#' + b.batch_id + '</span>'
+            + '<span style="color:var(--c-text-secondary);overflow:hidden;text-overflow:ellipsis;">' + (b.merkle_root || '').substring(0, 20) + '...</span>'
+            + '<span>' + (b.message_count || 0) + '</span>'
+            + '<span><a href="' + expUrl + '" target="_blank" style="color:var(--c-accent);font-size:0.7rem;">view →</a></span>'
+            + '</div>';
+        });
+        list.innerHTML = html;
+      })
+      .catch(function(){});
+  }
+
+  // ── Server status ──
   fetch(API + '/api/health')
     .then(function(r){ return r.json(); })
     .then(function(data){
       if (data && data.status === 'healthy') {
-        document.querySelector('.cursor-line span').textContent = 'server v' + data.version + ' — ' + data.database + ' — uptime ' + data.uptime_seconds + 's';
+        var el = document.querySelector('.cursor-line span');
+        if (el) el.textContent = 'server v' + data.version + ' — ' + data.database + ' — uptime ' + data.uptime_seconds + 's';
       }
     })
     .catch(function(){});

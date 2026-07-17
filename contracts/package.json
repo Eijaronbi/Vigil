@@ -1,0 +1,19 @@
+{
+  "name": "vigil-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:testnet": "hardhat ignition deploy ./ignition/modules/MemoryVault.ts --network monadTestnet",
+    "deploy:mainnet": "hardhat ignition deploy ./ignition/modules/MemoryVault.ts --network monadMainnet",
+    "verify:testnet": "hardhat verify --network monadTestnet",
+    "verify:mainnet": "hardhat verify --network monadMainnet"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-viem": "^4.0.0",
+    "@nomicfoundation/hardhat-verify": "^2.0.0",
+    "hardhat": "^2.26.0",
+    "hardhat-viem": "^1.0.0",
+    "viem": "^2.0.0"
+  }
+}

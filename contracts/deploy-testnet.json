@@ -1,0 +1,9 @@
+{
+  "network": "testnet",
+  "chain_id": 10143,
+  "address": "0x819b869951dEa78C2BeEf5dD79691CbbB861bfFc",
+  "deployer": "0x49e93877177574CCC301315C69116eeCB1f945cc",
+  "tx_hash": "e09e9a7a4cc3589bce0449ea7876cb6553279426d9fd72c8d2671c2c2b4f18b2",
+  "block_number": 45712917,
+  "timestamp": 1784264072
+}

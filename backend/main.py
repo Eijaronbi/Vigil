@@ -7,10 +7,11 @@ from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
 
 from backend.database import init_db
 from backend.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
-from backend.routers import auth, dashboard, groups, messages, rules
+from backend.routers import auth, dashboard, groups, messages, rules, sources, vault
 from backend.tts import TTSEngine
 
 tts_engine: TTSEngine | None = None
@@ -25,6 +26,7 @@ async def lifespan(app):
     global tts_engine
     tts_engine = TTSEngine()
     init_db()
+    await sources.init_telegram_bot()
     yield
 
 
@@ -45,6 +47,8 @@ app.include_router(messages.router)
 app.include_router(groups.router)
 app.include_router(rules.router)
 app.include_router(dashboard.router)
+app.include_router(sources.router)
+app.include_router(vault.router)
 
 
 @app.exception_handler(Exception)
@@ -78,6 +82,32 @@ async def text_to_speech(
             status_code=503, content="TTS unavailable (edge-tts not installed?)"
         )
     return Response(content=audio, media_type="audio/mp3")
+
+
+class SetVoiceRequest(BaseModel):
+    voice: str
+
+
+@app.get("/api/tts/voices")
+async def list_voices():
+    if tts_engine is None:
+        return JSONResponse(status_code=503, content={"error": "TTS not ready"})
+    voices = await tts_engine.list_voices()
+    grouped: dict[str, list[dict]] = {}
+    for v in voices:
+        key = v["locale"]
+        if key not in grouped:
+            grouped[key] = []
+        grouped[key].append(v)
+    return {"voices": voices, "grouped": grouped, "current": tts_engine.voice}
+
+
+@app.post("/api/tts/voice")
+async def set_voice(body: SetVoiceRequest):
+    if tts_engine is None:
+        return JSONResponse(status_code=503, content={"error": "TTS not ready"})
+    tts_engine.set_voice(body.voice)
+    return {"ok": True, "voice": body.voice}
 
 
 @app.get("/api/tts/priority")

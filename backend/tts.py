@@ -29,6 +29,26 @@ class TTSEngine:
         except Exception:
             return None
 
+    async def list_voices(self) -> list[dict]:
+        if not EDGE_AVAILABLE:
+            return []
+        try:
+            raw = await edge_tts.list_voices()
+            return [
+                {
+                    "name": v["ShortName"],
+                    "locale": v["Locale"],
+                    "gender": v["Gender"],
+                    "region": v["Locale"].split("-")[0] if "-" in v["Locale"] else v["Locale"],
+                }
+                for v in raw
+            ]
+        except Exception:
+            return []
+
+    def set_voice(self, voice: str):
+        self.voice = voice
+
     async def synthesize_alert_summary(self, alerts: list[dict]) -> str | None:
         if not alerts:
             return None
