@@ -1,15 +1,23 @@
+import os
+import time
 from contextlib import asynccontextmanager
+from pathlib import Path
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
+from fastapi.staticfiles import StaticFiles
 
 from backend.database import init_db
-from backend.routers import dashboard, groups, messages, rules
+from backend.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
+from backend.routers import auth, dashboard, groups, messages, rules
 from backend.tts import TTSEngine
 
-
 tts_engine: TTSEngine | None = None
+
+START_TIME = time.time()
+
+HERE = Path(__file__).resolve().parent.parent
 
 
 @asynccontextmanager
@@ -20,16 +28,41 @@ async def lifespan(app):
     yield
 
 
-app = FastAPI(title="Message Monitor", lifespan=lifespan)
+app = FastAPI(title="Vigil", version="2.0.0", lifespan=lifespan)
 
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RateLimitMiddleware)
 app.add_middleware(
-    CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]
+    CORSMiddleware,
+    allow_origins=["http://localhost:8002", "http://127.0.0.1:8002", "http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
 )
 
+app.include_router(auth.router)
 app.include_router(messages.router)
 app.include_router(groups.router)
 app.include_router(rules.router)
 app.include_router(dashboard.router)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "request_id": str(id(request))},
+    )
+
+
+@app.get("/api/health")
+async def health():
+    return {
+        "status": "healthy",
+        "version": "2.0.0",
+        "uptime_seconds": int(time.time() - START_TIME),
+        "database": "sqlite",
+    }
 
 
 @app.get("/api/tts")
@@ -39,11 +72,11 @@ async def text_to_speech(
 ):
     if tts_engine is None:
         return Response(status_code=503, content="TTS not ready")
-
     audio = await tts_engine.synthesize(text)
     if audio is None:
-        return Response(status_code=503, content="TTS unavailable (edge-tts not installed?)")
-
+        return Response(
+            status_code=503, content="TTS unavailable (edge-tts not installed?)"
+        )
     return Response(content=audio, media_type="audio/mp3")
 
 
@@ -56,12 +89,10 @@ async def priority_tts(
 ):
     if tts_engine is None:
         return Response(status_code=503, content="TTS not ready")
-
     read_text = summary or f"Priority message from {sender} in {group}. {text[:200]}"
     audio = await tts_engine.synthesize(read_text[:500])
     if audio is None:
         return Response(status_code=503, content="TTS unavailable")
-
     return Response(content=audio, media_type="audio/mp3")
 
 

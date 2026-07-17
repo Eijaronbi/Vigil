@@ -8,19 +8,24 @@ from backend.classifier.classification_service import classify_message
 from backend.config import settings
 from backend.database import get_db
 from backend.models import Group, Message
+from backend.routers.auth import verify_token
 from backend.schemas import MessageIn, MessageOut
 
 router = APIRouter(prefix="/api/messages", tags=["messages"])
 
 
 @router.post("", response_model=MessageOut)
-async def create_message(msg: MessageIn, db: Session = Depends(get_db)):
+async def create_message(
+    msg: MessageIn,
+    db: Session = Depends(get_db),
+):
     group_id = msg.group_id
     if group_id is None:
-        group = db.query(Group).filter(
-            Group.source == msg.source,
-            Group.name == msg.group_name,
-        ).first()
+        group = (
+            db.query(Group)
+            .filter(Group.source == msg.source, Group.name == msg.group_name)
+            .first()
+        )
         if not group:
             raise HTTPException(status_code=404, detail="Group not found")
         group_id = group.id
@@ -47,7 +52,8 @@ def list_messages(
     source: str | None = Query(None),
     group_name: str | None = Query(None),
     important: bool | None = Query(None),
-    limit: int = Query(50, ge=1, le=500),
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
     db: Session = Depends(get_db),
 ):
     q = db.query(Message)
@@ -61,4 +67,4 @@ def list_messages(
     if important:
         q = q.filter(Message.importance_score >= settings.importance_threshold)
 
-    return q.order_by(desc(Message.timestamp)).limit(limit).all()
+    return q.order_by(desc(Message.timestamp)).offset(offset).limit(limit).all()

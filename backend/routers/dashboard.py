@@ -1,62 +1,54 @@
-from fastapi import APIRouter, Depends, Request
-from fastapi.responses import HTMLResponse
-from sqlalchemy import desc
+from pathlib import Path
+
+from fastapi import APIRouter, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
-from backend.models import Group, Message
+from backend.routers.auth import verify_token
 
 router = APIRouter(tags=["dashboard"])
 
-ROW = "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>"
+HERE = Path(__file__).resolve().parent.parent.parent
+
+STATIC_FILES = {
+    "/styles.css": "text/css",
+    "/script.js": "application/javascript",
+}
 
 
-@router.get("/", response_class=HTMLResponse)
-def dashboard(request: Request, db: Session = Depends(get_db)):
-    messages = (
-        db.query(Message)
-        .order_by(desc(Message.timestamp))
-        .limit(50)
-        .all()
-    )
-    groups = db.query(Group).all()
+@router.get("/")
+def serve_index():
+    return FileResponse(HERE / "index.html")
 
-    group_rows = "\n".join(
-        f"<li>{g.source} / {g.name} ({g.external_id})</li>" for g in groups
-    )
-    msg_rows = "\n".join(
-        ROW.format(
-            m.source,
-            m.group.name if m.group else "",
-            m.sender,
-            m.text[:100],
-            m.importance_score or "",
-            m.timestamp.strftime("%Y-%m-%d %H:%M") if m.timestamp else "",
-        )
-        for m in messages
-    )
 
-    html = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Message Monitor</title>
-  <link rel="stylesheet" href="/styles.css">
-</head>
-<body>
-  <h1>Message Monitor</h1>
-  <section>
-    <h2>Groups</h2>
-    <ul>{group_rows}</ul>
-  </section>
-  <section>
-    <h2>Recent Messages</h2>
-    <table>
-      <thead><tr><th>Source</th><th>Group</th><th>Sender</th><th>Text</th><th>Score</th><th>Timestamp</th></tr></thead>
-      <tbody>{msg_rows}</tbody>
-    </table>
-  </section>
-</body>
-</html>"""
-    return HTMLResponse(html)
+@router.get("/index.html")
+def serve_index_direct():
+    return FileResponse(HERE / "index.html")
+
+
+@router.get("/live-demo.html")
+def serve_live_demo():
+    return FileResponse(HERE / "live-demo.html")
+
+
+@router.get("/styles.css")
+def serve_css():
+    return FileResponse(HERE / "styles.css", media_type="text/css")
+
+
+@router.get("/script.js")
+def serve_js():
+    return FileResponse(HERE / "script.js", media_type="application/javascript")
+
+
+@router.get("/api/dashboard/stats")
+def dashboard_stats(db: Session = Depends(get_db), _=Depends(verify_token)):
+    from backend.models import Message
+
+    total = db.query(Message).count()
+    latest = db.query(Message).order_by(Message.timestamp.desc()).first()
+    return {
+        "total_messages": total,
+        "latest_timestamp": latest.timestamp.isoformat() if latest else None,
+    }

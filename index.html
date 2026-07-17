@@ -309,7 +309,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="line" style="margin-top:8px;"><span class="prompt">password</span></div>
 <div class="line"><input type="password" id="upass" value="demo" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
 <div class="line" style="margin-top:16px;text-align:center;"><button class="btn-primary" onclick="login()">connect →</button></div>
-<div class="line" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-text-secondary);">demo: demo / demo</div>
+<div class="line" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-text-secondary);">default password: vigil</div>
 </div>
 </div>
 
@@ -419,6 +419,11 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
 <script>
 (function(){
+  var API = 'http://localhost:8002';
+  var TOKEN = null;
+  var WS = null;
+  var wsReconnectTimer = null;
+
   // ── Demo TTS ──
   window.speakDemo = function() {
     var text = document.getElementById('demoInput').value.trim();
@@ -426,10 +431,9 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     var log = document.getElementById('demoLog');
     var entry = document.createElement('div');
     entry.className = 'entry';
-    var time = new Date().toLocaleTimeString();
-    entry.innerHTML = '<span class="time">' + time + ' </span><span class="text">speaking: "' + text.substring(0, 60) + '..."</span>';
+    var t = new Date().toLocaleTimeString();
+    entry.innerHTML = '<span class="time">' + t + ' </span><span class="text">speaking: "' + text.substring(0, 60) + '..."</span>';
     log.insertBefore(entry, log.firstChild);
-    var API = 'http://localhost:8080';
     fetch(API + '/api/tts?text=' + encodeURIComponent(text), {cache:'no-store'})
       .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
       .then(function(blob){
@@ -448,24 +452,49 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   };
 
   window.downloadExtension = function() {
-    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\\n\\n1. Open chrome://extensions\\n2. Enable Developer mode\\n3. Load unpacked → select the extension/ folder\\n4. Navigate to web.whatsapp.com');
+    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\n\n1. Open chrome://extensions\n2. Enable Developer mode\n3. Load unpacked → select the extension/ folder\n4. Navigate to web.whatsapp.com');
   };
   window.downloadApk = function() {
-    alert('Android app: Flutter build in progress.\\n\\nOnce built, APK will be available for sideload.\\nFor now, use the browser dashboard to test.');
+    alert('Android app: Flutter build in progress.\n\nOnce built, APK will be available for sideload.\nFor now, use the browser dashboard to test.');
   };
 
-  // ── Login / Session ──
+  // ── Auth ──
   window.login = function() {
-    document.getElementById('loginPanel').style.display = 'none';
-    document.getElementById('sessionPanel').classList.add('active');
-    loadSampleMessages();
-    // simulate source connections
-    setTimeout(function(){ document.getElementById('waStatus').textContent = 'connected'; document.getElementById('waIndicator').style.color = '#00FF41'; }, 500);
-    setTimeout(function(){ document.getElementById('tgStatus').textContent = 'connected'; document.getElementById('tgIndicator').style.color = '#00FF41'; }, 800);
-    setTimeout(function(){ document.getElementById('twStatus').textContent = 'active'; document.getElementById('twIndicator').style.color = '#FFB000'; }, 1200);
-    setTimeout(function(){ document.getElementById('gmStatus').textContent = 'connected'; document.getElementById('gmIndicator').style.color = '#00FF41'; }, 1500);
+    var pass = document.getElementById('upass').value;
+    if (!pass) return;
+    var btn = document.querySelector('#loginPanel .btn-primary');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+    fetch(API + '/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password: pass})
+    })
+    .then(function(r){
+      if (!r.ok) throw Error('Bad password');
+      return r.json();
+    })
+    .then(function(data){
+      TOKEN = data.token;
+      document.getElementById('loginPanel').style.display = 'none';
+      document.getElementById('sessionPanel').classList.add('active');
+      document.getElementById('sessionUser').textContent = 'authenticated';
+      connectWs();
+      fetchMessages();
+    })
+    .catch(function(){
+      btn.textContent = 'connect →';
+      btn.disabled = false;
+      alert('Login failed. Default password: vigil');
+    });
   };
+
   window.logout = function() {
+    if (TOKEN) {
+      fetch(API + '/api/auth/logout', {method: 'POST', headers: {'Authorization': 'Bearer ' + TOKEN}});
+    }
+    TOKEN = null;
+    disconnectWs();
     document.getElementById('sessionPanel').classList.remove('active');
     document.getElementById('loginPanel').style.display = 'block';
     document.getElementById('waStatus').textContent = 'waiting...';
@@ -476,41 +505,95 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     document.getElementById('tgIndicator').style.color = '';
     document.getElementById('twIndicator').style.color = '';
     document.getElementById('gmIndicator').style.color = '';
+    document.getElementById('msgList').innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— disconnected —</span></div>';
   };
 
-  var sampleMessages = [
-    { source:'whatsapp', sender:'Joy', text:'Deal alert — price target at 4500. Let\'s move on this.', score:9 },
-    { source:'telegram', sender:'Ops Team', text:'Server load at 92% in us-east-1. Need to scale.', score:8 },
-    { source:'gmail', sender:'alerts@company.com', text:'SUBJECT: Production database failing — connection timeout errors', score:10 },
-    { source:'twitter', sender:'@crypto_whale', text:'Breaking: Major protocol upgrade scheduled for tomorrow', score:6 },
-    { source:'whatsapp', sender:'Deals Group', text:'New lead: Acme Corp, budget 50k, decision by Friday', score:7 },
-    { source:'telegram', sender:'Joy', text:'Meeting confirmed for tomorrow 2pm with the investors', score:5 },
-    { source:'gmail', sender:'noreply@github.com', text:'[org/repo] Critical vulnerability found — CVE-2026-1234', score:8 },
-    { source:'whatsapp', sender:'Mom', text:'Call me when you get a chance. Nothing urgent ❤️', score:2 }
-  ];
-  function renderMessages(msgs) {
-    var list = document.getElementById('msgList');
-    var html = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>';
-    var i = 0;
-    for(i=0; i<msgs.length; i++){
-      var m = msgs[i];
-      var cls = 'score ' + (m.score >= 8 ? 'high' : m.score >= 5 ? 'medium' : 'low');
-      html += '<div class="msg-row"><span class="source">' + m.source + '</span><span class="sender">' + m.sender + '</span><span class="text">' + m.text + '</span><span class="' + cls + '">' + m.score + '</span></div>';
-    }
-    list.innerHTML = html;
+  function authHeaders() {
+    return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
   }
-  window.loadSampleMessages = function() { renderMessages(sampleMessages); };
+
+  // ── Real API data ──
+  function fetchMessages(query) {
+    var url = API + '/api/messages?limit=20';
+    if (query) url += '&' + query;
+    var list = document.getElementById('msgList');
+    list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);"><span colspan="4">loading...</span></div>';
+    fetch(url, {headers: authHeaders()})
+      .then(function(r){ if (!r.ok) throw Error(r.status); return r.json(); })
+      .then(function(data){
+        if (!Array.isArray(data) || data.length === 0) {
+          list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— no messages yet. connect sources to see them —</span></div>';
+          return;
+        }
+        var html = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>';
+        for (var i = 0; i < data.length; i++) {
+          var m = data[i];
+          var score = m.importance_score || 0;
+          var cls = 'score ' + (score >= 8 ? 'high' : score >= 5 ? 'medium' : 'low');
+          html += '<div class="msg-row"><span class="source">' + (m.source || '') + '</span><span class="sender">' + escapeHtml(m.sender || '') + '</span><span class="text">' + escapeHtml(m.text || '') + '</span><span class="' + cls + '">' + score + '</span></div>';
+        }
+        list.innerHTML = html;
+      })
+      .catch(function(e){
+        list.innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-error);"><span colspan="4">error loading messages: ' + e.message + '</span></div>';
+      });
+  }
+
   window.queryMessages = function() {
-    var q = document.getElementById('queryInput').value.toLowerCase().trim();
-    if (!q) { renderMessages(sampleMessages); return; }
-    var filtered = sampleMessages.filter(function(m){
-      return (q.includes('source:') ? m.source.includes(q.split('source:')[1]) : true)
-        && (q.includes('sender:') ? m.sender.toLowerCase().includes(q.split('sender:')[1]) : true)
-        && (q.includes('group:') ? m.text.toLowerCase().includes(q.split('group:')[1]) : true)
-        && (m.text.toLowerCase().includes(q) || m.sender.toLowerCase().includes(q));
-    });
-    renderMessages(filtered.length > 0 ? filtered : [{ source:'—', sender:'—', text:'no results for "'+q+'"', score:0 }]);
+    var q = document.getElementById('queryInput').value.trim().toLowerCase();
+    var params = '';
+    if (q.startsWith('source:')) params = 'source=' + encodeURIComponent(q.split(':')[1].trim());
+    else if (q.startsWith('sender:')) params = 'group_name=' + encodeURIComponent(q.split(':')[1].trim());
+    else if (q) params = 'source=' + encodeURIComponent(q);
+    fetchMessages(params);
   };
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  // ── WebSocket ──
+  function connectWs() {
+    disconnectWs();
+    try {
+      WS = new WebSocket('ws://localhost:8002/ws');
+      WS.onopen = function() {
+        document.getElementById('waStatus').textContent = 'connected';
+        document.getElementById('waIndicator').style.color = '#00FF41';
+      };
+      WS.onmessage = function(ev) {
+        try {
+          var data = JSON.parse(ev.data);
+          if (data.type === 'alert' || data.type === 'priority_alert') {
+            fetchMessages();
+          }
+        } catch(e) {}
+      };
+      WS.onclose = function() {
+        document.getElementById('waStatus').textContent = 'disconnected';
+        document.getElementById('waIndicator').style.color = '#FF4444';
+        if (TOKEN) wsReconnectTimer = setTimeout(connectWs, 5000);
+      };
+      WS.onerror = function() { if (WS) WS.close(); };
+    } catch(e) {}
+  }
+
+  function disconnectWs() {
+    if (wsReconnectTimer) { clearTimeout(wsReconnectTimer); wsReconnectTimer = null; }
+    if (WS) { try { WS.close(); } catch(e) {} WS = null; }
+  }
+
+  // ── Detect server status ──
+  fetch(API + '/api/health')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      if (data && data.status === 'healthy') {
+        document.querySelector('.cursor-line span').textContent = 'server v' + data.version + ' — ' + data.database + ' — uptime ' + data.uptime_seconds + 's';
+      }
+    })
+    .catch(function(){});
 })();
 </script>
 </body>

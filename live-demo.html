@@ -122,7 +122,7 @@
 
   <script>
     (function() {
-      var API = "http://localhost:8080";
+      var API = "http://localhost:8002";
       var ws = null;
       var statusEl = document.getElementById("status");
       var logEl = document.getElementById("log");
@@ -135,7 +135,7 @@
 
       function connect() {
         try {
-          ws = new WebSocket("ws://localhost:8080/ws");
+          ws = new WebSocket("ws://localhost:8002/ws");
           ws.onopen = function() {
             statusEl.className = "status connected";
             statusEl.innerHTML = '<span class="dot"></span><span>Connected to Vigil</span>';

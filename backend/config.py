@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     monad_rpc_url: str = "https://testnet-rpc.monad.xyz"
     contract_address: str = ""
     wallet_private_key: str = ""
+    auth_password: str = "vigil"
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 

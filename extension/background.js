@@ -5,8 +5,8 @@ let pingInterval = null;
 let waConnected = false;
 
 /* ── Configuration ── */
-const BACKEND = "http://localhost:8080";
-const WS_URL = "ws://localhost:8080/ws";
+const BACKEND = "http://localhost:8002";
+const WS_URL = "ws://localhost:8002/ws";
 const RECONNECT_DELAY = 5000;
 const PING_INTERVAL = 25000;
 
