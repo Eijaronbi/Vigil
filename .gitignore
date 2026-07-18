@@ -12,3 +12,5 @@ Thumbs.db
 node_modules/
 flutter_app/build/
 flutter_app/.dart_tool/
+thread.txt
+thread.doc

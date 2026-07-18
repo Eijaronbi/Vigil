@@ -537,7 +537,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
 <script>
 (function(){
-  var API = 'http://localhost:8002';
+  var API = window.location.origin;
   var TOKEN = null;
   var WS = null;
   var wsReconnectTimer = null;
@@ -808,7 +808,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   function connectWs() {
     disconnectWs();
     try {
-      WS = new WebSocket('ws://localhost:8002/ws');
+      WS = new WebSocket((window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + window.location.host + '/ws');
       WS.onmessage = function(ev) {
         try {
           var data = JSON.parse(ev.data);
