@@ -1,3 +1,6 @@
+import os
+from datetime import datetime
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
@@ -142,7 +145,7 @@ def list_sources():
             {
                 "id": "whatsapp",
                 "name": "WhatsApp",
-                "connected": False,
+                "connected": _WHATSAPP_CONNECTED,
             },
         ]
     }
@@ -198,6 +201,44 @@ def telegram_groups():
         ]
     finally:
         db.close()
+
+
+@router.post("/telegram/sync-groups")
+async def telegram_sync_groups():
+    global _TG_WATCHER
+    if not _TG_WATCHER:
+        return {"ok": False, "error": "Telegram bot not connected"}
+    try:
+        updates = await _TG_WATCHER.fetch_updates()
+        new_count = 0
+        from backend.models import Group
+        from backend.database import SessionLocal
+
+        db = SessionLocal()
+        try:
+            for update in updates:
+                msg = update.get("message", {})
+                chat = msg.get("chat", {})
+                chat_id = str(chat.get("id"))
+                title = chat.get("title") or chat.get("first_name", "Unknown")
+                existing = db.query(Group).filter(
+                    Group.source == "telegram", Group.external_id == chat_id
+                ).first()
+                if not existing:
+                    group = Group(
+                        source="telegram",
+                        name=title,
+                        external_id=chat_id,
+                        user_id=1,
+                    )
+                    db.add(group)
+                    new_count += 1
+            db.commit()
+        finally:
+            db.close()
+        return {"ok": True, "new_groups": new_count, "total": len(updates)}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 DISCORD_BOT_TOKEN_STORED: str = ""
@@ -309,3 +350,82 @@ async def init_telegram_bot():
             global TELEGRAM_BOT_INFO
             TELEGRAM_BOT_INFO = result
             await _start_watcher(settings.telegram_bot_token)
+
+
+_WHATSAPP_CONNECTED = False
+
+
+@router.post("/whatsapp/message")
+async def whatsapp_message(body: dict):
+    global _WHATSAPP_CONNECTED
+    _WHATSAPP_CONNECTED = True
+    from backend.models import Group, Message
+    from backend.classifier.classification_service import classify_message
+    from backend.schemas import MessageIn
+
+    group_name = body.get("group_name", "WhatsApp")
+    sender = body.get("sender", "Unknown")
+    text = body.get("text", "")
+    if not text:
+        return {"ok": False, "error": "empty text"}
+
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.source == "whatsapp", Group.name == group_name).first()
+        if not group:
+            group = Group(source="whatsapp", name=group_name, external_id=group_name, user_id=1)
+            db.add(group)
+            db.commit()
+            db.refresh(group)
+
+        msg_body = MessageIn(source="whatsapp", group_name=group_name, sender=sender, text=text)
+        db_msg = Message(group_id=group.id, source="whatsapp", sender=sender, text=text, timestamp=datetime.now())
+        db.add(db_msg)
+        db.commit()
+        db.refresh(db_msg)
+
+        await classify_message(db, db_msg, msg_body)
+        db.refresh(db_msg)
+
+        import asyncio
+        try:
+            from backend.websocket_manager import ws_manager
+            asyncio.create_task(ws_manager.broadcast({
+                "type": "alert",
+                "source": "whatsapp",
+                "sender": sender,
+                "group_name": group_name,
+                "text": text[:500],
+            }))
+        except Exception:
+            pass
+
+        return {"ok": True, "message_id": db_msg.id, "score": db_msg.importance_score}
+    finally:
+        db.close()
+
+
+@router.get("/whatsapp/status")
+def whatsapp_status():
+    return {"connected": _WHATSAPP_CONNECTED}
+
+
+_WHATSAPP_AUTH_TOKEN: str = ""
+
+
+class WhatsAppAuthRequest(BaseModel):
+    token: str
+
+
+@router.post("/whatsapp/auth")
+async def whatsapp_auth(body: WhatsAppAuthRequest):
+    global _WHATSAPP_AUTH_TOKEN
+    _WHATSAPP_AUTH_TOKEN = body.token
+    return {"ok": True, "authenticated": True}
+
+
+@router.get("/whatsapp/auth-token")
+def whatsapp_get_auth_token():
+    if not _WHATSAPP_AUTH_TOKEN:
+        _WHATSAPP_AUTH_TOKEN = os.urandom(16).hex()
+    return {"token": _WHATSAPP_AUTH_TOKEN}

@@ -107,6 +107,38 @@ class DigestQueue(Base):
     message: Mapped["Message"] = relationship("Message", back_populates="digest_entries")
 
 
+class MonitorTarget(Base):
+    __tablename__ = "monitor_targets"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    source: Mapped[str] = mapped_column(String(50), nullable=False)
+    target_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    target_id: Mapped[str] = mapped_column(String(500), nullable=False)
+    label: Mapped[str] = mapped_column(String(255), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    last_checked: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    last_post_text: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+
+    saved_urls: Mapped[list["SavedUrl"]] = relationship(
+        "SavedUrl", back_populates="target", cascade="all, delete-orphan"
+    )
+
+
+class SavedUrl(Base):
+    __tablename__ = "saved_urls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    target_id: Mapped[int] = mapped_column(Integer, ForeignKey("monitor_targets.id"), nullable=False)
+    url: Mapped[str] = mapped_column(String(1024), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.now, nullable=False)
+
+    target: Mapped["MonitorTarget"] = relationship("MonitorTarget", back_populates="saved_urls")
+
+
 class DailyReport(Base):
     __tablename__ = "daily_reports"
 

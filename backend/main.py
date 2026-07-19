@@ -1,3 +1,4 @@
+import asyncio
 import os
 import time
 from contextlib import asynccontextmanager
@@ -11,7 +12,7 @@ from pydantic import BaseModel
 
 from backend.database import init_db
 from backend.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
-from backend.routers import auth, dashboard, groups, messages, rules, sources, vault
+from backend.routers import auth, chat, config_api, dashboard, groups, messages, rules, sources, targets, vault
 from backend.tts import TTSEngine
 
 tts_engine: TTSEngine | None = None
@@ -26,7 +27,6 @@ async def lifespan(app):
     global tts_engine
     tts_engine = TTSEngine()
     init_db()
-    await sources.init_telegram_bot()
     yield
 
 
@@ -48,6 +48,9 @@ app.include_router(groups.router)
 app.include_router(rules.router)
 app.include_router(dashboard.router)
 app.include_router(sources.router)
+app.include_router(targets.router)
+app.include_router(chat.router)
+app.include_router(config_api.router)
 app.include_router(vault.router)
 
 

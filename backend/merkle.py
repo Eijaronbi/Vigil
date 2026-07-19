@@ -1,14 +1,14 @@
-import hashlib
-from typing import Any
+from web3 import Web3
 
 
 def hash_message(source: str, sender: str, text: str, timestamp: int) -> bytes:
-    data = f"{source}|{sender}|{text}|{timestamp}".encode()
-    return hashlib.sha256(data).digest()
+    raw = source + sender + text + str(timestamp)
+    return Web3.keccak(text=raw)
 
 
 def hash_pair(a: bytes, b: bytes) -> bytes:
-    return hashlib.sha256(a + b).digest() if a < b else hashlib.sha256(b + a).digest()
+    raw = a + b if a < b else b + a
+    return Web3.keccak(raw)
 
 
 def build_merkle_tree(leaves: list[bytes]) -> list[list[bytes]]:

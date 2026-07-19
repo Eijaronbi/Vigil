@@ -28,9 +28,16 @@ async def classify_message(db: Session, msg: Message, message_in: MessageIn):
     msg.importance_score = rule_result["score"]
 
     if rule_result["score"] >= settings.importance_threshold:
-        llm_key = settings.groq_api_key or settings.openrouter_api_key
-        llm_model = settings.groq_model if settings.groq_api_key else settings.openrouter_model
-        llm_url = "https://api.groq.com/openai/v1" if settings.groq_api_key else None
+        if settings.groq_api_key:
+            llm_key = settings.groq_api_key
+            llm_model = settings.groq_model
+            llm_url = "https://api.groq.com/openai/v1"
+        elif settings.openrouter_api_key:
+            llm_key = settings.openrouter_api_key
+            llm_model = settings.openrouter_model
+            llm_url = settings.openrouter_base_url
+        else:
+            return
         scorer = LLMScorer(api_key=llm_key, model=llm_model, base_url=llm_url)
         llm_result = await scorer.score(
             text=message_in.text,
@@ -71,15 +78,15 @@ async def classify_message(db: Session, msg: Message, message_in: MessageIn):
             # On-chain attestation (non-blocking)
             try:
                 from backend.onchain import onchain_client
-                tx_hash = onchain_client.attest_alert(
-                    text=message_in.text,
-                    group=message_in.group_name,
-                    timestamp=int(msg.timestamp.timestamp()),
-                    score=msg.importance_score,
-                )
-                if tx_hash:
-                    print(f"Attested on-chain: {tx_hash}")
+                result = onchain_client.commit_batch([{
+                    "source": message_in.source,
+                    "sender": message_in.sender,
+                    "text": message_in.text,
+                    "timestamp": int(msg.timestamp.timestamp()),
+                }])
+                if result:
+                    print(f"Committed on-chain: {result['tx_hash']} root={result['merkle_root']}")
             except Exception as e:
-                print(f"On-chain attestation failed: {e}")
+                print(f"On-chain commit failed: {e}")
 
     db.commit()

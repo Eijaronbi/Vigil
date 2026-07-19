@@ -1,0 +1,9 @@
+{
+  "network": "mainnet",
+  "chain_id": 143,
+  "address": "0x39bb644Bb3f64C3e6909dD53C73Aad1993867B69",
+  "deployer": "0x49e93877177574CCC301315C69116eeCB1f945cc",
+  "tx_hash": "4de7967afaad2244f23a275d5859b403e5a1ef1f814382ad4dc1936c2b3577c3",
+  "block_number": 88699066,
+  "timestamp": 1784433278
+}

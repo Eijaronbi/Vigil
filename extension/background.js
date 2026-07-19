@@ -3,20 +3,29 @@ let isSpeaking = false;
 let reconnectTimer = null;
 let pingInterval = null;
 let waConnected = false;
+let authToken = "";
 
-/* ── Configuration ── */
-const BACKEND = "http://localhost:8002";
-const WS_URL = "ws://localhost:8002/ws";
 const RECONNECT_DELAY = 5000;
 const PING_INTERVAL = 25000;
 
-/* ── WebSocket with keepalive ── */
+function getBackend() {
+  return localStorage.getItem("vigil_backend") || "http://localhost:8002";
+}
+
+function getWSUrl() {
+  const b = getBackend().replace(/^http/, "ws");
+  return b + "/ws";
+}
+
+function authHeaders() {
+  return authToken ? {"Authorization": "Bearer " + authToken, "Content-Type": "application/json"} : {"Content-Type": "application/json"};
+}
+
 function connectWebSocket() {
   if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return;
   try {
-    ws = new WebSocket(WS_URL);
+    ws = new WebSocket(getWSUrl());
     ws.onopen = function() {
-      console.log("Vigil: WS connected");
       if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
       startWsPing();
       chrome.action.setBadgeText({ text: "ON" });
@@ -31,9 +40,7 @@ function connectWebSocket() {
         if (data.type === "priority_alert") {
           speakNow(data.summary || ("Priority message from " + data.sender), true);
         }
-      } catch (e) {
-        console.error("Vigil: WS parse error", e);
-      }
+      } catch (e) {}
     };
     ws.onclose = function() {
       ws = null;
@@ -42,9 +49,7 @@ function connectWebSocket() {
       chrome.action.setBadgeBackgroundColor({ color: "#FF4444" });
       scheduleReconnect();
     };
-    ws.onerror = function() {
-      if (ws) ws.close();
-    };
+    ws.onerror = function() { if (ws) ws.close(); };
   } catch (e) {
     scheduleReconnect();
   }
@@ -68,13 +73,9 @@ function stopWsPing() {
   if (pingInterval) { clearInterval(pingInterval); pingInterval = null; }
 }
 
-/* ── TTS ── */
 function speakNow(text, force) {
   if (!text) return;
-  if (force) {
-    window.speechSynthesis.cancel();
-    isSpeaking = false;
-  }
+  if (force) { window.speechSynthesis.cancel(); isSpeaking = false; }
   if (isSpeaking) return;
   isSpeaking = true;
   var utter = new SpeechSynthesisUtterance(text);
@@ -83,45 +84,22 @@ function speakNow(text, force) {
   window.speechSynthesis.speak(utter);
 }
 
-function playAudioFromUrl(url) {
-  var ctx = new (window.AudioContext || window.webkitAudioContext)();
-  fetch(url)
-    .then(function (r) { return r.arrayBuffer(); })
-    .then(function (buf) { return ctx.decodeAudioData(buf); })
-    .then(function (audioBuf) {
-      var source = ctx.createBufferSource();
-      source.buffer = audioBuf;
-      source.connect(ctx.destination);
-      source.start(0);
-    })
-    .catch(function (err) { console.error("Vigil: audio play error", err); });
-}
-
-/* ── Keep service worker alive ── */
 chrome.alarms.create("vigil-keepalive", { periodInMinutes: 1 });
 chrome.alarms.onAlarm.addListener(function(alarm) {
   if (alarm.name === "vigil-keepalive") {
-    if (!ws || ws.readyState !== WebSocket.OPEN) {
-      connectWebSocket();
-    }
+    if (!ws || ws.readyState !== WebSocket.OPEN) connectWebSocket();
   }
 });
 
-chrome.runtime.onStartup.addListener(function() {
-  connectWebSocket();
-});
+chrome.runtime.onStartup.addListener(function() { connectWebSocket(); });
+chrome.runtime.onInstalled.addListener(function() { connectWebSocket(); });
 
-chrome.runtime.onInstalled.addListener(function() {
-  connectWebSocket();
-});
-
-/* ── Message handlers ── */
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.type === "NEW_MESSAGES") {
     for (var i = 0; i < request.messages.length; i++) {
-      fetch(BACKEND + "/api/messages", {
+      fetch(getBackend() + "/api/sources/whatsapp/message", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(),
         body: JSON.stringify(request.messages[i]),
       }).catch(function (err) { console.error("Vigil: POST error", err); });
     }
@@ -146,7 +124,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     });
     sendResponse({ success: true });
   } else if (request.type === "CHECK_MESSAGES") {
-    fetch(BACKEND + "/api/messages?important=true&limit=5")
+    fetch(getBackend() + "/api/messages?important=true&limit=5", {headers: authHeaders()})
       .then(function (r) { return r.json(); })
       .then(function (data) {
         if (Array.isArray(data) && data.length > 0 && !isSpeaking) {
@@ -156,31 +134,19 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       })
       .catch(function (err) { console.error("Vigil: GET error", err); });
     sendResponse({ success: true });
-  } else if (request.type === "CHECK_MESSAGES_TTS") {
-    fetch(BACKEND + "/api/messages?important=true&limit=5")
-      .then(function (r) { return r.json(); })
-      .then(function (data) {
-        if (Array.isArray(data) && data.length > 0) {
-          var text = data.map(function (m) { return m.summary || m.text; }).join(". ");
-          return fetch(BACKEND + "/api/tts?text=" + encodeURIComponent(text));
-        }
-      })
-      .then(function (r) {
-        if (r && r.ok) return r.blob();
-      })
-      .then(function (blob) {
-        if (blob) {
-          var url = URL.createObjectURL(blob);
-          playAudioFromUrl(url);
-        }
-      })
-      .catch(function (err) { console.error("Vigil: TTS GET error", err); });
+  } else if (request.type === "SET_TOKEN") {
+    authToken = request.token;
     sendResponse({ success: true });
+  } else if (request.type === "SET_BACKEND") {
+    localStorage.setItem("vigil_backend", request.url);
+    connectWebSocket();
+    sendResponse({ success: true });
+  } else if (request.type === "GET_STATUS") {
+    sendResponse({ connected: waConnected, wsConnected: !!(ws && ws.readyState === WebSocket.OPEN) });
   }
   return true;
 });
 
-/* ── Voice command: "check messages" ── */
 try {
   var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (SpeechRecognition) {
@@ -202,5 +168,4 @@ try {
   }
 } catch (_) {}
 
-/* ── Initial connect ── */
 connectWebSocket();

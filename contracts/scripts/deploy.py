@@ -56,18 +56,25 @@ def deploy(chain_key: str, private_key: str, verify: bool = False):
     if balance == 0:
         raise RuntimeError("Deployer has no MON — use faucet at https://faucet.monad.xyz")
 
-    # Compile with solc
+    # Compile with solc (or use cached artifacts)
     import subprocess
     out_dir = HERE / "artifacts"
     out_dir.mkdir(exist_ok=True)
-    result = subprocess.run(
-        ["solc", "--evm-version", "prague", "--optimize", "--optimize-runs", "200",
-         "--bin", "--abi", "--overwrite", "-o", str(out_dir),
-         str(CONTRACT_PATH)],
-        capture_output=True, text=True
-    )
-    if result.returncode != 0:
-        raise RuntimeError(f"solc failed:\n{result.stderr}")
+    
+    bin_path = out_dir / "MemoryVault.bin"
+    abi_path = out_dir / "MemoryVault.abi"
+    
+    if bin_path.exists() and abi_path.exists():
+        print("  Using cached artifacts")
+    else:
+        result = subprocess.run(
+            ["solc", "--evm-version", "prague", "--optimize", "--optimize-runs", "200",
+             "--bin", "--abi", "--overwrite", "-o", str(out_dir),
+             str(CONTRACT_PATH)],
+            capture_output=True, text=True
+        )
+        if result.returncode != 0:
+            raise RuntimeError(f"solc failed:\n{result.stderr}")
 
     with open(out_dir / "MemoryVault.bin") as f:
         bytecode = f.read().strip()

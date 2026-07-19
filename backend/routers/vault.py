@@ -128,7 +128,8 @@ def list_batches(token_data: dict = Depends(verify_token)):
             committer=b[4],
             explorer_url=f"{_explorer_url()}/address/{settings.contract_address}?batch={i}",
         ))
-    return {"batches": batches, "count": count, "network": "monad-testnet", "contract_address": settings.contract_address}
+    network_name = "monad-mainnet" if settings.monad_chain_id == 143 else "monad-testnet"
+    return {"batches": batches, "count": count, "network": network_name, "contract_address": settings.contract_address}
 
 
 @router.get("/batches/{batch_id}")

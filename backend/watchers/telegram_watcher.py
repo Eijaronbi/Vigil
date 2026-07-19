@@ -44,6 +44,17 @@ class TelegramWatcher:
         await self._app.start()
         await self._app.updater.start_polling()
 
+    async def fetch_updates(self):
+        updates = []
+        if self._app and self._app.updater:
+            try:
+                raw = await self._app.bot.get_updates(timeout=5)
+                for u in raw:
+                    updates.append(u.to_dict() if hasattr(u, "to_dict") else {"message": {}})
+            except Exception:
+                pass
+        return updates
+
     async def stop(self):
         if self._app:
             await self._app.updater.stop()

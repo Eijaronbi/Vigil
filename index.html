@@ -122,6 +122,36 @@ nav .container { display: flex; align-items: center; justify-content: space-betw
 .query-bar input { flex: 1; padding: 10px 16px; background: var(--c-surface-2); border: 1px solid var(--c-border); color: var(--c-text); font-family: var(--ff-mono); font-size: 0.8rem; }
 .query-bar input:focus { outline: none; border-color: var(--c-accent); }
 
+/* Monitoring targets */
+.target-input-group { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+.target-input-group select { padding:8px 12px; background:var(--c-surface-2); border:1px solid var(--c-border); color:var(--c-text); font-family:var(--ff-mono); font-size:0.75rem; min-width:110px; }
+.target-input-group input { flex:1; min-width:140px; padding:8px 12px; background:var(--c-surface-2); border:1px solid var(--c-border); color:var(--c-text); font-family:var(--ff-mono); font-size:0.75rem; }
+.target-input-group input:focus { outline:none; border-color:var(--c-accent); }
+.target-input-group button { padding:8px 16px; background:var(--c-accent); color:var(--c-bg); border:none; font-family:var(--ff-mono); font-size:0.7rem; text-transform:uppercase; letter-spacing:0.08em; cursor:pointer; white-space:nowrap; }
+.target-input-group button:hover { opacity:0.85; }
+.target-row { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid var(--c-border); font-size:0.75rem; }
+.target-row:last-child { border-bottom:none; }
+.target-row .src-badge { font-size:0.6rem; padding:2px 6px; border:1px solid var(--c-border); color:var(--c-text-secondary); min-width:60px; text-align:center; text-transform:uppercase; letter-spacing:0.05em; }
+.target-row .t-label { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; color:var(--c-text); }
+.target-row .t-status { font-size:0.65rem; color:var(--c-text-secondary); white-space:nowrap; }
+.target-row .t-actions { display:flex; gap:4px; flex-shrink:0; }
+.target-row .t-actions button { padding:3px 8px; font-size:0.6rem; background:transparent; border:1px solid var(--c-border); color:var(--c-text-secondary); cursor:pointer; font-family:var(--ff-mono); }
+.target-row .t-actions button:hover { border-color:var(--c-accent); color:var(--c-accent); }
+.target-row .t-actions .btn-danger:hover { border-color:var(--c-red); color:var(--c-red); }
+.target-alert { background:var(--c-surface); border:1px solid var(--c-accent-dim); padding:8px 12px; margin:4px 0; font-size:0.7rem; display:flex; align-items:center; gap:8px; animation:fadeIn 0.3s; }
+.target-alert .a-src { color:var(--c-accent); }
+.target-alert .a-text { flex:1; color:var(--c-text-secondary); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.target-alert .a-time { font-size:0.6rem; color:var(--c-text-secondary); white-space:nowrap; }
+@keyframes fadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+.saved-url-row { display:flex; align-items:center; gap:8px; padding:6px 0; border-bottom:1px solid var(--c-border); font-size:0.72rem; }
+.saved-url-row:last-child { border-bottom:none; }
+.saved-url-row .su-url { flex:1; color:var(--c-accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.saved-url-row .su-note { color:var(--c-text-secondary); max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.saved-url-row .su-time { font-size:0.6rem; color:var(--c-text-secondary); white-space:nowrap; }
+.saved-url-row button { padding:2px 6px; font-size:0.6rem; background:transparent; border:1px solid var(--c-border); color:var(--c-text-secondary); cursor:pointer; font-family:var(--ff-mono); }
+.saved-url-row button:hover { border-color:var(--c-red); color:var(--c-red); }
+
+
 /* Dashboard session panel */
 .session-panel { display: none; margin-top: 40px; }
 .session-panel.active { display: block; }
@@ -158,6 +188,57 @@ footer a:hover { color: var(--c-text); }
 footer .logo { font-size: 1rem; margin-bottom: 12px; }
 footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-secondary); }
 .footer-bottom { border-top: 1px solid var(--c-border); margin-top: 32px; padding-top: 20px; text-align: center; font-family: var(--ff-mono); font-size: 0.75rem; color: var(--c-text-secondary); }
+
+/* AI Chat widget */
+#chatToggle { position:fixed; bottom:24px; right:24px; z-index:9999; width:64px; height:64px; border-radius:50%; background:var(--c-accent); color:var(--c-bg); border:none; font-size:1.5rem; cursor:pointer; box-shadow:0 0 30px rgba(0,255,65,0.4); transition:all 0.2s; display:flex; align-items:center; justify-content:center; }
+#chatToggle:hover { transform:scale(1.1); box-shadow:0 0 50px rgba(0,255,65,0.6); }
+#chatToggle.listening { animation:pulse 1s infinite; background:var(--c-red); box-shadow:0 0 40px rgba(255,50,50,0.5); }
+#chatPanel { display:none; position:fixed; bottom:96px; right:24px; z-index:9998; width:380px; max-width:calc(100vw - 48px); height:540px; max-height:calc(100vh - 140px); background:var(--c-surface); border:1px solid var(--c-border); flex-direction:column; font-family:var(--ff-mono); }
+#chatHeader { display:flex; justify-content:space-between; align-items:center; padding:12px 16px; border-bottom:1px solid var(--c-border); }
+#chatHeader span { font-size:0.75rem; color:var(--c-accent); }
+#chatHeader .close { cursor:pointer; color:var(--c-text-secondary); font-size:0.8rem; }
+#voiceMain { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20px; gap:12px; }
+#bigMicBtn { width:80px; height:80px; border-radius:50%; background:var(--c-surface-2); border:2px solid var(--c-border); color:var(--c-text); font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+#bigMicBtn:hover { border-color:var(--c-accent); color:var(--c-accent); transform:scale(1.05); }
+#bigMicBtn.listening { background:var(--c-red); border-color:var(--c-red); color:var(--c-bg); animation:pulse 1s infinite; }
+#bigMicBtn.speaking { background:var(--c-accent-dim); border-color:var(--c-accent); color:var(--c-accent); }
+#voiceStatusBig { font-size:0.75rem; color:var(--c-text-secondary); text-align:center; min-height:1.2em; }
+#waveformBig { display:flex; align-items:center; gap:3px; height:40px; }
+#waveformBig .bar { width:4px; background:var(--c-accent); border-radius:2px; height:6px; transition:height 0.15s; }
+#waveformBig.idle .bar { height:6px; opacity:0.15; }
+#waveformBig.listening .bar { animation:wave-listening 0.8s ease-in-out infinite alternate; }
+#waveformBig.speaking .bar { animation:wave-speaking 0.5s ease-in-out infinite alternate; }
+#waveformBig.processing .bar { animation:wave-processing 1.2s ease-in-out infinite; }
+#waveformBig .bar:nth-child(1) { animation-delay:0s; }
+#waveformBig .bar:nth-child(2) { animation-delay:0.08s; }
+#waveformBig .bar:nth-child(3) { animation-delay:0.16s; }
+#waveformBig .bar:nth-child(4) { animation-delay:0.24s; }
+#waveformBig .bar:nth-child(5) { animation-delay:0.32s; }
+#waveformBig .bar:nth-child(6) { animation-delay:0.4s; }
+#waveformBig .bar:nth-child(7) { animation-delay:0.48s; }
+#waveformBig .bar:nth-child(8) { animation-delay:0.56s; }
+#waveformBig .bar:nth-child(9) { animation-delay:0.64s; }
+#waveformBig .bar:nth-child(10) { animation-delay:0.72s; }
+#voiceTranscript { font-size:0.65rem; color:var(--c-accent); text-align:center; max-width:90%; min-height:1em; word-wrap:break-word; }
+#voiceLog { width:100%; max-height:100px; overflow-y:auto; font-size:0.6rem; color:var(--c-text-secondary); text-align:center; }
+#voiceAssistant { flex:0 0 auto; max-height:30%; display:none; flex-direction:column; width:100%; }
+#voiceAssistantInput { display:flex; padding:8px; gap:6px; border-top:1px solid var(--c-border); }
+#voiceAssistantInput input { flex:1; padding:8px 12px; background:var(--c-surface-2); border:1px solid var(--c-border); color:var(--c-text); font-family:var(--ff-mono); font-size:0.75rem; }
+#voiceAssistantInput input:focus { outline:none; border-color:var(--c-accent); }
+#voiceAssistantInput button { padding:8px 16px; background:var(--c-accent); color:var(--c-bg); border:none; font-family:var(--ff-mono); font-size:0.7rem; cursor:pointer; }
+#voiceAssistantLog { flex:1; overflow-y:auto; padding:8px 12px; font-size:0.7rem; display:flex; flex-direction:column; gap:6px; }
+#voiceAssistantLog .msg { max-width:90%; padding:6px 10px; border-radius:4px; line-height:1.4; }
+#voiceAssistantLog .msg.user { align-self:flex-end; background:var(--c-accent-dim); border:1px solid rgba(0,255,65,0.2); }
+#voiceAssistantLog .msg.bot { align-self:flex-start; background:var(--c-surface-2); border:1px solid var(--c-border); }
+@keyframes pulse { 0% { opacity:1; } 50% { opacity:0.5; } 100% { opacity:1; } }
+.voice-toggle { display:flex; align-items:center; gap:6px; font-size:0.65rem; color:var(--c-text-secondary); cursor:pointer; padding:4px 0; }
+.voice-toggle.active { color:var(--c-accent); }
+@keyframes wave-listening { 0% { height:6px; } 100% { height:30px; } }
+@keyframes wave-speaking { 0% { height:4px; } 50% { height:34px; } 100% { height:4px; } }
+@keyframes wave-processing { 0% { height:4px; } 25% { height:24px; } 50% { height:4px; } 75% { height:24px; } 100% { height:4px; } }
+
+
+
 
 @media (max-width: 900px) {
   .steps, .sources-grid { grid-template-columns: 1fr 1fr; }
@@ -404,10 +485,97 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
 <div id="telegramGroupPanel" style="display:none;margin-top:16px;">
 <div class="terminal-block">
-<div class="line"><span class="highlight">// telegram — connected groups</span></div>
+<div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+<span><span class="highlight">// telegram — connected groups</span></span>
+<span style="display:flex;gap:6px;">
+<button class="btn-secondary" style="padding:4px 8px;font-size:0.65rem;" onclick="syncTelegramGroups()">sync</button>
+<button class="btn-secondary" style="padding:4px 8px;font-size:0.65rem;" onclick="loadTelegramGroups()">refresh</button>
+</span>
+</div>
+<div class="line" style="font-size:0.65rem;color:var(--c-text-secondary);padding:4px 0;">add the bot to any group and click "sync" to detect it. then send a message in the group to start monitoring.</div>
 <div id="telegramGroupList" style="margin-top:8px;">
 <div class="line" style="color:var(--c-text-secondary);">loading groups...</div>
 </div>
+</div>
+</div>
+
+<div id="briefPanel" style="margin-top:16px;display:none;">
+<div class="terminal-block">
+<div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+<span><span class="highlight">// vigil brief</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">at a glance</span></span>
+<button class="btn-secondary" style="padding:4px 10px;font-size:0.65rem;" onclick="loadBrief()">refresh</button>
+</div>
+<div id="briefContent" style="padding:8px 0;">
+<div class="brief-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px;">
+<div class="brief-stat" style="background:var(--c-surface-2);padding:10px;text-align:center;border:1px solid var(--c-border);">
+  <div style="font-size:1.1rem;color:var(--c-accent);" id="briefToday">-</div>
+  <div style="font-size:0.6rem;color:var(--c-text-secondary);text-transform:uppercase;letter-spacing:0.05em;">today</div>
+</div>
+<div class="brief-stat" style="background:var(--c-surface-2);padding:10px;text-align:center;border:1px solid var(--c-border);">
+  <div style="font-size:1.1rem;color:var(--c-accent);" id="briefTotal">-</div>
+  <div style="font-size:0.6rem;color:var(--c-text-secondary);text-transform:uppercase;letter-spacing:0.05em;">total</div>
+</div>
+<div class="brief-stat" style="background:var(--c-surface-2);padding:10px;text-align:center;border:1px solid var(--c-border);">
+  <div style="font-size:1.1rem;color:var(--c-accent);" id="briefSources">-</div>
+  <div style="font-size:0.6rem;color:var(--c-text-secondary);text-transform:uppercase;letter-spacing:0.05em;">sources</div>
+</div>
+<div class="brief-stat" style="background:var(--c-surface-2);padding:10px;text-align:center;border:1px solid var(--c-border);">
+  <div style="font-size:1.1rem;color:var(--c-accent);" id="briefPriority">-</div>
+  <div style="font-size:0.6rem;color:var(--c-text-secondary);text-transform:uppercase;letter-spacing:0.05em;">priority</div>
+</div>
+</div>
+<div id="briefLatest" style="font-size:0.7rem;color:var(--c-text-secondary);"></div>
+</div>
+</div>
+</div>
+
+<div id="monitorPanel" style="margin-top:16px;">
+<div class="terminal-block">
+<div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+<span><span class="highlight">// monitoring targets</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">watch profiles & groups for new posts</span></span>
+<button class="btn-secondary" style="padding:4px 10px;font-size:0.65rem;" onclick="pollTargetsNow()">poll now</button>
+</div>
+<div class="target-input-group">
+<select id="targetSource">
+<option value="twitter">X / Twitter</option>
+<option value="facebook">Facebook</option>
+<option value="telegram">Telegram</option>
+<option value="whatsapp">WhatsApp</option>
+</select>
+<input type="text" id="targetInput" placeholder="handle, username or URL /x.com/username">
+<input type="text" id="targetLabel" placeholder="label (optional)">
+<button onclick="addMonitorTarget()">+ watch</button>
+</div>
+<div id="targetList" style="margin-top:8px;">
+<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no targets yet. add a profile or group to monitor for new posts.</div>
+</div>
+</div>
+</div>
+
+<div id="savedUrlsPanel" style="display:none;margin-top:16px;">
+<div class="terminal-block">
+<div class="line" style="display:flex;justify-content:space-between;align-items:center;">
+<span><span class="highlight">// saved URLs</span> <span id="savedUrlsTargetLabel" style="color:var(--c-text-secondary);font-size:0.7rem;"></span></span>
+<button class="btn-secondary" style="padding:4px 10px;font-size:0.65rem;" onclick="showAddUrlInput()">+ save url</button>
+</div>
+<div id="addUrlInputGroup" style="display:none;margin-top:8px;padding:8px;background:var(--c-surface-2);border:1px solid var(--c-border);">
+<div class="line" style="margin-bottom:4px;"><span class="prompt">paste tweet / post URL to save</span></div>
+<div class="line" style="display:flex;gap:6px;flex-wrap:wrap;">
+<input type="text" id="saveUrlInput" placeholder="https://x.com/username/status/..." style="flex:1;min-width:200px;padding:6px 10px;background:var(--c-surface);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.72rem;">
+<input type="text" id="saveUrlNote" placeholder="note (e.g. job posting)" style="flex:1;min-width:120px;padding:6px 10px;background:var(--c-surface);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.72rem;">
+<button style="padding:6px 14px;background:var(--c-accent);color:var(--c-bg);border:none;font-family:var(--ff-mono);font-size:0.65rem;cursor:pointer;" onclick="saveUrlForCurrentTarget()">save</button>
+</div>
+</div>
+<div id="savedUrlsList" style="margin-top:8px;">
+<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no saved URLs yet.</div>
+</div>
+</div>
+</div>
+
+<div id="targetAlertsPanel" style="margin-top:16px;display:none;">
+<div class="terminal-block">
+<div class="line"><span class="highlight">// target alerts</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">new posts detected</span></div>
+<div id="targetAlertsList"></div>
 </div>
 </div>
 
@@ -425,6 +593,40 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="line"><select id="voiceSelect" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;" onchange="changeVoice()">
 <option value="">— select region first —</option>
 </select></div>
+</div>
+</div>
+
+<div id="settingsPanel" style="margin-top:16px;">
+<div class="terminal-block" style="cursor:pointer;" onclick="var n=document.getElementById('settingsContent');n.style.display=n.style.display==='none'?'block':'none'">
+<div class="line"><span class="highlight">// alert settings</span> <span style="color:var(--c-text-secondary);font-size:0.7rem;">click to expand</span></div>
+<div class="line" style="font-size:0.75rem;color:var(--c-text-secondary);margin-top:4px;">threshold: <span id="thresholdLabel">6</span> · rules: <span id="rulesCount">0</span> · priority groups: <span id="priorityCount">0</span></div>
+</div>
+<div id="settingsContent" style="display:none;padding:12px 0;">
+
+<div class="line" style="margin-bottom:6px;"><span class="prompt">importance threshold <span style="color:var(--c-text-secondary);font-size:0.65rem;">(messages scored ≥ this trigger alerts)</span></span></div>
+<div class="line" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+<input type="range" id="thresholdSlider" min="0" max="10" value="6" style="flex:1;accent-color:var(--c-accent);" oninput="document.getElementById('thresholdVal').textContent=this.value;updateThreshold(this.value)">
+<span id="thresholdVal" style="font-size:0.9rem;color:var(--c-accent);min-width:20px;">6</span>
+</div>
+
+<div class="line" style="margin-bottom:4px;"><span class="prompt">keyword rules <span style="color:var(--c-text-secondary);font-size:0.65rem;">(alert when these words appear)</span></span></div>
+<div class="line" style="display:flex;gap:6px;margin-bottom:8px;">
+<input type="text" id="keywordInput" placeholder="e.g. urgent, job, deal" style="flex:1;padding:6px 10px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.72rem;">
+<button style="padding:6px 14px;background:var(--c-accent);color:var(--c-bg);border:none;font-family:var(--ff-mono);font-size:0.65rem;cursor:pointer;" onclick="addKeywordRule()">+ add</button>
+</div>
+<div id="keywordRulesList"></div>
+
+<div class="line" style="margin-top:10px;margin-bottom:4px;"><span class="prompt">priority senders <span style="color:var(--c-text-secondary);font-size:0.65rem;">(always alert from these people)</span></span></div>
+<div class="line" style="display:flex;gap:6px;margin-bottom:8px;">
+<input type="text" id="senderInput" placeholder="e.g. @username" style="flex:1;padding:6px 10px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.72rem;">
+<button style="padding:6px 14px;background:var(--c-accent);color:var(--c-bg);border:none;font-family:var(--ff-mono);font-size:0.65rem;cursor:pointer;" onclick="addSenderRule()">+ add</button>
+</div>
+<div id="senderRulesList"></div>
+
+<div class="line" style="margin-top:10px;margin-bottom:4px;"><span class="prompt">priority groups <span style="color:var(--c-text-secondary);font-size:0.65rem;">(all messages from these groups get high alerts)</span></span></div>
+<div id="priorityGroupsList" style="margin-bottom:8px;"></div>
+
+</div>
 </div>
 </div>
 
@@ -597,10 +799,16 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       TOKEN = data.token;
       document.getElementById('loginPanel').style.display = 'none';
       document.getElementById('sessionPanel').classList.add('active');
+      document.getElementById('chatToggle').style.display = 'flex';
+      document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
       connectWs();
       fetchMessages();
       loadSourceStatus();
+      loadMonitorTargets();
+      loadSettings();
       loadVoices();
+      loadBrief();
+      checkVoiceSupport();
     })
     .catch(function(){
       btn.textContent = 'connect →';
@@ -618,11 +826,40 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     disconnectWs();
     document.getElementById('sessionPanel').classList.remove('active');
     document.getElementById('loginPanel').style.display = 'block';
+    document.getElementById('chatToggle').style.display = 'none';
+    document.getElementById('chatPanel').style.display = 'none';
+    document.getElementById('chatToggle').className = '';
     document.getElementById('msgList').innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— disconnected —</span></div>';
   };
 
   function authHeaders() {
     return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
+  }
+
+  // ── Vigil Brief ──
+  function loadBrief() {
+    fetch(API + '/api/dashboard/brief', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        document.getElementById('briefPanel').style.display = 'block';
+        document.getElementById('briefToday').textContent = d.today || 0;
+        document.getElementById('briefTotal').textContent = d.total_messages || 0;
+        document.getElementById('briefSources').textContent = Object.keys(d.sources || {}).length;
+        document.getElementById('briefPriority').textContent = d.priority_group_count || 0;
+
+        var latestHtml = '';
+        if (d.latest && d.latest.length) {
+          latestHtml = '<div style="margin-top:4px;"><span style="color:var(--c-accent);">latest</span>';
+          d.latest.forEach(function(m){
+            latestHtml += '<div style="padding:3px 0;display:flex;gap:6px;"><span style="color:var(--c-text-secondary);min-width:60px;">' + escapeHtml(m.source) + '</span><span style="color:var(--c-text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + escapeHtml(m.text) + '</span></div>';
+          });
+          latestHtml += '</div>';
+        } else {
+          latestHtml = '<span style="color:var(--c-text-secondary);">no messages yet. connect sources above.</span>';
+        }
+        document.getElementById('briefLatest').innerHTML = latestHtml;
+      })
+      .catch(function(){});
   }
 
   // ── Source status ──
@@ -655,6 +892,197 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       .catch(function(){});
   }
 
+  // ── Monitoring Targets ──
+  window.addMonitorTarget = function() {
+    var source = document.getElementById('targetSource').value;
+    var targetId = document.getElementById('targetInput').value.trim();
+    var label = document.getElementById('targetLabel').value.trim();
+    if (!targetId) { alert('enter a handle, username or URL'); return; }
+    var btn = document.querySelector('#monitorPanel button');
+    btn.textContent = 'adding...';
+    btn.disabled = true;
+    fetch(API + '/api/targets', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({source: source, target_type: 'profile', target_id: targetId, label: label})
+    })
+    .then(function(r){
+      if (!r.ok) { if (r.status === 409) throw Error('already watching this target'); throw Error('failed'); }
+      return r.json();
+    })
+    .then(function(){
+      document.getElementById('targetInput').value = '';
+      document.getElementById('targetLabel').value = '';
+      loadMonitorTargets();
+    })
+    .catch(function(e){
+      alert(e.message);
+    })
+    .finally(function(){
+      btn.textContent = '+ watch';
+      btn.disabled = false;
+    });
+  };
+
+  function loadMonitorTargets() {
+    fetch(API + '/api/targets', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var list = document.getElementById('targetList');
+        if (!data.targets || data.targets.length === 0) {
+          list.innerHTML = '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no targets yet. add a profile or group to monitor for new posts.</div>';
+          return;
+        }
+        var html = '';
+        data.targets.forEach(function(t){
+          var icon = t.source === 'twitter' ? '𝕏' : t.source === 'facebook' ? 'f' : t.source === 'telegram' ? '✈' : '💬';
+          var status = t.enabled ? (t.last_checked ? 'checked ' + timeAgo(t.last_checked) : 'waiting') : 'paused';
+          html += '<div class="target-row">'
+            + '<span class="src-badge">' + icon + ' ' + t.source + '</span>'
+            + '<span class="t-label" title="' + escapeHtml(t.target_id) + '">' + escapeHtml(t.label || t.target_id) + '</span>'
+            + '<span class="t-status">' + status + '</span>'
+            + '<span class="t-actions">'
+            + (t.source === 'twitter' ? '<button onclick="showSavedUrls(' + t.id + ',\'' + escapeHtml(t.label || t.target_id) + '\')" title="save post URLs">🔗</button>' : '')
+            + '<button onclick="toggleMonitorTarget(' + t.id + ',' + (t.enabled ? 'false' : 'true') + ')" title="' + (t.enabled ? 'pause' : 'resume') + '">' + (t.enabled ? '⏸' : '▶') + '</button>'
+            + '<button class="btn-danger" onclick="deleteMonitorTarget(' + t.id + ')" title="remove">✕</button>'
+            + '</span>'
+            + '</div>';
+        });
+        list.innerHTML = html;
+      })
+      .catch(function(){});
+  }
+
+  window.toggleMonitorTarget = function(id, enabled) {
+    fetch(API + '/api/targets/' + id, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({enabled: enabled})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ loadMonitorTargets(); })
+    .catch(function(){});
+  };
+
+  window.deleteMonitorTarget = function(id) {
+    if (!confirm('Remove this target?')) return;
+    fetch(API + '/api/targets/' + id, {
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ' + TOKEN}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      loadMonitorTargets();
+      document.getElementById('savedUrlsPanel').style.display = 'none';
+    })
+    .catch(function(){});
+  };
+
+  window.pollTargetsNow = function() {
+    var btn = document.querySelector('#monitorPanel .btn-secondary');
+    btn.textContent = 'polling...';
+    btn.disabled = true;
+    fetch(API + '/api/targets/poll', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if (data.new_posts > 0) {
+          showAlert('found ' + data.new_posts + ' new posts');
+          loadMonitorTargets();
+        }
+      })
+      .catch(function(){})
+      .finally(function(){
+        btn.textContent = 'poll now';
+        btn.disabled = false;
+      });
+  };
+
+  // ── Saved URLs ──
+  var currentSavedUrlTargetId = null;
+
+  window.showSavedUrls = function(targetId, label) {
+    currentSavedUrlTargetId = targetId;
+    var panel = document.getElementById('savedUrlsPanel');
+    document.getElementById('savedUrlsTargetLabel').textContent = 'for ' + label;
+    panel.style.display = 'block';
+    loadSavedUrls(targetId);
+  };
+
+  function loadSavedUrls(targetId) {
+    fetch(API + '/api/targets/' + targetId + '/saved-urls', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var list = document.getElementById('savedUrlsList');
+        if (!data.urls || data.urls.length === 0) {
+          list.innerHTML = '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">no saved URLs yet. save tweets, job posts, or anything important.</div>';
+          return;
+        }
+        var html = '';
+        data.urls.forEach(function(u){
+          html += '<div class="saved-url-row">'
+            + '<span class="su-url"><a href="' + escapeHtml(u.url) + '" target="_blank" style="color:var(--c-accent);">' + escapeHtml(u.title || u.url.substring(0,50)) + '</a></span>'
+            + '<span class="su-note">' + escapeHtml(u.note || '') + '</span>'
+            + '<span class="su-time">' + timeAgo(u.created_at) + '</span>'
+            + '<button onclick="deleteSavedUrl(' + u.id + ')" title="delete">✕</button>'
+            + '</div>';
+        });
+        list.innerHTML = html;
+      })
+      .catch(function(){});
+  }
+
+  window.showAddUrlInput = function() {
+    var g = document.getElementById('addUrlInputGroup');
+    g.style.display = g.style.display === 'none' ? 'block' : 'none';
+    if (g.style.display === 'block') document.getElementById('saveUrlInput').focus();
+  };
+
+  window.saveUrlForCurrentTarget = function() {
+    if (!currentSavedUrlTargetId) return;
+    var url = document.getElementById('saveUrlInput').value.trim();
+    var note = document.getElementById('saveUrlNote').value.trim();
+    if (!url) { alert('paste a URL'); return; }
+    fetch(API + '/api/targets/' + currentSavedUrlTargetId + '/saved-urls', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({url: url, title: url.substring(0,80), note: note})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      document.getElementById('saveUrlInput').value = '';
+      document.getElementById('saveUrlNote').value = '';
+      document.getElementById('addUrlInputGroup').style.display = 'none';
+      loadSavedUrls(currentSavedUrlTargetId);
+    })
+    .catch(function(){});
+  };
+
+  window.deleteSavedUrl = function(id) {
+    if (!confirm('Delete this saved URL?')) return;
+    fetch(API + '/api/targets/saved-urls/' + id, {
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ' + TOKEN}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ loadSavedUrls(currentSavedUrlTargetId); })
+    .catch(function(){});
+  };
+
+  // ── Target alerts ──
+  function addTargetAlert(alert) {
+    var panel = document.getElementById('targetAlertsPanel');
+    panel.style.display = 'block';
+    var list = document.getElementById('targetAlertsList');
+    var entry = document.createElement('div');
+    entry.className = 'target-alert';
+    var t = new Date().toLocaleTimeString();
+    entry.innerHTML = '<span class="a-src">' + (alert.source === 'twitter' ? '𝕏' : alert.source === 'facebook' ? 'f' : '📡') + '</span>'
+      + '<span class="a-text"><strong>' + escapeHtml(alert.sender || alert.target_label || '') + '</strong> — ' + escapeHtml((alert.text || '').substring(0, 120)) + '</span>'
+      + '<span class="a-time">' + t + '</span>';
+    list.insertBefore(entry, list.firstChild);
+    while (list.children.length > 20) list.removeChild(list.lastChild);
+  }
+
   // ── Telegram ──
   window.connectTelegram = function() {
     var token = prompt('Enter your Telegram bot token from @BotFather:');
@@ -685,6 +1113,21 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     });
   };
 
+  window.syncTelegramGroups = function() {
+    var btn = document.querySelector('#telegramGroupPanel .btn-secondary');
+    var orig = btn.textContent;
+    btn.textContent = 'syncing...';
+    btn.disabled = true;
+    fetch(API + '/api/sources/telegram/sync-groups', {method:'POST', headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        btn.textContent = d.ok ? 'synced +' + d.new_groups : 'error';
+        setTimeout(function(){ btn.textContent = 'sync'; btn.disabled = false; }, 2000);
+        loadTelegramGroups();
+      })
+      .catch(function(){ btn.textContent = 'sync'; btn.disabled = false; });
+  };
+
   function loadTelegramGroups() {
     fetch(API + '/api/sources/telegram/groups', {headers: authHeaders()})
       .then(function(r){ return r.json(); })
@@ -702,6 +1145,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         });
         list.innerHTML = html;
         fetchMessages();
+        loadPriorityGroups();
       })
       .catch(function(){});
   }
@@ -804,6 +1248,221 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     return d.innerHTML;
   }
 
+  // ── AI Voice ──
+  window.toggleChat = function() {
+    var panel = document.getElementById('chatPanel');
+    var shown = panel.style.display === 'flex';
+    panel.style.display = shown ? 'none' : 'flex';
+    var btn = document.getElementById('chatToggle');
+    btn.className = shown ? '' : 'listening';
+    if (!shown) {
+      var el = document.getElementById('voiceReplyToggle');
+      if (el) el.className = 'voice-toggle active';
+      VOICE_REPLY_ENABLED = true;
+      showTyping('listening', 'tap 🎤 and speak a command');
+    }
+  };
+
+  var VOICE_REPLY_ENABLED = false;
+
+  window.toggleVoiceReply = function() {
+    VOICE_REPLY_ENABLED = !VOICE_REPLY_ENABLED;
+    var el = document.getElementById('voiceReplyToggle');
+    el.className = 'voice-toggle' + (VOICE_REPLY_ENABLED ? ' active' : '');
+    var st = document.getElementById('voiceStatus');
+    if (VOICE_REPLY_ENABLED) {
+      st.textContent = 'voice replies on — AI will speak';
+      setTimeout(function(){ if (st.textContent === 'voice replies on — AI will speak') st.textContent = ''; }, 3000);
+    }
+  };
+
+  // auto-start voice replies on first chat open
+  window.toggleChat_orig = window.toggleChat;
+  window.toggleChat = function() {
+    window.toggleChat_orig();
+    if (!VOICE_REPLY_ENABLED && window.speechSynthesis) {
+      VOICE_REPLY_ENABLED = true;
+      var el = document.getElementById('voiceReplyToggle');
+      if (el) el.className = 'voice-toggle active';
+    }
+  };
+
+  function speakResponse(text) {
+    if (!VOICE_REPLY_ENABLED || !text) return;
+    setWaveform('speaking');
+    fetch(API + '/api/tts?text=' + encodeURIComponent(text.substring(0, 500)), {cache:'no-store'})
+      .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
+      .then(function(blob){
+        var url = URL.createObjectURL(blob);
+        var audio = new Audio(url);
+        audio.onended = function(){ URL.revokeObjectURL(url); setWaveform('idle'); };
+        audio.onerror = function(){ setWaveform('idle'); };
+        audio.play().catch(function(){ setWaveform('idle'); });
+      })
+      .catch(function(){
+        if(window.speechSynthesis){
+          var u = new SpeechSynthesisUtterance(text.substring(0, 200));
+          u.rate = 0.9;
+          u.onend = function(){ setWaveform('idle'); };
+          u.onerror = function(){ setWaveform('idle'); };
+          window.speechSynthesis.speak(u);
+        } else {
+          setWaveform('idle');
+        }
+      });
+  }
+
+  window.sendChat = function(text) {
+    var input = document.getElementById('chatInput');
+    var msg = text || (input ? input.value.trim() : '');
+    if (!msg) return;
+    if (input) input.value = '';
+    var log = document.getElementById('voiceAssistantLog');
+    log.innerHTML += '<div class="msg user"><span>' + escapeHtml(msg) + '</span></div>';
+    log.scrollTop = log.scrollHeight;
+    log.innerHTML += '<div class="msg bot"><span style="color:var(--c-text-secondary);">thinking...</span></div>';
+    log.scrollTop = log.scrollHeight;
+    setWaveform('processing');
+    document.getElementById('voiceStatusBig').textContent = 'thinking...';
+    fetch(API + '/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({message: msg})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var botMsg = log.querySelector('.msg.bot:last-child');
+      var response = data.response || 'no response';
+      if (botMsg) botMsg.innerHTML = '<span>' + escapeHtml(response) + '</span>';
+      log.scrollTop = log.scrollHeight;
+      document.getElementById('voiceStatusBig').textContent = '';
+      speakResponse(response);
+    })
+    .catch(function(){
+      var botMsg = log.querySelector('.msg.bot:last-child');
+      if (botMsg) botMsg.innerHTML = '<span style="color:var(--c-error);">error — AI unavailable</span>';
+      document.getElementById('voiceStatusBig').textContent = 'error';
+      setWaveform('idle');
+    });
+  };
+
+  // ── Voice Input (Speech-to-Text) ──
+  var speechRecognition = null;
+  var isListening = false;
+
+  function showTyping(msg, status) {
+    var log = document.getElementById('voiceAssistantLog');
+    if (msg) log.innerHTML += '<div class="msg bot"><span>' + msg + '</span></div>';
+    log.scrollTop = log.scrollHeight;
+    if (status) document.getElementById('voiceStatusBig').textContent = status;
+  }
+
+  function setWaveform(state) {
+    var wf = document.getElementById('waveformBig');
+    if (wf) wf.className = state === 'idle' ? 'idle' : state;
+    var btn = document.getElementById('bigMicBtn');
+    var toggle = document.getElementById('chatToggle');
+    if (state === 'listening') {
+      if (btn) { btn.className = 'listening'; btn.textContent = '⏹'; }
+      toggle.className = 'listening';
+    } else if (state === 'speaking' || state === 'processing') {
+      if (btn) { btn.className = 'speaking'; btn.textContent = '🔊'; }
+      toggle.className = '';
+    } else {
+      if (btn) { btn.className = ''; btn.textContent = '🎤'; }
+      toggle.className = '';
+    }
+  }
+
+  function checkVoiceSupport() {
+    var status = document.getElementById('voiceStatus');
+    var mic = document.getElementById('micBtn');
+    var hasSR = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+    var hasSS = !!window.speechSynthesis;
+    if (!hasSR && !hasSS) {
+      mic.style.display = 'none';
+      status.textContent = 'voice not supported';
+      return;
+    }
+    if (!hasSR) {
+      mic.title = 'speech-to-text unavailable (use Chrome)';
+      status.textContent = 'speech-to-text needs Chrome';
+      return;
+    }
+    if (location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+      status.textContent = 'microphone needs HTTPS';
+    }
+  }
+
+  window.toggleVoiceInput = function() {
+    var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      document.getElementById('voiceStatusBig').textContent = 'speech not supported — use Chrome';
+      return;
+    }
+    if (isListening) {
+      if (speechRecognition) speechRecognition.stop();
+      isListening = false;
+      setWaveform('idle');
+      document.getElementById('voiceStatusBig').textContent = 'tap 🎤 and speak';
+      document.getElementById('voiceTranscript').textContent = '';
+      return;
+    }
+    speechRecognition = new SpeechRecognition();
+    speechRecognition.continuous = false;
+    speechRecognition.interimResults = true;
+    speechRecognition.lang = 'en-US';
+    isListening = true;
+    setWaveform('listening');
+    document.getElementById('voiceStatusBig').textContent = 'listening...';
+    document.getElementById('voiceTranscript').textContent = '';
+    var lastTranscript = '';
+    speechRecognition.onresult = function(event) {
+      var transcript = '';
+      for (var i = event.resultIndex; i < event.results.length; i++) {
+        var r = event.results[i];
+        transcript += r[0].transcript;
+      }
+      lastTranscript = transcript;
+      document.getElementById('voiceTranscript').textContent = '✎ ' + transcript;
+    };
+    speechRecognition.onend = function() {
+      var finalText = lastTranscript;
+      isListening = false;
+      setWaveform('processing');
+      document.getElementById('voiceStatusBig').textContent = 'processing...';
+      if (finalText) {
+        document.getElementById('voiceTranscript').textContent = '';
+        sendChat(finalText);
+      } else {
+        setWaveform('idle');
+        document.getElementById('voiceStatusBig').textContent = 'tap 🎤 and speak';
+      }
+    };
+    speechRecognition.onerror = function(e) {
+      isListening = false;
+      setWaveform('idle');
+      var msg = e.error;
+      if (msg === 'not-allowed') msg = 'microphone blocked by browser. needs HTTPS.';
+      else if (msg === 'aborted') msg = '';
+      document.getElementById('voiceStatusBig').textContent = msg;
+      document.getElementById('voiceTranscript').textContent = '';
+    };
+    speechRecognition.start();
+  };
+
+  function timeAgo(isoStr) {
+    if (!isoStr) return '';
+    var diff = Date.now() - new Date(isoStr).getTime();
+    var sec = Math.floor(diff / 1000);
+    if (sec < 60) return sec + 's ago';
+    var min = Math.floor(sec / 60);
+    if (min < 60) return min + 'm ago';
+    var hr = Math.floor(min / 60);
+    if (hr < 24) return hr + 'h ago';
+    return Math.floor(hr / 24) + 'd ago';
+  }
+
   // ── WebSocket ──
   function connectWs() {
     disconnectWs();
@@ -813,6 +1472,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         try {
           var data = JSON.parse(ev.data);
           if (data.type === 'alert' || data.type === 'priority_alert') fetchMessages();
+          if (data.type === 'target_alert') { addTargetAlert(data); fetchMessages(); }
         } catch(e) {}
       };
       WS.onclose = function() { if (TOKEN) wsReconnectTimer = setTimeout(connectWs, 5000); };
@@ -905,6 +1565,131 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     .catch(function(){});
   };
 
+  // ── Alert Settings ──
+  function loadSettings() {
+    fetch(API + '/api/config', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var th = data.importance_threshold || 6;
+        document.getElementById('thresholdSlider').value = th;
+        document.getElementById('thresholdVal').textContent = th;
+        document.getElementById('thresholdLabel').textContent = th;
+        loadRules();
+        loadPriorityGroups();
+      })
+      .catch(function(){});
+  }
+
+  window.updateThreshold = function(val) {
+    fetch(API + '/api/config/threshold', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({importance_threshold: parseInt(val)})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      document.getElementById('thresholdLabel').textContent = data.importance_threshold;
+    })
+    .catch(function(){});
+  };
+
+  function loadRules() {
+    fetch(API + '/api/config/rules', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var rules = data.rules || [];
+        document.getElementById('rulesCount').textContent = rules.length;
+        var keywordHtml = '';
+        var senderHtml = '';
+        rules.forEach(function(r){
+          var item = '<div class="line" style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;margin:2px 0;background:var(--c-surface-2);font-size:0.7rem;">'
+            + '<span>' + (r.rule_type === 'keyword' ? '🔑 ' : '👤 ') + escapeHtml(r.value) + '</span>'
+            + '<button style="padding:2px 6px;font-size:0.6rem;background:transparent;border:1px solid var(--c-border);color:var(--c-text-secondary);cursor:pointer;" onclick="deleteRule(' + r.id + ')">✕</button>'
+            + '</div>';
+          if (r.rule_type === 'keyword') keywordHtml += item;
+          else senderHtml += item;
+        });
+        document.getElementById('keywordRulesList').innerHTML = keywordHtml || '<div class="line" style="font-size:0.7rem;color:var(--c-text-secondary);">no keyword rules</div>';
+        document.getElementById('senderRulesList').innerHTML = senderHtml || '<div class="line" style="font-size:0.7rem;color:var(--c-text-secondary);">no sender rules</div>';
+      })
+      .catch(function(){});
+  }
+
+  window.addKeywordRule = function() {
+    var val = document.getElementById('keywordInput').value.trim();
+    if (!val) return;
+    fetch(API + '/api/config/rules', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({rule_type: 'keyword', value: val, group_id: 0, priority: 2})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      document.getElementById('keywordInput').value = '';
+      loadRules();
+    })
+    .catch(function(){});
+  };
+
+  window.addSenderRule = function() {
+    var val = document.getElementById('senderInput').value.trim();
+    if (!val) return;
+    fetch(API + '/api/config/rules', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({rule_type: 'sender', value: val, group_id: 0, priority: 3})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      document.getElementById('senderInput').value = '';
+      loadRules();
+    })
+    .catch(function(){});
+  };
+
+  window.deleteRule = function(id) {
+    fetch(API + '/api/config/rules/' + id, {
+      method: 'DELETE',
+      headers: {'Authorization': 'Bearer ' + TOKEN}
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ loadRules(); })
+    .catch(function(){});
+  };
+
+  function loadPriorityGroups() {
+    fetch(API + '/api/config/groups', {headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var groups = data.groups || [];
+        var priority = groups.filter(function(g){ return g.is_priority; });
+        document.getElementById('priorityCount').textContent = priority.length;
+        var html = '';
+        groups.forEach(function(g){
+          html += '<div class="line" style="display:flex;justify-content:space-between;align-items:center;padding:4px 8px;margin:2px 0;background:var(--c-surface-2);font-size:0.7rem;">'
+            + '<span>' + escapeHtml(g.source) + '/' + escapeHtml(g.name) + '</span>'
+            + '<label style="display:flex;align-items:center;gap:6px;cursor:pointer;">'
+            + '<input type="checkbox" ' + (g.is_priority ? 'checked' : '') + ' onchange="toggleGroupPriority(' + g.id + ', this.checked)" style="accent-color:var(--c-accent);">'
+            + '<span style="color:var(--c-text-secondary);font-size:0.65rem;">priority</span>'
+            + '</label>'
+            + '</div>';
+        });
+        document.getElementById('priorityGroupsList').innerHTML = html || '<div class="line" style="font-size:0.7rem;color:var(--c-text-secondary);">no groups yet. connect sources first.</div>';
+      })
+      .catch(function(){});
+  }
+
+  window.toggleGroupPriority = function(groupId, isPriority) {
+    fetch(API + '/api/config/groups/priority', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({group_id: groupId, is_priority: isPriority})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){ loadPriorityGroups(); })
+    .catch(function(){});
+  };
+
   // ── Wallet & Memory Vault ──
   var WALLET_ADDRESS = null;
   var WALLET_PROVIDER = null;
@@ -962,12 +1747,16 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         TOKEN = data.token;
         document.getElementById('loginPanel').style.display = 'none';
         document.getElementById('sessionPanel').classList.add('active');
+        document.getElementById('chatToggle').style.display = 'flex';
+        document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
         document.getElementById('sessionWallet').textContent = ' — ' + WALLET_ADDRESS.substring(0,6) + '...' + WALLET_ADDRESS.substring(38);
         document.getElementById('networkBadge').style.display = 'inline';
         document.getElementById('vaultPanel').style.display = 'block';
         connectWs();
         fetchMessages();
         loadSourceStatus();
+        loadMonitorTargets();
+        loadSettings();
         loadVoices();
         loadBatches();
       })
@@ -1062,7 +1851,50 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       }
     })
     .catch(function(){});
+  // ── Chat welcome on first open ──
+  var chatOpened = false;
+  window.toggleChat = (function(orig) {
+    return function() {
+      orig();
+      if (!chatOpened) {
+        chatOpened = true;
+        var log = document.getElementById('voiceAssistantLog');
+        log.innerHTML = '<div class="msg bot"><span>👋 tap 🎤 and speak. Try "what\'s happening?" or "check if CZ posted anything."</span></div>';
+      }
+    };
+  })(window.toggleChat);
 })();
 </script>
+
+<button id="chatToggle" onclick="toggleChat()" style="display:none;" title="talk to vigil">🎤</button>
+<div id="chatPanel">
+  <div id="chatHeader">
+    <span>// vigil voice</span>
+    <span class="close" onclick="toggleChat()">✕</span>
+  </div>
+  <div id="voiceMain">
+    <div id="waveformBig" class="idle">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <button id="bigMicBtn" onclick="toggleVoiceInput()" title="click and speak">🎤</button>
+    <div id="voiceStatusBig">tap the mic and speak a command</div>
+    <div id="voiceTranscript"></div>
+    <div id="voiceLog"></div>
+  </div>
+  <div id="voiceAssistant" style="display:flex;">
+    <div id="voiceAssistantLog"></div>
+    <div id="voiceAssistantInput">
+      <input type="text" id="chatInput" placeholder="type a command..." onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">send</button>
+    </div>
+  </div>
+  <div style="padding:4px 12px;border-top:1px solid var(--c-border);display:flex;justify-content:space-between;align-items:center;">
+    <label class="voice-toggle active" id="voiceReplyToggle" onclick="toggleVoiceReply()">
+      <span>🔊</span> <span>speak responses</span>
+    </label>
+    <span id="voiceStatus" style="font-size:0.6rem;color:var(--c-text-secondary);"></span>
+  </div>
+</div>
 </body>
 </html>

@@ -14,7 +14,8 @@ class Settings(BaseSettings):
     groq_api_key: str = ""
     groq_model: str = "llama-3.3-70b-versatile"
     openrouter_api_key: str = ""
-    openrouter_model: str = "openai/gpt-4o-mini"
+    openrouter_model: str = "meta-llama/llama-3.2-3b-instruct:free"
+    openrouter_base_url: str = "https://openrouter.ai/api/v1"
     importance_threshold: int = 6
     digest_interval_minutes: int = 30
     daily_report_time: str = "08:00"
