@@ -1,0 +1,202 @@
+# VIGIL — Complete Project Context for AI
+
+## What We Are Building
+
+Vigil is a cross-platform message monitoring and intelligence system that:
+
+- Monitors Telegram groups, X/Twitter profiles, Facebook pages, Gmail inbox, WhatsApp (via Chrome extension), and Discord
+- Classifies every message by importance using AI (Groq LLM scoring for relevance/priority)
+- Lets users ask an AI assistant questions about their monitored feeds ("check if CZ posted", "what did Vitalik say?")
+- AI assistant can live-search social media (X, Facebook, Reddit, Instagram) via Jina Reader and the web via Serper.dev (Google) and DuckDuckGo
+- Reads important messages aloud via TTS (edge-tts)
+- Stores critical messages on-chain via Monad (Memory Vault contract)
+- Live dashboard with WebSocket real-time alerts
+
+Target users: power-users in crypto/DeFi communities who monitor many channels and need AI-powered awareness without checking their phone constantly.
+
+---
+
+## Architecture
+
+```
+Browser ── Google OAuth | Email/Password | MetaMask ──> FastAPI Backend ──> SQLite DB
+                                                               │
+          ┌────────────────────────────────────────────────────┤
+          │                    │                               │
+          ▼                    ▼                               ▼
+   Telegram Bot API    Jina Reader (X, FB)            Monad Mainnet
+   Gmail OAuth 2.0     Serper.dev / DuckDuckGo        MemoryVault Contract
+   WhatsApp Extension  Groq AI (function calling)
+   Discord             Edge TTS
+                       WebSocket (real-time alerts)
+```
+
+**Deployment:** Railway (auto-deploy from GitHub), Dockerized with python:3.12-slim
+
+**Live URL:** https://vigil-monitor-production.up.railway.app/
+
+**Contract:** `0x39bb644Bb3f64C3e6909dD53C73Aad1993867B69` on Monad mainnet (chain 143, RPC `https://rpc.monad.xyz`)
+
+---
+
+## Current Codebase Structure
+
+```
+/backend/
+  __init__.py
+  main.py              — FastAPI app, lifespan, exception handler, health, TTS endpoints, WebSocket
+  config.py            — Pydantic Settings (all env vars)
+  database.py          — SQLAlchemy engine, session, init_db with auto-migration
+  models.py            — User, Group, Rule, Message, DigestQueue, MonitorTarget, SavedUrl, DailyReport
+  middleware.py        — SecurityHeadersMiddleware (CSP, HSTS, Permissions-Policy), RateLimitMiddleware
+  jina_service.py      — Jina Reader (URL/social fetch), Serper.dev (Google search), DuckDuckGo search fallback
+  tts.py               — Edge TTS engine
+
+  /routers/
+    auth.py            — Auth: email/password register+login, Google OAuth, wallet (EIP-191), JWT tokens
+    chat.py            — AI chat with Groq function calling (tools: search_social, search_web)
+    dashboard.py       — Dashboard brief, sources status
+    sources.py         — Source connections: Telegram sync, Gmail status, etc.
+    targets.py         — Monitor targets CRUD + Jina polling
+    messages.py        — Message listing
+    groups.py          — Group management
+    rules.py           — Alert rules CRUD
+    config_api.py      — Config: thresholds, group priority, rules
+    vault.py           — On-chain Memory Vault (Monad contract interactions)
+
+  /classifier/
+    llm_scorer.py      — Groq/OpenRouter message importance classifier
+
+  /watchers/
+    telegram_watcher.py — Telegram bot polling
+
+/index.html             — Single-page frontend (vanilla JS, ethers.js, Google Identity Services)
+
+/Dockerfile             — python:3.12-slim, uvicorn on port 8080
+```
+
+---
+
+## Authentication (3 Methods)
+
+1. **Email + Password** — `POST /api/auth/register`, `POST /api/auth/login`. Bcrypt hashing. JWT tokens (HS256, 72h expiry). Email validated with Pydantic EmailStr + email-validator.
+2. **Google OAuth** — `POST /api/auth/google`. Frontend uses Google Identity Services (GIS) to get ID token, backend verifies with google-auth library.
+3. **Wallet (EVM)** — `POST /api/auth/nonce` → user signs with MetaMask → `POST /api/auth/wallet-login`. EIP-191 personal_sign verification via web3.py eth_account.
+
+JWT is stored in frontend JS variable (in-memory), sent as `Authorization: Bearer <token>` header.
+
+---
+
+## Search & Tool Calling
+
+**search_social tool** (AI can call this when asked about social media):
+- Uses Jina Reader API (`r.jina.ai`) to fetch any public URL and return clean markdown content
+- Works with X/Twitter, Facebook, Instagram, Reddit, YouTube, any public webpage
+- Requires JINA_API_KEY (free at jina.ai, 500 RPM)
+- CRITICAL: Jina Reader is ONLY for fetching public URL content / social media profiles. It is NOT a search engine.
+
+**search_web tool** (AI calls this for general web searches):
+- Primary: Serper.dev API (Google search results, free 2,500/mo, requires SERPER_API_KEY)
+- Fallback: DuckDuckGo (unlimited, no API key needed)
+- Fallback 2: Jina Search (s.jina.ai, its own index — weakest results)
+
+---
+
+## Key Features Implemented
+
+- Voice-first chat interface with waveform animation
+- TTS with edge-tts (browser speechSynthesis fallback)
+- Live "Vigil Brief" dashboard widget (messages today/total/sources/priority)
+- Telegram group sync
+- Monitoring targets CRUD (X/Twitter, Facebook profiles)
+- Jina-based background polling for monitored targets
+- Saved URLs vault
+- WebSocket real-time alerts
+- Security headers (CSP, HSTS, X-Frame-Options, Permissions-Policy with mic=(self))
+- Rate limiting (60 req/min per IP)
+- On-chain attestation via Monad MemoryVault contract
+
+---
+
+## YOUR TASK — GLM5 / AI Code Improver
+
+You are a senior production engineer. Your job is to take this codebase and make it **genuinely production-grade** — the kind of app you would ship to paying customers. Everything below is what needs attention, but you should also find issues I haven't listed.
+
+### Critical Security Items
+
+1. **Rate limiting is per-IP, not per-user.** Change to per-user (JWT-based) limiting with different tiers (authenticated vs unauthenticated). Use a proper token bucket or sliding window.
+2. **No CSRF protection.** Add CSRF tokens or SameSite cookie checks for state-changing requests.
+3. **No account lockout.** Add exponential backoff on failed login attempts (store failed attempts per email in DB).
+4. **Password reset flow.** Add forgot-password / reset-password endpoints with time-limited tokens sent via email. Add SMTP config already exists in Settings stub.
+5. **Email verification.** The `email_verified` field exists but never gets used beyond Google auth. Send a verification email on registration.
+6. **API key rotation.** JWT_SECRET_KEY can't be rotated without invalidating all tokens. Add a key rotation mechanism or support multiple valid keys during rotation windows.
+7. **No refresh tokens.** JWTs are long-lived (72h). Add short-lived access tokens + refresh token rotation.
+8. **In-memory nonce store.** NONCES dict is process-local — crashes wipe all pending wallet nonces. Move to DB or Redis.
+9. **No session invalidation.** Logout doesn't invalidate the JWT. Add a blocklist or short expiry.
+10. **CSP allows 'unsafe-inline'.** That's a XSS gap. Move inline JS/CSS to external files or use a nonce/hash-based CSP.
+11. **No SQL injection protection currently** — verify all raw SQL in database.py migration uses proper escaping.
+12. **Google OAuth state parameter.** The Google login flow doesn't use a state parameter (CSRF for OAuth). Add it.
+
+### Architecture & Production Hardening
+
+1. **Replace SQLite with PostgreSQL.** Railway supports it natively. Add async SQLAlchemy with asyncpg.
+2. **Add Alembic for migrations.** The current auto-migration in database.py is fragile.
+3. **Conversation memory.** The chat endpoint only sends system context + last user message. Add a proper conversation history store (DB table with user_id, role, content, timestamp) with context window management.
+4. **Async all the way.** Convert synchronous DB calls to async (SQLAlchemy async). The wallet nonce checks, login, register are all sync blocking the event loop.
+5. **Proper error handling.** The global exception handler in main.py returns a generic 500 with no logging. Add structured logging (structlog or similar) with request IDs, user IDs, and error context. Don't leak internals in error responses.
+6. **Health checks.** Add readiness (DB connection, LLM API reachable) and liveness probes.
+7. **Graceful shutdown.** Handle SIGTERM properly (close DB connections, flush pending attestations).
+8. **Background task queue.** The Jina polling in targets.py runs synchronously in the request handler. Move to a proper task queue (Celery with Redis, or just asyncio background tasks with proper error handling).
+9. **Secrets management.** .env is committed to git (at least locally). Add .env.example, ensure .env is in .gitignore, and use Railway's native env vars.
+10. **Add CI/CD.** GitHub Actions for linting (ruff), type checking (mypy), and security scanning (bandit).
+
+### Code Quality
+
+1. **Add types everywhere.** Many functions lack return type annotations.
+2. **Extract settings validation.** Add a proper validation method on Settings that fails fast on missing required keys (JWT_SECRET_KEY, etc.).
+3. **Add tests.** Unit tests for auth, models, search service. Integration tests for API endpoints using TestClient with an in-memory DB. At minimum: auth register/login/wallet flow, chat tool calling, Jina service error handling.
+4. **Remove unused dependencies.** celery, redis, discord.py are in requirements.txt but barely used.
+5. **Configurable CORS origins.** Currently allows `*`. Lock to the actual frontend domain.
+6. **Add proper API docs.** Not just auto-generated Swagger — add descriptions to endpoints, models, and error responses.
+7. **Standardize error response format.** Currently some endpoints return `{"error": "..."}`, others return `{"detail": "..."}`. Pick one format (RFC 7807 Problem Details) and use consistently.
+
+### Performance
+
+1. **Add response caching.** The brief endpoint, source status, and targets list don't change second-to-second. Add ETag or Cache-Control headers, or server-side caching with configurable TTL.
+2. **Database indexing.** Verify all query patterns have proper indexes (user_id foreign keys, message timestamps, group lookups).
+3. **Connection pooling.** SQLAlchemy engine already pools but verify pool_size and overflow settings are appropriate for Railway's container limits.
+4. **Static file serving.** The Dockerfile copies everything but there's no CDN or cache busting for index.html.
+
+### Missing Features (if time permits)
+
+1. **Multi-user workspaces.** Currently user context is per-session but all monitor targets are hardcoded to user_id=1 in many places. Make truly multi-tenant.
+2. **Admin panel.** Basic user management, API usage stats.
+3. **Webhook notifications.** Let users configure custom webhooks (Discord, Slack, custom) for high-priority alerts instead of only in-app.
+4. **Email digest.** Sends a periodic summary of important messages via email (SMTP config exists but unused).
+
+### IMPORTANT NOTES
+
+- Jina Reader API (`r.jina.ai`) is ONLY for fetching public URL content / social media profiles. It is NOT a search engine. It requires JINA_API_KEY now (anonymous access is blocked for most domains).
+- For web search (Google results), use Serper.dev API as primary and DuckDuckGo as fallback.
+- The app runs on Railway at port 8080 with uvicorn.
+- Database is SQLite locally (will need PostgreSQL for production on Railway).
+- The frontend is a single index.html file with vanilla JS, ethers.js, and Google Identity Services.
+
+---
+
+## Environment Variables Needed
+
+```
+JWT_SECRET_KEY           — Required. Used for signing JWT tokens.
+DATABASE_URL             — SQLite or PostgreSQL connection string.
+GROQ_API_KEY             — For AI chat and message classification.
+JINA_API_KEY             — For Jina Reader social media fetching.
+SERPER_API_KEY           — For Google search results via Serper.dev.
+GOOGLE_OAUTH_CLIENT_ID   — For Google Sign-In (from Google Cloud Console).
+GOOGLE_OAUTH_CLIENT_SECRET — For Google Sign-In.
+TELEGRAM_BOT_TOKEN       — For Telegram bot integration.
+CONTRACT_ADDRESS         — Monad MemoryVault contract address.
+WALLET_PRIVATE_KEY       — For on-chain attestation.
+MONAD_RPC_URL            — Monad mainnet RPC.
+OPENROUTER_API_KEY       — Fallback LLM if Groq fails.
+```
