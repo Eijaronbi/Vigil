@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     wallet_private_key: str = ""
     auth_password: str = "vigil"
     jina_api_key: str = ""
+    serper_api_key: str = ""
 
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
