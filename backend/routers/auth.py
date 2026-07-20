@@ -303,6 +303,36 @@ def connect_wallet(
     return {"ok": True, "wallet_address": address}
 
 
+# ── Admin (master password login — no Google OAuth needed) ──
+
+
+@router.post("/admin-login", response_model=AuthResponse)
+def admin_login(db: Session = Depends(get_db)):
+    password = settings.auth_password
+    if not password:
+        raise HTTPException(status_code=503, detail="Admin password not configured")
+
+    user = db.query(User).filter(User.id == 1).first()
+    if not user:
+        user = User(
+            id=1,
+            name="admin",
+            email="admin@vigil.local",
+            password_hash=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+            auth_method="password",
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        if not user.password_hash or not bcrypt.checkpw(password.encode(), user.password_hash.encode()):
+            user.password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+            db.commit()
+
+    token = _make_jwt(user.id)
+    return AuthResponse(token=token, user=_user_to_dict(user))
+
+
 # ── Config ──
 
 

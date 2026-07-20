@@ -411,8 +411,9 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="line"><input type="password" id="loginPassword" value="" placeholder="min 8 characters" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
 <div class="line" style="margin-top:10px;display:flex;gap:8px;">
   <button class="btn-primary" onclick="emailLogin()" style="flex:1;">sign in →</button>
-  <button class="btn-secondary" onclick="emailRegister()" style="flex:1;">create account</button>
+  <button class="btn-secondary" onclick="emailRegister()" style="flex:1;">register</button>
 </div>
+<div style="margin-top:6px;"><a href="#" onclick="adminLogin();return false;" style="color:var(--c-text-secondary);font-size:0.65rem;font-family:var(--ff-mono);">admin login (master password)</a></div>
 </div>
 
 <div id="authTabGoogle" class="auth-panel" style="display:none;">
@@ -874,6 +875,21 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   document.getElementById('loginEmail').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') emailLogin();
   });
+
+  window.adminLogin = function() {
+    var err = document.getElementById('loginError');
+    err.style.display = 'none';
+    fetch(API + '/api/auth/admin-login', {method: 'POST'})
+      .then(function(r){
+        if (!r.ok) throw Error('Admin login failed');
+        return r.json();
+      })
+      .then(onLoginSuccess)
+      .catch(function(e){
+        err.textContent = e.message;
+        err.style.display = 'block';
+      });
+  };
 
   window.emailLogin = function() {
     var email = document.getElementById('loginEmail').value.trim();
