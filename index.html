@@ -399,13 +399,19 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="line" style="text-align:center;margin-bottom:16px;"><span class="highlight">// vigil session login</span></div>
 
 <div class="auth-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--c-border);">
+  <button class="auth-tab" data-tab="wallet" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">wallet</button>
   <button class="auth-tab active" data-tab="email" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid var(--c-accent);color:var(--c-accent);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">email</button>
   <button class="auth-tab" data-tab="google" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">google</button>
-  <button class="auth-tab" data-tab="wallet" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">wallet</button>
   <button class="auth-tab" data-tab="admin" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">admin</button>
 </div>
 
-<div id="authTabEmail" class="auth-panel">
+<div id="authTabWallet" class="auth-panel">
+<div class="line" style="text-align:center;padding:16px 0;">
+  <button class="btn-primary" id="walletConnectBtn" onclick="connectWallet()">⧄ connect wallet</button>
+</div>
+</div>
+
+<div id="authTabEmail" class="auth-panel" style="display:none;">
 <div class="line"><span class="prompt">email</span></div>
 <div class="line"><input type="email" id="loginEmail" value="" placeholder="you@example.com" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
 <div class="line" style="margin-top:8px;"><span class="prompt">password</span></div>
