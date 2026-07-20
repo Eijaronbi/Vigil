@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Group, User
 from backend.schemas import GroupIn, GroupOut
+from backend.routers.auth import verify_token
 
-router = APIRouter(prefix="/api/groups", tags=["groups"])
+router = APIRouter(prefix="/api/groups", tags=["groups"], dependencies=[Depends(verify_token)])
 
 
 class GroupPatch(BaseModel):

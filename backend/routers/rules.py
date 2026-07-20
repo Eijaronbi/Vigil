@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from backend.database import get_db
 from backend.models import Rule
 from backend.schemas import RuleIn
+from backend.routers.auth import verify_token
 
-router = APIRouter(prefix="/api/rules", tags=["rules"])
+router = APIRouter(prefix="/api/rules", tags=["rules"], dependencies=[Depends(verify_token)])
 
 
 @router.post("")

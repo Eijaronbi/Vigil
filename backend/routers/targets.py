@@ -9,8 +9,9 @@ from sqlalchemy.orm import Session
 
 from backend.database import get_db
 from backend.models import MonitorTarget, SavedUrl
+from backend.routers.auth import verify_token
 
-router = APIRouter(prefix="/api/targets", tags=["targets"])
+router = APIRouter(prefix="/api/targets", tags=["targets"], dependencies=[Depends(verify_token)])
 
 
 class AddTargetRequest(BaseModel):

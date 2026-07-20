@@ -5,8 +5,9 @@ from sqlalchemy.orm import Session
 from backend.config import settings
 from backend.database import get_db
 from backend.models import Group, Rule
+from backend.routers.auth import verify_token
 
-router = APIRouter(prefix="/api/config", tags=["config"])
+router = APIRouter(prefix="/api/config", tags=["config"], dependencies=[Depends(verify_token)])
 
 
 class ThresholdUpdate(BaseModel):

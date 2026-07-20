@@ -9,6 +9,7 @@ from backend.classifier.llm_scorer import LLMScorer
 from backend.config import settings
 from backend.database import get_db
 from backend.models import Message, MonitorTarget
+from backend.routers.auth import verify_token
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
 
@@ -75,7 +76,7 @@ SYSTEM_PROMPT = (
 
 
 @router.post("")
-async def chat(body: ChatRequest, db: Session = Depends(get_db)):
+async def chat(body: ChatRequest, db: Session = Depends(get_db), _=Depends(verify_token)):
     context = _build_context(db)
     scorer = _get_scorer()
 
