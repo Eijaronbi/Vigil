@@ -402,6 +402,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   <button class="auth-tab active" data-tab="email" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid var(--c-accent);color:var(--c-accent);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">email</button>
   <button class="auth-tab" data-tab="google" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">google</button>
   <button class="auth-tab" data-tab="wallet" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">wallet</button>
+  <button class="auth-tab" data-tab="admin" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">admin</button>
 </div>
 
 <div id="authTabEmail" class="auth-panel">
@@ -413,7 +414,6 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   <button class="btn-primary" onclick="emailLogin()" style="flex:1;">sign in →</button>
   <button class="btn-secondary" onclick="emailRegister()" style="flex:1;">register</button>
 </div>
-<div style="margin-top:6px;"><a href="#" onclick="adminLogin();return false;" style="color:var(--c-text-secondary);font-size:0.65rem;font-family:var(--ff-mono);">admin login (master password)</a></div>
 </div>
 
 <div id="authTabGoogle" class="auth-panel" style="display:none;">
@@ -426,6 +426,14 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div id="authTabWallet" class="auth-panel" style="display:none;">
 <div class="line" style="text-align:center;padding:16px 0;">
   <button class="btn-primary" id="walletConnectBtn" onclick="connectWallet()">⧄ connect wallet</button>
+</div>
+</div>
+
+<div id="authTabAdmin" class="auth-panel" style="display:none;">
+<div class="line"><span class="prompt">master password</span></div>
+<div class="line"><input type="password" id="adminPassword" placeholder="enter master password" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:10px;">
+  <button class="btn-primary" onclick="adminLogin()" style="width:100%;">authenticate →</button>
 </div>
 </div>
 
@@ -878,13 +886,22 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
   window.adminLogin = function() {
     var err = document.getElementById('loginError');
+    var pass = document.getElementById('adminPassword').value;
+    if (!pass) return;
     err.style.display = 'none';
-    fetch(API + '/api/auth/admin-login', {method: 'POST'})
+    fetch(API + '/api/auth/admin-login', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({password: pass}),
+    })
       .then(function(r){
         if (!r.ok) throw Error('Admin login failed');
         return r.json();
       })
-      .then(onLoginSuccess)
+      .then(function(d){
+        onLoginSuccess(d);
+        document.getElementById('adminPassword').value = '';
+      })
       .catch(function(e){
         err.textContent = e.message;
         err.style.display = 'block';

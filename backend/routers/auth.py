@@ -307,10 +307,15 @@ def connect_wallet(
 
 
 @router.post("/admin-login", response_model=AuthResponse)
-def admin_login(db: Session = Depends(get_db)):
-    password = settings.auth_password
-    if not password:
+def admin_login(body: dict, db: Session = Depends(get_db)):
+    master = settings.auth_password
+    if not master:
         raise HTTPException(status_code=503, detail="Admin password not configured")
+
+    import hmac
+    provided = body.get("password", "")
+    if not provided or not hmac.compare_digest(provided.encode(), master.encode()):
+        raise HTTPException(status_code=401, detail="Invalid admin password")
 
     user = db.query(User).filter(User.id == 1).first()
     if not user:
@@ -318,15 +323,15 @@ def admin_login(db: Session = Depends(get_db)):
             id=1,
             name="admin",
             email="admin@vigil.local",
-            password_hash=bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+            password_hash=bcrypt.hashpw(master.encode(), bcrypt.gensalt()).decode(),
             auth_method="password",
         )
         db.add(user)
         db.commit()
         db.refresh(user)
     else:
-        if not user.password_hash or not bcrypt.checkpw(password.encode(), user.password_hash.encode()):
-            user.password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
+        if not user.password_hash or not bcrypt.checkpw(master.encode(), user.password_hash.encode()):
+            user.password_hash = bcrypt.hashpw(master.encode(), bcrypt.gensalt()).decode()
             db.commit()
 
     token = _make_jwt(user.id)
