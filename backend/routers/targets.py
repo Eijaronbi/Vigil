@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.database import get_db
+from backend.jina_service import fetch_url
 from backend.models import MonitorTarget, SavedUrl
 from backend.routers.auth import verify_token
 
@@ -189,17 +190,14 @@ async def poll_targets(db: Session = Depends(get_db)):
 
 async def _fetch_target_posts(target: MonitorTarget) -> list[dict]:
     if target.source == "twitter":
-        url = f"https://r.jina.ai/https://x.com/{target.target_id}"
+        content = await fetch_url(f"https://x.com/{target.target_id}")
     elif target.source == "facebook":
-        url = f"https://r.jina.ai/https://facebook.com/{target.target_id}"
+        content = await fetch_url(f"https://facebook.com/{target.target_id}")
     else:
         return []
 
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.get(url, headers={"Accept": "text/plain", "X-Return-Format": "markdown"})
-        if resp.status_code != 200:
-            return []
-        content = resp.text
+    if not content:
+        return []
 
     if target.last_post_text and target.last_post_text in content:
         return []

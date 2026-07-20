@@ -4,34 +4,76 @@ import httpx
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-
-from backend.classifier.llm_scorer import LLMScorer
 from backend.config import settings
 from backend.database import get_db
+from backend.jina_service import fetch_url, search_web
 from backend.models import Message, MonitorTarget
-from backend.routers.auth import verify_token
+from backend.routers.auth import get_current_user, User
 
 router = APIRouter(prefix="/api/chat", tags=["chat"])
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_social",
+            "description": "Fetch the latest public posts from any social media profile or public page. Works with X/Twitter, Facebook, Instagram, Reddit, YouTube, and any public URL.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "url": {
+                        "type": "string",
+                        "description": "Full profile URL to fetch (e.g., https://x.com/cz_binance, https://facebook.com/username, https://reddit.com/r/subreddit)",
+                    }
+                },
+                "required": ["url"],
+            },
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_web",
+            "description": "Search the web for current information about any topic, person, news, or event.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "The search query string",
+                    }
+                },
+                "required": ["query"],
+            },
+        }
+    },
+]
+
+
+TOOL_IMPLEMENTATIONS = {
+    "search_social": fetch_url,
+    "search_web": search_web,
+}
+
+
+SYSTEM_PROMPT = (
+    "You are Vigil's AI assistant inside a cross-platform message monitor. "
+    "The user has connected Telegram, X/Twitter, Facebook, and other sources. "
+    "You have tools to fetch live data from social media and search the web — use them when asked about current posts, news, or specific people. "
+    "When you use a tool, incorporate the result into your answer naturally. "
+    "Be concise. If there's no relevant data, say so honestly."
+)
 
 
 class ChatRequest(BaseModel):
     message: str
 
 
-def _get_scorer():
-    if settings.groq_api_key:
-        return LLMScorer(
-            api_key=settings.groq_api_key,
-            model="llama-3.3-70b-versatile",
-        )
-    return LLMScorer(
-        api_key=settings.openrouter_api_key,
-        model=settings.openrouter_model or "meta-llama/llama-3.2-3b-instruct:free",
-        base_url=settings.openrouter_base_url,
-    )
+class ChatResponse(BaseModel):
+    response: str
 
 
-def _build_context(db: Session) -> str:
+def _build_context(db: Session, user_id: int) -> str:
     parts = []
 
     recent = (
@@ -51,7 +93,7 @@ def _build_context(db: Session) -> str:
 
     targets = (
         db.query(MonitorTarget)
-        .filter(MonitorTarget.user_id == 1)
+        .filter(MonitorTarget.user_id == user_id)
         .all()
     )
     if targets:
@@ -63,44 +105,120 @@ def _build_context(db: Session) -> str:
     return "\n".join(parts)
 
 
-SYSTEM_PROMPT = (
-    "You are Vigil's AI assistant inside a cross-platform message monitor."
-    " The user has connected Telegram, X/Twitter, Facebook, and other sources."
-    " Below is their recent message feed and monitoring targets."
-    " Answer questions about what's happening, who posted what,"
-    " and help them track important messages and job opportunities."
-    " Be concise. If asked about a specific person or topic,"
-    " check the message feed for relevant content."
-    " If there's no relevant data, say so honestly."
-)
+def _get_llm_config():
+    if settings.groq_api_key:
+        return {
+            "api_key": settings.groq_api_key,
+            "model": settings.groq_model or "llama-3.3-70b-versatile",
+            "base_url": "https://api.groq.com/openai/v1",
+        }
+    return {
+        "api_key": settings.openrouter_api_key,
+        "model": settings.openrouter_model or "meta-llama/llama-3.2-3b-instruct:free",
+        "base_url": settings.openrouter_base_url,
+    }
 
 
-@router.post("")
-async def chat(body: ChatRequest, db: Session = Depends(get_db), _=Depends(verify_token)):
-    context = _build_context(db)
-    scorer = _get_scorer()
+async def _call_llm(
+    messages: list[dict],
+    tools: list | None = None,
+    tool_choice: str | None = None,
+) -> dict:
+    cfg = _get_llm_config()
+    body = {"model": cfg["model"], "messages": messages}
+    if tools:
+        body["tools"] = tools
+    if tool_choice:
+        body["tool_choice"] = tool_choice
 
     async with httpx.AsyncClient() as client:
-        response = await client.post(
-            scorer.api_url,
+        resp = await client.post(
+            f"{cfg['base_url'].rstrip('/')}/chat/completions",
             headers={
-                "Authorization": f"Bearer {scorer.api_key}",
+                "Authorization": f"Bearer {cfg['api_key']}",
                 "Content-Type": "application/json",
             },
-            json={
-                "model": scorer.model,
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "system", "content": f"Current data:\n{context}"},
-                    {"role": "user", "content": body.message},
-                ],
-            },
+            json=body,
             timeout=60,
         )
+    if resp.status_code != 200:
+        return {"error": f"LLM returned {resp.status_code}"}
+    return resp.json()
 
-    if response.status_code != 200:
-        return {"response": "AI is unavailable right now. Try again later."}
 
-    data = response.json()
-    content = data["choices"][0]["message"]["content"]
-    return {"response": content}
+async def _execute_tool(name: str, args: dict) -> str:
+    impl = TOOL_IMPLEMENTATIONS.get(name)
+    if not impl:
+        return f"Error: unknown tool '{name}'"
+
+    try:
+        if name == "search_social":
+            url = args.get("url", "")
+            if not url:
+                return "Error: missing 'url' argument"
+            result = await impl(url)
+            return result or "No content could be fetched from that URL."
+        elif name == "search_web":
+            query = args.get("query", "")
+            if not query:
+                return "Error: missing 'query' argument"
+            results = await impl(query)
+            if not results:
+                return "No search results found."
+            formatted = []
+            for r in results[:5]:
+                formatted.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content'][:300]}")
+            return "\n\n---\n\n".join(formatted)
+        else:
+            return "Tool result unavailable."
+    except Exception as e:
+        return f"Error executing tool '{name}': {e}"
+
+
+@router.post("", response_model=ChatResponse)
+async def chat(
+    body: ChatRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    context = _build_context(db, current_user.id)
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "system", "content": f"Current data:\n{context}"},
+        {"role": "user", "content": body.message},
+    ]
+
+    result = await _call_llm(messages, tools=TOOLS)
+
+    if "error" in result:
+        return ChatResponse(response="AI is unavailable right now. Try again later.")
+
+    choice = result["choices"][0]
+    message = choice["message"]
+
+    if message.get("tool_calls"):
+        messages.append({
+            "role": "assistant",
+            "content": message.get("content") or "",
+            "tool_calls": message["tool_calls"],
+        })
+
+        for tc in message["tool_calls"]:
+            fn = tc["function"]
+            name = fn["name"]
+            args = json.loads(fn["arguments"])
+            tool_result = await _execute_tool(name, args)
+            messages.append({
+                "role": "tool",
+                "tool_call_id": tc["id"],
+                "content": tool_result,
+            })
+
+        final = await _call_llm(messages)
+        if "error" in final:
+            return ChatResponse(response=tool_result[:1000])
+        content = final["choices"][0]["message"]["content"]
+        return ChatResponse(response=content)
+
+    return ChatResponse(response=message.get("content", ""))

@@ -20,12 +20,25 @@ class Settings(BaseSettings):
     digest_interval_minutes: int = 30
     daily_report_time: str = "08:00"
     ws_port: int = 8765
-    monad_rpc_url: str = "https://testnet-rpc.monad.xyz"
-    monad_explorer_url: str = "https://testnet.monadexplorer.com"
-    monad_chain_id: int = 10143
+    monad_rpc_url: str = "https://mainnet-rpc.monad.xyz"
+    monad_explorer_url: str = "https://monadscan.com"
+    monad_chain_id: int = 143
     contract_address: str = ""
     wallet_private_key: str = ""
     auth_password: str = "vigil"
+    jina_api_key: str = ""
+
+    google_oauth_client_id: str = ""
+    google_oauth_client_secret: str = ""
+    jwt_secret_key: str = ""
+    jwt_algorithm: str = "HS256"
+    jwt_expire_hours: int = 72
+
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = "noreply@vigil-monitor.app"
 
     model_config = {"env_file": HERE / ".env", "env_file_encoding": "utf-8", "extra": "ignore"}
 

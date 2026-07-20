@@ -22,13 +22,13 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         if "text/html" in (response.headers.get("content-type", "")):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline' https:; "
+                "script-src 'self' 'unsafe-inline' https: https://accounts.google.com https://apis.google.com; "
                 "style-src 'self' 'unsafe-inline' https:; "
                 "img-src 'self' data: blob: https:; "
                 "font-src 'self' data: https:; "
-                "connect-src 'self' https: wss:; "
+                "connect-src 'self' https: wss: https://accounts.google.com; "
                 "media-src 'self' blob: data: https:; "
-                "frame-src 'self'; "
+                "frame-src 'self' https://accounts.google.com; "
                 "object-src 'none'; "
                 "base-uri 'self'"
             )

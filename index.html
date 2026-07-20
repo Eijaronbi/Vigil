@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.5/ethers.umd.min.js"></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 :root {
   --c-bg: #0A0A0A;
@@ -396,14 +397,38 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div id="loginPanel">
 <div class="terminal-block" style="max-width:400px;margin:0 auto;">
 <div class="line" style="text-align:center;margin-bottom:16px;"><span class="highlight">// vigil session login</span></div>
-<div class="line" style="text-align:center;margin-bottom:12px;font-size:0.75rem;color:var(--c-text-secondary);">connect wallet or use password</div>
-<div class="line" style="text-align:center;margin-bottom:16px;"><button class="btn-primary" id="walletConnectBtn" onclick="connectWallet()">⧄ connect wallet</button></div>
-<div class="line" style="border-top:1px solid var(--c-border);padding-top:12px;margin-bottom:8px;text-align:center;font-size:0.65rem;color:var(--c-text-secondary);">or password login</div>
-<div class="line"><span class="prompt">password</span></div>
-<div class="line"><input type="password" id="upass" value="vigil" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
-<div class="line" style="margin-top:8px;text-align:center;"><button class="btn-primary" onclick="login()">connect →</button></div>
+
+<div class="auth-tabs" style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--c-border);">
+  <button class="auth-tab active" data-tab="email" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid var(--c-accent);color:var(--c-accent);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">email</button>
+  <button class="auth-tab" data-tab="google" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">google</button>
+  <button class="auth-tab" data-tab="wallet" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">wallet</button>
+</div>
+
+<div id="authTabEmail" class="auth-panel">
+<div class="line"><span class="prompt">email</span></div>
+<div class="line"><input type="email" id="loginEmail" value="" placeholder="you@example.com" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:8px;"><span class="prompt">password</span></div>
+<div class="line"><input type="password" id="loginPassword" value="" placeholder="min 8 characters" style="width:100%;padding:8px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>
+<div class="line" style="margin-top:10px;display:flex;gap:8px;">
+  <button class="btn-primary" onclick="emailLogin()" style="flex:1;">sign in →</button>
+  <button class="btn-secondary" onclick="emailRegister()" style="flex:1;">create account</button>
+</div>
+</div>
+
+<div id="authTabGoogle" class="auth-panel" style="display:none;">
+<div class="line" style="text-align:center;padding:16px 0;">
+  <div id="g_id_onload" style="display:inline-block;"></div>
+  <button class="btn-primary" id="googleSignInBtn" onclick="initGoogleSignIn()" style="width:100%;justify-content:center;">▣ sign in with google</button>
+</div>
+</div>
+
+<div id="authTabWallet" class="auth-panel" style="display:none;">
+<div class="line" style="text-align:center;padding:16px 0;">
+  <button class="btn-primary" id="walletConnectBtn" onclick="connectWallet()">⧄ connect wallet</button>
+</div>
+</div>
+
 <div class="line" id="loginError" style="margin-top:8px;text-align:center;font-size:0.7rem;color:var(--c-error);display:none;"></div>
-<div class="line" id="walletLoginError" style="margin-top:4px;text-align:center;font-size:0.7rem;color:var(--c-error);display:none;"></div>
 </div>
 </div>
 
@@ -778,44 +803,119 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   };
 
   // ── Auth ──
-  window.login = function() {
-    var pass = document.getElementById('upass').value;
-    if (!pass) return;
-    var btn = document.querySelector('#loginPanel .btn-primary');
+  var GOOGLE_CLIENT_ID = '';
+
+  fetch(API + '/api/auth/config').then(function(r){ return r.json(); }).then(function(d){
+    GOOGLE_CLIENT_ID = d.google_oauth_client_id || '';
+    if (GOOGLE_CLIENT_ID && window.google && window.google.accounts) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: function(response) {
+          if (response.credential) {
+            authFetch(API + '/api/auth/google', {id_token: response.credential})
+              .then(onLoginSuccess)
+              .catch(function(e){
+                var err = document.getElementById('loginError');
+                err.textContent = 'Google sign-in failed: ' + e.message;
+                err.style.display = 'block';
+              });
+          }
+        }
+      });
+    }
+  }).catch(function(){});
+
+  function authHeaders() {
+    return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
+  }
+
+  function onLoginSuccess(data) {
+    TOKEN = data.token;
+    var user = data.user || {};
+    document.getElementById('loginPanel').style.display = 'none';
+    document.getElementById('sessionPanel').classList.add('active');
+    document.getElementById('chatToggle').style.display = 'flex';
+    document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
+    document.getElementById('sessionUser').textContent = user.name || user.email || 'authenticated';
+    if (user.wallet_address) {
+      var addr = user.wallet_address;
+      document.getElementById('sessionWallet').textContent = ' — ' + addr.substring(0,6) + '...' + addr.substring(38);
+      document.getElementById('networkBadge').style.display = 'inline';
+      document.getElementById('vaultPanel').style.display = 'block';
+    } else {
+      document.getElementById('sessionWallet').textContent = ' — ' + user.email;
+    }
+    connectWs();
+    fetchMessages();
+    loadSourceStatus();
+    loadMonitorTargets();
+    loadSettings();
+    loadVoices();
+    loadBrief();
+    checkVoiceSupport();
+  }
+
+  function authFetch(url, body) {
     var err = document.getElementById('loginError');
-    btn.textContent = 'connecting...';
-    btn.disabled = true;
     err.style.display = 'none';
-    fetch(API + '/api/auth/login', {
+    return fetch(url, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({password: pass})
-    })
-    .then(function(r){
-      if (!r.ok) throw Error('Bad password');
+      body: JSON.stringify(body)
+    }).then(function(r){
+      if (!r.ok) return r.json().then(function(e){ throw Error(e.detail || 'request failed'); });
       return r.json();
-    })
-    .then(function(data){
-      TOKEN = data.token;
-      document.getElementById('loginPanel').style.display = 'none';
-      document.getElementById('sessionPanel').classList.add('active');
-      document.getElementById('chatToggle').style.display = 'flex';
-      document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
-      connectWs();
-      fetchMessages();
-      loadSourceStatus();
-      loadMonitorTargets();
-      loadSettings();
-      loadVoices();
-      loadBrief();
-      checkVoiceSupport();
-    })
-    .catch(function(){
-      btn.textContent = 'connect →';
-      btn.disabled = false;
-      err.textContent = 'invalid password. default: vigil';
-      err.style.display = 'block';
     });
+  }
+
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') emailLogin();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') emailLogin();
+  });
+
+  window.emailLogin = function() {
+    var email = document.getElementById('loginEmail').value.trim();
+    var pass = document.getElementById('loginPassword').value;
+    if (!email || !pass) return;
+    var btn = document.querySelector('#authTabEmail .btn-primary');
+    btn.textContent = 'connecting...';
+    btn.disabled = true;
+    authFetch(API + '/api/auth/login', {email: email, password: pass})
+      .then(onLoginSuccess)
+      .catch(function(e){
+        btn.textContent = 'sign in →';
+        btn.disabled = false;
+        var err = document.getElementById('loginError');
+        err.textContent = e.message;
+        err.style.display = 'block';
+      });
+  };
+
+  window.emailRegister = function() {
+    var email = document.getElementById('loginEmail').value.trim();
+    var pass = document.getElementById('loginPassword').value;
+    var name = email.split('@')[0];
+    if (!email || !pass) return;
+    if (pass.length < 8) {
+      var err = document.getElementById('loginError');
+      err.textContent = 'password must be at least 8 characters';
+      err.style.display = 'block';
+      return;
+    }
+    var btn = document.querySelector('#authTabEmail .btn-secondary');
+    btn.textContent = 'creating...';
+    btn.disabled = true;
+    authFetch(API + '/api/auth/register', {name: name, email: email, password: pass})
+      .then(onLoginSuccess)
+      .catch(function(e){
+        btn.textContent = 'create account';
+        btn.disabled = false;
+        var err = document.getElementById('loginError');
+        err.textContent = e.message;
+        err.style.display = 'block';
+      });
   };
 
   window.logout = function() {
@@ -823,18 +923,57 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       fetch(API + '/api/auth/logout', {method: 'POST', headers: {'Authorization': 'Bearer ' + TOKEN}});
     }
     TOKEN = null;
+    WALLET_ADDRESS = null;
     disconnectWs();
     document.getElementById('sessionPanel').classList.remove('active');
     document.getElementById('loginPanel').style.display = 'block';
     document.getElementById('chatToggle').style.display = 'none';
     document.getElementById('chatPanel').style.display = 'none';
     document.getElementById('chatToggle').className = '';
+    document.getElementById('vaultPanel').style.display = 'none';
+    document.getElementById('networkBadge').style.display = 'none';
     document.getElementById('msgList').innerHTML = '<div class="msg-row header"><span>source</span><span>sender</span><span>message</span><span>score</span></div>\n<div class="msg-row" style="color:var(--c-text-secondary);font-style:italic;"><span colspan="4">— disconnected —</span></div>';
   };
 
-  function authHeaders() {
-    return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
-  }
+  // ── Auth tabs ──
+  document.querySelectorAll('.auth-tab').forEach(function(tab){
+    tab.addEventListener('click', function(){
+      document.querySelectorAll('.auth-tab').forEach(function(t){
+        t.style.color = 'var(--c-text-secondary)';
+        t.style.borderBottomColor = 'transparent';
+        t.classList.remove('active');
+      });
+      this.style.color = 'var(--c-accent)';
+      this.style.borderBottomColor = 'var(--c-accent)';
+      this.classList.add('active');
+      document.querySelectorAll('.auth-panel').forEach(function(p){ p.style.display = 'none'; });
+      document.getElementById('authTab' + this.dataset.tab.charAt(0).toUpperCase() + this.dataset.tab.slice(1)).style.display = 'block';
+      document.getElementById('loginError').style.display = 'none';
+    });
+  });
+
+  // ── Google Sign-In ──
+  window.initGoogleSignIn = function() {
+    if (!GOOGLE_CLIENT_ID) {
+      var err = document.getElementById('loginError');
+      err.textContent = 'Google OAuth not configured. Add GOOGLE_OAUTH_CLIENT_ID to .env';
+      err.style.display = 'block';
+      return;
+    }
+    if (typeof google === 'undefined' || !google.accounts) {
+      var err = document.getElementById('loginError');
+      err.textContent = 'Google Identity Services not loaded. Check internet connection.';
+      err.style.display = 'block';
+      return;
+    }
+    var btn = document.getElementById('googleSignInBtn');
+    btn.textContent = 'opening Google...';
+    btn.disabled = true;
+    google.accounts.id.prompt(function(){
+      btn.textContent = '▣ sign in with google';
+      btn.disabled = false;
+    });
+  };
 
   // ── Vigil Brief ──
   function loadBrief() {
@@ -1696,14 +1835,15 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   var WALLET_SIGNER = null;
 
   window.connectWallet = function() {
+    var err = document.getElementById('loginError');
     if (!window.ethers) {
-      document.getElementById('walletLoginError').textContent = 'ethers.js not loaded';
-      document.getElementById('walletLoginError').style.display = 'block';
+      err.textContent = 'ethers.js not loaded';
+      err.style.display = 'block';
       return;
     }
     if (!window.ethereum) {
-      document.getElementById('walletLoginError').textContent = 'no wallet detected (install MetaMask)';
-      document.getElementById('walletLoginError').style.display = 'block';
+      err.textContent = 'no wallet detected (install MetaMask)';
+      err.style.display = 'block';
       return;
     }
     var btn = document.getElementById('walletConnectBtn');
@@ -1744,27 +1884,15 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         return r.json();
       })
       .then(function(data) {
-        TOKEN = data.token;
-        document.getElementById('loginPanel').style.display = 'none';
-        document.getElementById('sessionPanel').classList.add('active');
-        document.getElementById('chatToggle').style.display = 'flex';
-        document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
-        document.getElementById('sessionWallet').textContent = ' — ' + WALLET_ADDRESS.substring(0,6) + '...' + WALLET_ADDRESS.substring(38);
-        document.getElementById('networkBadge').style.display = 'inline';
-        document.getElementById('vaultPanel').style.display = 'block';
-        connectWs();
-        fetchMessages();
-        loadSourceStatus();
-        loadMonitorTargets();
-        loadSettings();
-        loadVoices();
+        onLoginSuccess(data);
         loadBatches();
       })
       .catch(function(e) {
         btn.textContent = '⧄ connect wallet';
         btn.disabled = false;
-        document.getElementById('walletLoginError').textContent = 'wallet connection failed: ' + e.message;
-        document.getElementById('walletLoginError').style.display = 'block';
+        var err = document.getElementById('loginError');
+        err.textContent = 'wallet connection failed: ' + e.message;
+        err.style.display = 'block';
       });
   };
 
