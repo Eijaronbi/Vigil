@@ -4,11 +4,9 @@ from backend.config import settings
 
 JINA_READER_URL = "https://r.jina.ai"
 JINA_SEARCH_URL = "https://s.jina.ai"
+JINA_DEEPSEARCH_URL = "https://deepsearch.jina.ai/v1/chat/completions"
 SERPER_URL = "https://google.serper.dev/search"
-TIMEOUT = 30
-
-
-# ── Jina Reader (social media / URL content fetch) ──
+TIMEOUT = 60
 
 
 def _jina_headers() -> dict:
@@ -18,12 +16,14 @@ def _jina_headers() -> dict:
     return headers
 
 
+# ── Jina Reader (fetch any public URL as clean text) ──
+
+
 async def fetch_url(url: str) -> str | None:
-    full_url = f"{JINA_READER_URL}/{url}"
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
-                full_url,
+                f"{JINA_READER_URL}/{url}",
                 headers=_jina_headers(),
                 json={"url": url},
             )
@@ -36,10 +36,41 @@ async def fetch_url(url: str) -> str | None:
         return None
 
 
-# ── Web Search (Serper → DuckDuckGo → Jina) ──
+# ── Web Search (Jina DeepSearch → Serper → DuckDuckGo → Jina Search) ──
 
 
-async def _serper_search(query: str) -> list[dict] | None:
+async def _jina_deepsearch(query: str) -> str | None:
+    if not settings.jina_api_key:
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=90) as client:
+            resp = await client.post(
+                JINA_DEEPSEARCH_URL,
+                headers=_jina_headers(),
+                json={
+                    "model": "jina-deepsearch-v1",
+                    "messages": [{"role": "user", "content": query}],
+                    "stream": False,
+                },
+            )
+            if resp.status_code != 200:
+                return None
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+    except Exception:
+        return None
+
+
+async def _format_results(results: list[dict]) -> str:
+    parts = []
+    for i, r in enumerate(results[:5], 1):
+        parts.append(
+            f"{i}. {r['title']}\n   URL: {r['url']}\n   {r['content'][:400]}"
+        )
+    return "\n\n".join(parts) if parts else ""
+
+
+async def _serper_search(query: str) -> str | None:
     if not settings.serper_api_key:
         return None
     try:
@@ -60,14 +91,14 @@ async def _serper_search(query: str) -> list[dict] | None:
                 results.append({
                     "title": item.get("title", ""),
                     "url": item.get("link", ""),
-                    "content": item.get("snippet", "")[:500],
+                    "content": item.get("snippet", ""),
                 })
-            return results if results else None
+            return await _format_results(results) if results else None
     except Exception:
         return None
 
 
-async def _ddg_search(query: str) -> list[dict]:
+async def _ddg_search(query: str) -> str | None:
     try:
         from duckduckgo_search import DDGS
 
@@ -77,14 +108,14 @@ async def _ddg_search(query: str) -> list[dict]:
                 results.append({
                     "title": r.get("title", ""),
                     "url": r.get("href", ""),
-                    "content": r.get("body", "")[:500],
+                    "content": r.get("body", ""),
                 })
-        return results
+        return await _format_results(results) if results else None
     except Exception:
-        return []
+        return None
 
 
-async def _jina_search(query: str) -> list[dict]:
+async def _jina_search(query: str) -> str | None:
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
@@ -93,25 +124,39 @@ async def _jina_search(query: str) -> list[dict]:
                 json={"q": query},
             )
             if resp.status_code != 200:
-                return []
+                return None
             data = resp.json()
             results = []
             for item in data.get("data", []):
                 results.append({
                     "title": item.get("title", ""),
                     "url": item.get("url", ""),
-                    "content": item.get("content", "")[:500],
+                    "content": item.get("content", ""),
                 })
-            return results
+            return await _format_results(results) if results else None
     except Exception:
-        return []
+        return None
 
 
-async def search_web(query: str) -> list[dict]:
-    results = await _serper_search(query)
-    if results:
-        return results
-    results = await _ddg_search(query)
-    if results:
-        return results
-    return await _jina_search(query)
+async def search_web(query: str) -> str:
+    import logging
+    logger = logging.getLogger("vigil.search")
+
+    result = await _jina_deepsearch(query)
+    if result:
+        logger.info("search_web provider=jina_deepsearch query=%r", query)
+        return result
+    result = await _serper_search(query)
+    if result:
+        logger.info("search_web provider=serper query=%r", query)
+        return result
+    result = await _ddg_search(query)
+    if result:
+        logger.info("search_web provider=duckduckgo query=%r", query)
+        return result
+    result = await _jina_search(query)
+    if result:
+        logger.info("search_web provider=jina_search query=%r", query)
+        return result
+    logger.warning("search_web provider=none query=%r", query)
+    return "No search results found."

@@ -162,13 +162,7 @@ async def _execute_tool(name: str, args: dict) -> str:
             query = args.get("query", "")
             if not query:
                 return "Error: missing 'query' argument"
-            results = await impl(query)
-            if not results:
-                return "No search results found."
-            formatted = []
-            for r in results[:5]:
-                formatted.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content'][:300]}")
-            return "\n\n---\n\n".join(formatted)
+            return await impl(query)
         else:
             return "Tool result unavailable."
     except Exception as e:
