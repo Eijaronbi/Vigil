@@ -76,16 +76,22 @@ def get_current_user(
 
 
 def _user_to_dict(user: User) -> dict:
-    return {
+    d: dict = {
         "id": user.id,
         "name": user.name,
-        "email": user.email,
         "auth_method": user.auth_method,
-        "email_verified": user.email_verified,
-        "wallet_address": user.wallet_address,
-        "telegram_chat_id": user.telegram_chat_id,
         "created_at": user.created_at.isoformat(),
     }
+    if user.auth_method in ("password", "google"):
+        d["email"] = user.email
+        d["email_verified"] = user.email_verified
+    if user.auth_method == "google":
+        d["google_id"] = user.google_id
+    if user.auth_method == "wallet":
+        d["wallet_address"] = user.wallet_address
+    if user.telegram_chat_id:
+        d["telegram_chat_id"] = user.telegram_chat_id
+    return d
 
 
 # ── Request / Response models ──
@@ -265,7 +271,6 @@ def wallet_login(body: WalletLoginRequest, db: Session = Depends(get_db)):
     else:
         user = User(
             name=address[:10],
-            email=f"wallet-{address[:8]}@vigil.local",
             wallet_address=address,
             auth_method="wallet",
         )
