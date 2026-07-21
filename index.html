@@ -1581,34 +1581,64 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     if (isListening) {
       if (speechRecognition) speechRecognition.stop();
       isListening = false;
-      setWaveform('idle');
-      document.getElementById('voiceStatusBig').textContent = 'tap 🎤 and speak';
-      document.getElementById('voiceTranscript').textContent = '';
+      if (voiceTimeout) clearTimeout(voiceTimeout);
+      voiceTimeout = null;
+      setWaveform('processing');
+      document.getElementById('voiceStatusBig').textContent = 'processing...';
+      var finalText = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
+      if (finalText) {
+        document.getElementById('voiceTranscript').textContent = '';
+        sendChat(finalText);
+      } else {
+        setWaveform('idle');
+        document.getElementById('voiceStatusBig').textContent = 'tap 🎤 and speak';
+      }
       return;
     }
     speechRecognition = new SpeechRecognition();
-    speechRecognition.continuous = false;
+    speechRecognition.continuous = true;
     speechRecognition.interimResults = true;
     speechRecognition.lang = 'en-US';
     isListening = true;
     setWaveform('listening');
     document.getElementById('voiceStatusBig').textContent = 'listening...';
     document.getElementById('voiceTranscript').textContent = '';
-    var lastTranscript = '';
+    var voiceTimeout = null;
     speechRecognition.onresult = function(event) {
       var transcript = '';
       for (var i = event.resultIndex; i < event.results.length; i++) {
         var r = event.results[i];
-        transcript += r[0].transcript;
+        if (r.isFinal) transcript += r[0].transcript;
       }
-      lastTranscript = transcript;
-      document.getElementById('voiceTranscript').textContent = '✎ ' + transcript;
+      if (transcript) {
+        var current = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
+        document.getElementById('voiceTranscript').textContent = '✎ ' + (current + ' ' + transcript).trim();
+      }
+      if (voiceTimeout) clearTimeout(voiceTimeout);
+      voiceTimeout = setTimeout(function() {
+        if (isListening) {
+          var autoText = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
+          if (autoText && autoText.length > 3) {
+            if (speechRecognition) speechRecognition.stop();
+            isListening = false;
+            voiceTimeout = null;
+            setWaveform('processing');
+            document.getElementById('voiceStatusBig').textContent = 'processing...';
+            var t = autoText;
+            document.getElementById('voiceTranscript').textContent = '';
+            sendChat(t);
+          }
+        }
+      }, 1500);
     };
     speechRecognition.onend = function() {
-      var finalText = lastTranscript;
+      if (!isListening) return;
       isListening = false;
+      if (voiceTimeout) clearTimeout(voiceTimeout);
+      voiceTimeout = null;
       setWaveform('processing');
       document.getElementById('voiceStatusBig').textContent = 'processing...';
+      var finalText = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
       if (finalText) {
         document.getElementById('voiceTranscript').textContent = '';
         sendChat(finalText);
@@ -1618,6 +1648,8 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       }
     };
     speechRecognition.onerror = function(e) {
+      if (voiceTimeout) clearTimeout(voiceTimeout);
+      voiceTimeout = null;
       isListening = false;
       setWaveform('idle');
       var msg = e.error;
