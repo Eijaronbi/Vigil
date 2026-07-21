@@ -160,6 +160,9 @@ async def fetch_url(url: str) -> str | None:
 
 
 async def search_web(query: str) -> str:
+    result = await _ddg_search(query)
+    if result:
+        return result
     result = await _jina_search(query)
     if result:
         return result
@@ -167,9 +170,6 @@ async def search_web(query: str) -> str:
     if result:
         return result
     result = await _serper_search(query)
-    if result:
-        return result
-    result = await _ddg_search(query)
     if result:
         return result
     logger.warning("search_web provider=none query=%r", query)

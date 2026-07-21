@@ -1496,8 +1496,6 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     if (!msg) return;
     if (input) input.value = '';
     var log = document.getElementById('voiceAssistantLog');
-    log.innerHTML += '<div class="msg user"><span>' + escapeHtml(msg) + '</span></div>';
-    log.scrollTop = log.scrollHeight;
     setWaveform('processing');
     document.getElementById('voiceStatusBig').textContent = 'thinking...';
 
