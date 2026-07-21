@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 from backend.database import init_db
 from backend.middleware import RateLimitMiddleware, SecurityHeadersMiddleware
-from backend.routers import auth, chat, config_api, dashboard, groups, messages, rules, sources, targets, vault
+from backend.routers import auth, chat, config_api, dashboard, groups, messages, public, rules, sources, targets, vault
 from backend.tts import TTSEngine
 
 tts_engine: TTSEngine | None = None
@@ -52,6 +52,7 @@ app.include_router(targets.router)
 app.include_router(chat.router)
 app.include_router(config_api.router)
 app.include_router(vault.router)
+app.include_router(public.router)
 
 
 @app.exception_handler(Exception)

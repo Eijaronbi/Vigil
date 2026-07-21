@@ -849,7 +849,6 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     var user = data.user || {};
     document.getElementById('loginPanel').style.display = 'none';
     document.getElementById('sessionPanel').classList.add('active');
-    document.getElementById('chatToggle').style.display = 'flex';
     document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>connected. tap 🎤 and speak a command.</span></div>';
     document.getElementById('sessionUser').textContent = user.name || user.email || 'authenticated';
     if (user.wallet_address) {
@@ -1437,7 +1436,8 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       var el = document.getElementById('voiceReplyToggle');
       if (el) el.className = 'voice-toggle active';
       VOICE_REPLY_ENABLED = true;
-      showTyping('listening', 'tap 🎤 and speak a command');
+      var hint = TOKEN ? 'tap 🎤 and speak a command' : 'no login needed. tap 🎤 to search the web';
+      showTyping('listening', hint);
     }
   };
 
@@ -1498,30 +1498,61 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     var log = document.getElementById('voiceAssistantLog');
     log.innerHTML += '<div class="msg user"><span>' + escapeHtml(msg) + '</span></div>';
     log.scrollTop = log.scrollHeight;
-    log.innerHTML += '<div class="msg bot"><span style="color:var(--c-text-secondary);">thinking...</span></div>';
-    log.scrollTop = log.scrollHeight;
     setWaveform('processing');
     document.getElementById('voiceStatusBig').textContent = 'thinking...';
-    fetch(API + '/api/chat', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
-      body: JSON.stringify({message: msg})
-    })
-    .then(function(r){ return r.json(); })
-    .then(function(data){
-      var botMsg = log.querySelector('.msg.bot:last-child');
-      var response = data.response || 'no response';
-      if (botMsg) botMsg.innerHTML = '<span>' + escapeHtml(response) + '</span>';
+
+    if (TOKEN) {
+      log.innerHTML += '<div class="msg bot"><span style="color:var(--c-text-secondary);">thinking...</span></div>';
       log.scrollTop = log.scrollHeight;
-      document.getElementById('voiceStatusBig').textContent = '';
-      speakResponse(response);
-    })
-    .catch(function(){
-      var botMsg = log.querySelector('.msg.bot:last-child');
-      if (botMsg) botMsg.innerHTML = '<span style="color:var(--c-error);">error — AI unavailable</span>';
-      document.getElementById('voiceStatusBig').textContent = 'error';
-      setWaveform('idle');
-    });
+      fetch(API + '/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+        body: JSON.stringify({message: msg})
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var botMsg = log.querySelector('.msg.bot:last-child');
+        var response = data.response || 'no response';
+        if (botMsg) botMsg.innerHTML = '<span>' + escapeHtml(response) + '</span>';
+        log.scrollTop = log.scrollHeight;
+        document.getElementById('voiceStatusBig').textContent = '';
+        speakResponse(response);
+      })
+      .catch(function(){
+        var botMsg = log.querySelector('.msg.bot:last-child');
+        if (botMsg) botMsg.innerHTML = '<span style="color:var(--c-error);">error — AI unavailable</span>';
+        document.getElementById('voiceStatusBig').textContent = 'error';
+        setWaveform('idle');
+      });
+    } else {
+      fetch(API + '/api/public/search?query=' + encodeURIComponent(msg))
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var results = data.results || [];
+        if (results.length === 0) {
+          log.innerHTML += '<div class="msg bot"><span>no results found.</span></div>';
+        } else {
+          var html = '<div class="msg bot"><span><b>search results:</b></span>';
+          results.forEach(function(r){
+            html += '<div style="margin:4px 0;line-height:1.3;">';
+            html += '<span>' + escapeHtml(r.title) + '</span>';
+            if (r.url) html += ' <span style="font-size:0.65rem;color:var(--c-accent);">→ ' + escapeHtml(r.url) + '</span>';
+            if (r.snippet) html += '<br><span style="font-size:0.65rem;color:var(--c-text-secondary);">' + escapeHtml(r.snippet) + '</span>';
+            html += '</div>';
+          });
+          html += '</div>';
+          log.innerHTML += html;
+        }
+        log.scrollTop = log.scrollHeight;
+        document.getElementById('voiceStatusBig').textContent = '';
+        setWaveform('idle');
+      })
+      .catch(function(){
+        log.innerHTML += '<div class="msg bot"><span style="color:var(--c-error);">search failed</span></div>';
+        document.getElementById('voiceStatusBig').textContent = 'error';
+        setWaveform('idle');
+      });
+    }
   };
 
   // ── Voice Input (Speech-to-Text) ──
@@ -2065,7 +2096,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 })();
 </script>
 
-<button id="chatToggle" onclick="toggleChat()" style="display:none;" title="talk to vigil">🎤</button>
+<button id="chatToggle" onclick="toggleChat()" title="talk to vigil">🎤</button>
 <div id="chatPanel">
   <div id="chatHeader">
     <span>// vigil voice</span>
