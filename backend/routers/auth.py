@@ -35,7 +35,7 @@ def _jwt_secret() -> str:
 def _make_jwt(user_id: int, wallet_address: str | None = None) -> str:
     now = datetime.now(timezone.utc)
     payload = {
-        "sub": user_id,
+        "sub": str(user_id),
         "iat": now,
         "exp": now + timedelta(hours=settings.jwt_expire_hours),
     }
@@ -59,7 +59,7 @@ def verify_token(authorization: str | None = Header(None)) -> dict:
     except pyjwt.InvalidTokenError:
         raise HTTPException(status_code=401, detail="Invalid token")
     return {
-        "user_id": payload["sub"],
+        "user_id": int(payload["sub"]),
         "expires_at": datetime.fromtimestamp(payload["exp"], tz=timezone.utc),
         "wallet": payload.get("wallet"),
     }
