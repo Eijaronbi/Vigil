@@ -1,6 +1,10 @@
+import logging
+
 import httpx
 
 from backend.config import settings
+
+logger = logging.getLogger("vigil.search")
 
 JINA_READER_URL = "https://r.jina.ai"
 JINA_SEARCH_URL = "https://s.jina.ai"
@@ -16,10 +20,47 @@ def _jina_headers() -> dict:
     return headers
 
 
-# ── Jina Reader (fetch any public URL as clean text) ──
+# ── Hound (keyless, anti-bot fetch + multi-engine search) ──
 
 
-async def fetch_url(url: str) -> str | None:
+async def _hound_fetch(url: str) -> str | None:
+    try:
+        from master_fetch.fetcher import http_get
+        from master_fetch.extractor import extract_content
+
+        resp = await http_get(url, timeout=TIMEOUT)
+        if resp.status != 200:
+            return None
+        extracted = extract_content(resp, extraction_type="markdown")
+        text = "\n".join(extracted).strip() if extracted else None
+        return text[:10000] if text else None
+    except Exception:
+        return None
+
+
+async def _hound_search(query: str) -> str | None:
+    try:
+        from master_fetch.search_engines import multi_search
+
+        ranked, _ = await multi_search(query, max_results=5)
+        if not ranked:
+            return None
+        parts = []
+        for i, r in enumerate(ranked[:5], 1):
+            parts.append(
+                f"{i}. {r.title}\n   URL: {r.url}\n   {r.snippet[:400]}"
+            )
+        return "\n\n".join(parts)
+    except Exception:
+        return None
+
+
+# ── Jina Reader (fetch any public URL as clean text, fallback) ──
+
+
+async def _jina_reader(url: str) -> str | None:
+    if not settings.jina_api_key:
+        return None
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
@@ -36,7 +77,7 @@ async def fetch_url(url: str) -> str | None:
         return None
 
 
-# ── Web Search (Jina DeepSearch → Serper → DuckDuckGo → Jina Search) ──
+# ── Web Search (Hound → Jina DeepSearch → Jina Search → Serper → DuckDuckGo) ──
 
 
 async def _jina_deepsearch(query: str) -> str | None:
@@ -61,13 +102,15 @@ async def _jina_deepsearch(query: str) -> str | None:
         return None
 
 
-async def _format_results(results: list[dict]) -> str:
+async def _format_results(results: list[dict]) -> str | None:
+    if not results:
+        return None
     parts = []
     for i, r in enumerate(results[:5], 1):
         parts.append(
             f"{i}. {r['title']}\n   URL: {r['url']}\n   {r['content'][:400]}"
         )
-    return "\n\n".join(parts) if parts else ""
+    return "\n\n".join(parts)
 
 
 async def _serper_search(query: str) -> str | None:
@@ -93,7 +136,7 @@ async def _serper_search(query: str) -> str | None:
                     "url": item.get("link", ""),
                     "content": item.get("snippet", ""),
                 })
-            return await _format_results(results) if results else None
+            return await _format_results(results)
     except Exception:
         return None
 
@@ -110,12 +153,14 @@ async def _ddg_search(query: str) -> str | None:
                     "url": r.get("href", ""),
                     "content": r.get("body", ""),
                 })
-        return await _format_results(results) if results else None
+        return await _format_results(results)
     except Exception:
         return None
 
 
 async def _jina_search(query: str) -> str | None:
+    if not settings.jina_api_key:
+        return None
     try:
         async with httpx.AsyncClient(timeout=TIMEOUT) as client:
             resp = await client.post(
@@ -133,18 +178,39 @@ async def _jina_search(query: str) -> str | None:
                     "url": item.get("url", ""),
                     "content": item.get("content", ""),
                 })
-            return await _format_results(results) if results else None
+            return await _format_results(results)
     except Exception:
         return None
 
 
-async def search_web(query: str) -> str:
-    import logging
-    logger = logging.getLogger("vigil.search")
+# ── Public API ──
 
+
+async def fetch_url(url: str) -> str | None:
+    result = await _hound_fetch(url)
+    if result:
+        logger.info("fetch_url provider=hound url=%r", url)
+        return result
+    result = await _jina_reader(url)
+    if result:
+        logger.info("fetch_url provider=jina url=%r", url)
+        return result
+    logger.warning("fetch_url provider=none url=%r", url)
+    return None
+
+
+async def search_web(query: str) -> str:
+    result = await _hound_search(query)
+    if result:
+        logger.info("search_web provider=hound query=%r", query)
+        return result
     result = await _jina_deepsearch(query)
     if result:
         logger.info("search_web provider=jina_deepsearch query=%r", query)
+        return result
+    result = await _jina_search(query)
+    if result:
+        logger.info("search_web provider=jina_search query=%r", query)
         return result
     result = await _serper_search(query)
     if result:
@@ -153,10 +219,6 @@ async def search_web(query: str) -> str:
     result = await _ddg_search(query)
     if result:
         logger.info("search_web provider=duckduckgo query=%r", query)
-        return result
-    result = await _jina_search(query)
-    if result:
-        logger.info("search_web provider=jina_search query=%r", query)
         return result
     logger.warning("search_web provider=none query=%r", query)
     return "No search results found."
