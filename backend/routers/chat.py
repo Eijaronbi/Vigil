@@ -105,18 +105,29 @@ def _build_context(db: Session, user_id: int) -> str:
     return "\n".join(parts)
 
 
-def _get_llm_config():
-    if settings.groq_api_key:
-        return {
-            "api_key": settings.groq_api_key,
-            "model": settings.groq_model or "llama-3.3-70b-versatile",
-            "base_url": "https://api.groq.com/openai/v1",
-        }
-    return {
-        "api_key": settings.openrouter_api_key,
-        "model": settings.openrouter_model or "meta-llama/llama-3.2-3b-instruct:free",
-        "base_url": settings.openrouter_base_url,
-    }
+LLM_PROVIDERS: list[dict] | None = None
+
+
+def _get_providers() -> list[dict]:
+    global LLM_PROVIDERS
+    if LLM_PROVIDERS is None:
+        providers = []
+        if settings.groq_api_key:
+            providers.append({
+                "name": "groq",
+                "api_key": settings.groq_api_key,
+                "model": settings.groq_model or "llama-3.3-70b-versatile",
+                "base_url": "https://api.groq.com/openai/v1",
+            })
+        if settings.openrouter_api_key:
+            providers.append({
+                "name": "openrouter",
+                "api_key": settings.openrouter_api_key,
+                "model": settings.openrouter_model or "meta-llama/llama-3.2-3b-instruct:free",
+                "base_url": settings.openrouter_base_url,
+            })
+        LLM_PROVIDERS = providers
+    return LLM_PROVIDERS
 
 
 async def _call_llm(
@@ -124,26 +135,40 @@ async def _call_llm(
     tools: list | None = None,
     tool_choice: str | None = None,
 ) -> dict:
-    cfg = _get_llm_config()
-    body = {"model": cfg["model"], "messages": messages}
-    if tools:
-        body["tools"] = tools
-    if tool_choice:
-        body["tool_choice"] = tool_choice
+    providers = _get_providers()
+    if not providers:
+        return {"error": "No LLM provider configured"}
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.post(
-            f"{cfg['base_url'].rstrip('/')}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {cfg['api_key']}",
-                "Content-Type": "application/json",
-            },
-            json=body,
-            timeout=60,
-        )
-    if resp.status_code != 200:
-        return {"error": f"LLM returned {resp.status_code}"}
-    return resp.json()
+    last_error = ""
+    for cfg in providers:
+        body = {"model": cfg["model"], "messages": messages}
+        if tools:
+            body["tools"] = tools
+        if tool_choice:
+            body["tool_choice"] = tool_choice
+
+        try:
+            async with httpx.AsyncClient() as client:
+                resp = await client.post(
+                    f"{cfg['base_url'].rstrip('/')}/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {cfg['api_key']}",
+                        "Content-Type": "application/json",
+                    },
+                    json=body,
+                    timeout=90,
+                )
+            if resp.status_code == 200:
+                return resp.json()
+            if resp.status_code == 429:
+                last_error = "rate_limited"
+                continue
+            last_error = f"LLM_{resp.status_code}"
+        except Exception as e:
+            last_error = str(e)
+            continue
+
+    return {"error": last_error}
 
 
 async def _execute_tool(name: str, args: dict) -> str:
@@ -169,6 +194,47 @@ async def _execute_tool(name: str, args: dict) -> str:
         return f"Error executing tool '{name}': {e}"
 
 
+class SearchRequest(BaseModel):
+    query: str
+
+
+class SearchResult(BaseModel):
+    title: str
+    url: str
+    snippet: str
+
+
+class SearchResponse(BaseModel):
+    results: list[SearchResult]
+    source: str
+
+
+@router.post("/search", response_model=SearchResponse)
+async def search(
+    body: SearchRequest,
+    current_user: User = Depends(get_current_user),
+):
+    raw = await search_web(body.query)
+    results: list[SearchResult] = []
+    source = "web"
+    if raw and raw != "No search results found.":
+        for line in raw.split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("1. ") or line.startswith("2. ") or line.startswith("3. ") or line.startswith("4. ") or line.startswith("5. "):
+                title = line[3:].strip()
+                results.append(SearchResult(title=title, url="", snippet=""))
+            elif line.startswith("   URL: "):
+                if results:
+                    results[-1].url = line[8:].strip()
+            elif line.startswith("   ") and results and not results[-1].snippet:
+                results[-1].snippet = line[3:400].strip()
+    if not results:
+        results.append(SearchResult(title=raw or "No results", url="", snippet=""))
+    return SearchResponse(results=results[:5], source=source)
+
+
 @router.post("", response_model=ChatResponse)
 async def chat(
     body: ChatRequest,
@@ -186,7 +252,9 @@ async def chat(
     result = await _call_llm(messages, tools=TOOLS)
 
     if "error" in result:
-        return ChatResponse(response="AI is unavailable right now. Try again later.")
+        err = result["error"]
+        msg = "AI is rate-limited. Try again in a minute." if err == "rate_limited" else "AI service unavailable. Try again later."
+        return ChatResponse(response=msg)
 
     choice = result["choices"][0]
     message = choice["message"]
@@ -211,7 +279,7 @@ async def chat(
 
         final = await _call_llm(messages)
         if "error" in final:
-            return ChatResponse(response=tool_result[:1000])
+            return ChatResponse(response=f"Here are the raw results:\n\n{tool_result[:2000]}")
         content = final["choices"][0]["message"]["content"]
         return ChatResponse(response=content)
 
