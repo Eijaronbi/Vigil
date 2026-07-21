@@ -218,18 +218,22 @@ async def search(
     results: list[SearchResult] = []
     source = "web"
     if raw and raw != "No search results found.":
-        for line in raw.split("\n"):
-            line = line.strip()
-            if not line:
+        for i, block in enumerate(raw.split("\n\n")):
+            block = block.strip()
+            if not block:
                 continue
-            if line.startswith("1. ") or line.startswith("2. ") or line.startswith("3. ") or line.startswith("4. ") or line.startswith("5. "):
-                title = line[3:].strip()
-                results.append(SearchResult(title=title, url="", snippet=""))
-            elif line.startswith("   URL: "):
-                if results:
-                    results[-1].url = line[8:].strip()
-            elif line.startswith("   ") and results and not results[-1].snippet:
-                results[-1].snippet = line[3:400].strip()
+            lines = block.split("\n")
+            title_line = lines[0] if lines else ""
+            idx = title_line.find(". ")
+            title = title_line[idx + 2:].strip() if idx > 0 else title_line
+            url = ""
+            snippet = ""
+            for line in lines[1:]:
+                if line.startswith("   URL: "):
+                    url = line[8:].strip()
+                elif line.strip() and not snippet:
+                    snippet = line.strip()[:400]
+            results.append(SearchResult(title=title, url=url, snippet=snippet))
     if not results:
         results.append(SearchResult(title=raw or "No results", url="", snippet=""))
     return SearchResponse(results=results[:5], source=source)
