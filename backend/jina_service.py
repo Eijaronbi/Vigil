@@ -108,17 +108,34 @@ async def _serper_search(query: str) -> str | None:
 
 async def _ddg_search(query: str) -> str | None:
     try:
-        from duckduckgo_search import DDGS
-
-        results = []
-        with DDGS() as ddgs:
-            for r in ddgs.text(query, max_results=5):
+        async with httpx.AsyncClient(timeout=15, follow_redirects=True) as client:
+            resp = await client.post(
+                "https://html.duckduckgo.com/html/",
+                data={"q": query},
+                headers={
+                    "User-Agent": "Mozilla/5.0 (compatible; Vigil/1.0)",
+                },
+            )
+            if resp.status_code != 200:
+                return None
+            results = []
+            import re
+            for item in re.findall(
+                r'<a rel="nofollow" class="result__a" href="([^"]+)".*?>(.*?)</a>.*?'
+                r'<a class="result__snippet"[^>]*>(.*?)</a>',
+                resp.text,
+                re.DOTALL,
+            ):
+                href, title_html, snippet_html = item
+                import html as hlib
+                title = hlib.unescape(re.sub(r"<[^>]+>", "", title_html)).strip()
+                snippet = hlib.unescape(re.sub(r"<[^>]+>", "", snippet_html)).strip()
                 results.append({
-                    "title": r.get("title", ""),
-                    "url": r.get("href", ""),
-                    "content": r.get("body", ""),
+                    "title": title,
+                    "url": href,
+                    "content": snippet,
                 })
-        return await _format_results(results)
+            return await _format_results(results)
     except Exception:
         return None
 
