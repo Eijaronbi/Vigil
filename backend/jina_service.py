@@ -171,9 +171,26 @@ async def _jina_search(query: str) -> str | None:
 async def fetch_url(url: str) -> str | None:
     result = await _jina_reader(url)
     if result:
-        return result
-    logger.warning("fetch_url provider=none url=%r", url)
-    return None
+        content_lower = result.lower()
+        if "hasn.t posted" not in content_lower and "no posts" not in content_lower and len(result) > 300:
+            return result
+        logger.info("fetch_url jina gave thin content for %r, falling back to search", url)
+    else:
+        logger.warning("fetch_url jina returned None for %r", url)
+
+    import re
+    x_match = re.match(r"https?://(?:www\.)?(?:x|twitter)\.com/([a-zA-Z0-9_]+)", url)
+    if x_match:
+        username = x_match.group(1)
+        search_q = f"from:@{username}"
+        search_result = await search_web(search_q)
+        if search_result and "No search results found." not in search_result:
+            return f"Profile: {url}\n\nRecent posts from @{username}:\n{search_result}"
+        search_q2 = f"site:x.com {username}"
+        search_result2 = await search_web(search_q2)
+        if search_result2 and "No search results found." not in search_result2:
+            return f"Profile: {url}\n\nRecent posts about @{username}:\n{search_result2}"
+    return result
 
 
 async def search_web(query: str) -> str:

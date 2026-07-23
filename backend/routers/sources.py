@@ -324,7 +324,7 @@ async def telegram_sync_groups_user(
     try:
         updates = await watcher.fetch_updates() if hasattr(watcher, 'fetch_updates') else []
         new_count = 0
-        from backend.models import Group
+        from backend.models import Group, Message
         from backend.database import SessionLocal
         db = SessionLocal()
         try:
@@ -344,7 +344,23 @@ async def telegram_sync_groups_user(
                         user_id=current_user.id,
                     )
                     db.add(group)
+                    db.commit()
+                    db.refresh(group)
                     new_count += 1
+                text = msg.get("text", "")
+                if text and existing:
+                    ts = msg.get("date")
+                    from datetime import datetime
+                    if ts:
+                        ts = datetime.fromtimestamp(ts)
+                    db_msg = Message(
+                        group_id=existing.id,
+                        source="telegram",
+                        sender=msg.get("from", {}).get("username") if msg.get("from") else None,
+                        text=text,
+                        timestamp=ts,
+                    )
+                    db.add(db_msg)
             db.commit()
         finally:
             db.close()
