@@ -791,7 +791,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <script>
 (function(){
   var API = window.location.origin;
-  var TOKEN = null;
+  var TOKEN = localStorage.getItem('vigil_token');
   var WS = null;
   var wsReconnectTimer = null;
 
@@ -853,12 +853,51 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     }
   }).catch(function(){});
 
+  // Restore session from localStorage
+  if (TOKEN) {
+    fetch(API + '/api/auth/verify', {headers: {'Authorization': 'Bearer ' + TOKEN}})
+      .then(function(r){ if (r.ok) return r.json(); else throw Error(); })
+      .then(function(){
+        var saved = localStorage.getItem('vigil_user');
+        var user = saved ? JSON.parse(saved) : {};
+        var wallet = localStorage.getItem('vigil_wallet') || '';
+        document.getElementById('loginPanel').style.display = 'none';
+        document.getElementById('sessionPanel').classList.add('active');
+        document.getElementById('voiceAssistantLog').innerHTML = '<div class="msg bot"><span>session restored. tap 🎤 and speak a command.</span></div>';
+        document.getElementById('sessionUser').textContent = user.name || user.email || 'authenticated';
+        if (wallet) {
+          document.getElementById('sessionWallet').textContent = ' — ' + wallet.substring(0,6) + '...' + wallet.substring(38);
+          document.getElementById('networkBadge').style.display = 'inline';
+          document.getElementById('vaultPanel').style.display = 'block';
+        } else {
+          document.getElementById('sessionWallet').textContent = ' — ' + (user.email || '');
+        }
+        connectWs();
+        fetchMessages();
+        loadSourceStatus();
+        loadMonitorTargets();
+        loadSettings();
+        loadVoices();
+        loadBrief();
+        checkVoiceSupport();
+      })
+      .catch(function(){
+        TOKEN = null;
+        localStorage.removeItem('vigil_token');
+        localStorage.removeItem('vigil_user');
+        localStorage.removeItem('vigil_wallet');
+      });
+  }
+
   function authHeaders() {
     return TOKEN ? {'Authorization': 'Bearer ' + TOKEN} : {};
   }
 
   function onLoginSuccess(data) {
     TOKEN = data.token;
+    localStorage.setItem('vigil_token', data.token);
+    localStorage.setItem('vigil_user', JSON.stringify(data.user || {}));
+    localStorage.setItem('vigil_wallet', data.user?.wallet_address || '');
     var user = data.user || {};
     document.getElementById('loginPanel').style.display = 'none';
     document.getElementById('sessionPanel').classList.add('active');
@@ -975,6 +1014,9 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     }
     TOKEN = null;
     WALLET_ADDRESS = null;
+    localStorage.removeItem('vigil_token');
+    localStorage.removeItem('vigil_user');
+    localStorage.removeItem('vigil_wallet');
     disconnectWs();
     document.getElementById('sessionPanel').classList.remove('active');
     document.getElementById('loginPanel').style.display = 'block';
@@ -1985,7 +2027,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
         body: JSON.stringify({message: msg})
       })
-      .then(function(r){ return r.json(); })
+      .then(function(r){
+        if (!r.ok) return r.json().then(function(e){ throw Error(e.detail || e.response || 'request failed'); });
+        return r.json();
+      })
       .then(function(data){
         var botMsg = log.querySelector('.msg.bot:last-child');
         var response = data.response || 'no response';
@@ -1994,9 +2039,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         document.getElementById('voiceStatusBig').textContent = '';
         speakResponse(response);
       })
-      .catch(function(){
+      .catch(function(err){
         var botMsg = log.querySelector('.msg.bot:last-child');
-        if (botMsg) botMsg.innerHTML = '<span style="color:var(--c-error);">error — AI unavailable</span>';
+        var msg = (err && err.message) || 'connection failed';
+        if (botMsg) botMsg.innerHTML = '<span style="color:var(--c-error);">error — ' + escapeHtml(msg) + '</span>';
         document.getElementById('voiceStatusBig').textContent = 'error';
         setWaveform('idle');
       });
