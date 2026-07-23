@@ -172,9 +172,10 @@ async def fetch_url(url: str) -> str | None:
     result = await _jina_reader(url)
     if result:
         content_lower = result.lower()
-        if "hasn.t posted" not in content_lower and "no posts" not in content_lower and len(result) > 300:
+        if len(content_lower) < 200 or "hasn" in content_lower or "no posts" in content_lower or "no tweets" in content_lower:
+            logger.info("fetch_url jina gave thin content for %r, falling back to search", url)
+        else:
             return result
-        logger.info("fetch_url jina gave thin content for %r, falling back to search", url)
     else:
         logger.warning("fetch_url jina returned None for %r", url)
 
