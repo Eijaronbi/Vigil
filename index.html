@@ -466,6 +466,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
 <div class="sources-section">
 <h3 style="margin-bottom:16px;font-family:var(--ff-mono);font-size:0.8rem;color:var(--c-text-secondary);">// connect sources</h3>
+<div style="margin-bottom:12px;display:flex;gap:8px;align-items:center;">
+<button class="btn-primary source-btn" id="autoReadToggle" onclick="toggleAutoRead()" style="font-size:0.65rem;">🔊 auto-read on</button>
+<span style="font-size:0.65rem;color:var(--c-text-secondary);">speak incoming messages aloud</span>
+</div>
 <div class="source-cards" id="sourceCards">
 <div class="source-card" data-source="telegram">
 <div class="source-icon">✈</div>
@@ -1900,6 +1904,43 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     }
   };
 
+  var AUTO_READ_ALERTS = true;
+
+  function toggleAutoRead() {
+    AUTO_READ_ALERTS = !AUTO_READ_ALERTS;
+    var btn = document.getElementById('autoReadToggle');
+    if (btn) {
+      btn.textContent = AUTO_READ_ALERTS ? '🔊 auto-read on' : '🔇 auto-read off';
+      btn.className = AUTO_READ_ALERTS ? 'btn-primary source-btn' : 'btn-secondary source-btn';
+    }
+  }
+
+  function speakAlert(data) {
+    if (!AUTO_READ_ALERTS) return;
+    var text = (data.sender || 'Someone') + ' from ' + (data.group_name || data.source || 'unknown') + ': ' + (data.text || '');
+    if (!text) return;
+    text = text.substring(0, 300);
+    setWaveform('speaking');
+    fetch(API + '/api/tts?text=' + encodeURIComponent(text), {cache:'no-store'})
+      .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
+      .then(function(blob){
+        var url = URL.createObjectURL(blob);
+        var audio = new Audio(url);
+        audio.onended = function(){ URL.revokeObjectURL(url); setWaveform('idle'); };
+        audio.onerror = function(){ setWaveform('idle'); };
+        audio.play().catch(function(){ setWaveform('idle'); });
+      })
+      .catch(function(){
+        if(window.speechSynthesis){
+          var u = new SpeechSynthesisUtterance(text);
+          u.rate = 0.9;
+          u.onend = function(){ setWaveform('idle'); };
+          u.onerror = function(){ setWaveform('idle'); };
+          window.speechSynthesis.speak(u);
+        } else { setWaveform('idle'); }
+      });
+  }
+
   function speakResponse(text) {
     if (!VOICE_REPLY_ENABLED || !text) return;
     setWaveform('speaking');
@@ -2147,7 +2188,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       WS.onmessage = function(ev) {
         try {
           var data = JSON.parse(ev.data);
-          if (data.type === 'alert' || data.type === 'priority_alert') fetchMessages();
+          if (data.type === 'alert' || data.type === 'priority_alert') {
+            fetchMessages();
+            speakAlert(data);
+          }
           if (data.type === 'target_alert') { addTargetAlert(data); fetchMessages(); }
         } catch(e) {}
       };
