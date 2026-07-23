@@ -12,6 +12,8 @@ RATE_WINDOW = 60
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        if request.scope.get("type") == "websocket":
+            return await call_next(request)
         response: Response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
