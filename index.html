@@ -1508,8 +1508,39 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   var TG_WIZARD_STEP = 0;
 
   window.connectTelegram = function() {
+    var btn = document.getElementById('telegramBtn');
+    if (btn && btn.className === 'btn-primary source-btn') {
+      showTelegramWizardSync();
+      return;
+    }
     showTelegramWizard();
   };
+
+  function showTelegramWizardSync() {
+    var panel = document.getElementById('telegramWizardPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'telegramWizardPanel';
+      panel.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+      panel.addEventListener('click', function(e) { if (e.target === panel) closeTelegramWizard(); });
+      document.body.appendChild(panel);
+    }
+    var btn = document.getElementById('telegramBtn');
+    var username = '';
+    var status = document.getElementById('telegramStatus');
+    if (status) username = status.textContent.replace('connected — @', '');
+    panel.innerHTML = '<div class="terminal-block" style="max-width:520px;width:90%;max-height:80vh;overflow-y:auto;margin:0;animation:fadeIn 0.2s;">'
+      + '<div class="line" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+      + '<span><span class="highlight">// telegram — already connected</span></span>'
+      + '<span onclick="closeTelegramWizard()" style="cursor:pointer;color:var(--c-text-secondary);font-size:1.1rem;">✕</span>'
+      + '</div>'
+      + '<div id="tgWizardBody">'
+      + wizardStep1(username || 'bot')
+      + '</div>'
+      + '<div id="tgWizardLog" style="margin-top:8px;font-size:0.7rem;color:var(--c-text-secondary);"></div>'
+      + '</div>';
+    panel.style.display = 'flex';
+  }
 
   function showTelegramWizard() {
     TG_WIZARD_STEP = 0;
