@@ -818,7 +818,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   };
 
   window.downloadExtension = function() {
-    alert('Chrome extension: load unpacked from hackathon/extension/ directory.\n\n1. Open chrome://extensions\n2. Enable Developer mode\n3. Load unpacked, select the extension/ folder\n4. Navigate to web.whatsapp.com');
+    showWizard('whatsapp', 'whatsapp setup', whatsappStep0());
   };
   window.downloadApk = function() {
     alert('Android app: Flutter build in progress.\n\nOnce built, APK will be available for sideload.\nFor now, use the browser dashboard to test.');
@@ -1306,6 +1306,204 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     while (list.children.length > 20) list.removeChild(list.lastChild);
   }
 
+  // ── Generic terminal wizard ──
+  function closeWizard(id) {
+    var p = document.getElementById(id + 'Wizard');
+    if (p) p.style.display = 'none';
+  }
+
+  function showWizard(sourceId, title, stepsHtml) {
+    var panel = document.getElementById(sourceId + 'Wizard');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = sourceId + 'Wizard';
+      panel.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+      panel.addEventListener('click', function(e) { if (e.target === panel) closeWizard(sourceId); });
+      document.body.appendChild(panel);
+    }
+    panel.innerHTML = '<div class="terminal-block" style="max-width:520px;width:90%;max-height:80vh;overflow-y:auto;margin:0;animation:fadeIn 0.2s;">'
+      + '<div class="line" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+      + '<span><span class="highlight">// ' + escapeHtml(title) + '</span></span>'
+      + '<span onclick="closeWizard(\'' + sourceId + '\')" style="cursor:pointer;color:var(--c-text-secondary);font-size:1.1rem;">✕</span>'
+      + '</div>'
+      + '<div id="' + sourceId + 'WizardBody">' + stepsHtml + '</div>'
+      + '<div id="' + sourceId + 'WizardLog" style="margin-top:8px;font-size:0.7rem;color:var(--c-text-secondary);"></div>'
+      + '</div>';
+    panel.style.display = 'flex';
+    setTimeout(function(){
+      var btn = document.getElementById(sourceId + 'WizardConnectBtn');
+      var handler = window[sourceId + 'WizardConnect'];
+      if (btn && handler) btn.onclick = handler;
+    }, 50);
+  }
+
+  function wizardLog(sourceId, msg) {
+    var log = document.getElementById(sourceId + 'WizardLog');
+    if (log) log.innerHTML = '<span style="color:var(--c-text-secondary);">> ' + escapeHtml(msg) + '</span>';
+  }
+
+  function updateSourceUI(sourceId, connected, label) {
+    var btn = document.getElementById(sourceId + 'Btn');
+    var status = document.getElementById(sourceId + 'Status');
+    if (btn) {
+      btn.textContent = connected ? (sourceId === 'twitter' || sourceId === 'facebook' ? 'watching' : 'connected') : 'connect';
+      btn.className = connected ? 'btn-primary source-btn' : 'btn-secondary source-btn';
+    }
+    if (status) {
+      if (connected) {
+        status.textContent = label || 'connected';
+        status.style.color = 'var(--c-accent)';
+      } else {
+        status.textContent = sourceId === 'whatsapp' ? 'install extension' : 'not connected';
+        status.style.color = 'var(--c-text-secondary)';
+      }
+    }
+  }
+
+  // ── Discord wizard steps ──
+  function discordStep0() {
+    return '<div class="line"><span class="prompt">step 1/3 — create a Discord bot</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. go to <span class="highlight">https://discord.com/developers/applications</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. click <span class="highlight">New Application</span> → give it a name</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. go to <span class="highlight">Bot</span> tab → <span class="highlight">Reset Token</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. enable <span class="highlight">Message Content Intent</span> under Privileged Gateway Intents</div>'
+      + '<div class="line" style="margin-top:12px;"><span class="prompt">paste your bot token:</span></div>'
+      + '<div class="line" style="margin:6px 0;"><input type="text" id="discordWizardToken" placeholder="paste token here" style="width:100%;padding:10px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" id="discordWizardConnectBtn" style="flex:1;">connect →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'discord\')">cancel</button>'
+      + '</div>';
+  }
+
+  function discordStep1() {
+    return '<div class="line"><span class="prompt">step 2/3 — add bot to server</span></div>'
+      + '<div class="line" style="color:var(--c-accent);font-size:0.8rem;margin:8px 0;">✓ discord connected</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. in Discord Developer Portal, go to <span class="highlight">OAuth2 → URL Generator</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. select scopes: <span class="highlight">bot</span>, <span class="highlight">applications.commands</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. select permissions: <span class="highlight">Read Messages</span>, <span class="highlight">Send Messages</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. open the generated URL → add bot to your server</div>'
+      + '<div class="line" style="margin-top:10px;">'
+      + '<button class="btn-primary" onclick="closeWizard(\'discord\')">done ✓</button>'
+      + '</div>';
+  }
+
+  // ── Twitter/X wizard steps ──
+  function twitterStep0() {
+    return '<div class="line"><span class="prompt">step 1/2 — enter X username</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">enter the X / Twitter username you want to monitor</div>'
+      + '<div class="line" style="margin:6px 0;"><input type="text" id="twitterWizardHandle" placeholder="@username or handle" style="width:100%;padding:10px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" id="twitterWizardConnectBtn" style="flex:1;">watch →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'twitter\')">cancel</button>'
+      + '</div>';
+  }
+
+  function twitterStep1(handle) {
+    return '<div class="line"><span class="prompt">step 2/2 — monitoring</span></div>'
+      + '<div class="line" style="color:var(--c-accent);font-size:0.8rem;margin:8px 0;">✓ watching <span class="highlight">@' + escapeHtml(handle) + '</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">new posts will appear in the message feed</div>'
+      + '<div class="line" style="margin-top:10px;">'
+      + '<button class="btn-primary" onclick="closeWizard(\'twitter\')">done ✓</button>'
+      + '</div>';
+  }
+
+  // ── Facebook wizard steps ──
+  function facebookStep0() {
+    return '<div class="line"><span class="prompt">step 1/2 — enter page name</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">enter the Facebook page name or handle you want to monitor</div>'
+      + '<div class="line" style="margin:6px 0;"><input type="text" id="facebookWizardHandle" placeholder="page name or handle" style="width:100%;padding:10px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" id="facebookWizardConnectBtn" style="flex:1;">watch →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'facebook\')">cancel</button>'
+      + '</div>';
+  }
+
+  function facebookStep1(handle) {
+    return '<div class="line"><span class="prompt">step 2/2 — monitoring</span></div>'
+      + '<div class="line" style="color:var(--c-accent);font-size:0.8rem;margin:8px 0;">✓ watching <span class="highlight">' + escapeHtml(handle) + '</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">new posts will appear in the message feed</div>'
+      + '<div class="line" style="margin-top:10px;">'
+      + '<button class="btn-primary" onclick="closeWizard(\'facebook\')">done ✓</button>'
+      + '</div>';
+  }
+
+  // ── Gmail wizard steps ──
+  function gmailStep0() {
+    return '<div class="line"><span class="prompt">step 1/3 — enable Gmail API</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. go to <span class="highlight">https://console.cloud.google.com</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. create or select a project</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. enable <span class="highlight">Gmail API</span></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" onclick="gmailNextStep()" style="flex:1;">next →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'gmail\')">cancel</button>'
+      + '</div>';
+  }
+
+  function gmailStep1() {
+    return '<div class="line"><span class="prompt">step 2/3 — create OAuth credentials</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. go to <span class="highlight">APIs & Services → Credentials</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. click <span class="highlight">Create Credentials → OAuth client ID</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. application type: <span class="highlight">Web application</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. add redirect URI:</div>'
+      + '<div class="line" style="background:var(--c-surface);padding:6px;font-size:0.72rem;margin:4px 0;">https://vigil-monitor-production.up.railway.app/api/sources/gmail/callback</div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" onclick="gmailNextStep()" style="flex:1;">next →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'gmail\')">cancel</button>'
+      + '</div>';
+  }
+
+  function gmailStep2() {
+    return '<div class="line"><span class="prompt">step 3/3 — set env vars</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">set these on Railway (or .env):</div>'
+      + '<div class="line" style="background:var(--c-surface);padding:6px;font-size:0.72rem;margin:4px 0;">GMAIL_OAUTH_CLIENT_ID=<span style="color:var(--c-amber);">your_client_id</span></div>'
+      + '<div class="line" style="background:var(--c-surface);padding:6px;font-size:0.72rem;margin:4px 0;">GMAIL_OAUTH_CLIENT_SECRET=<span style="color:var(--c-amber);">your_secret</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">then <span class="highlight">redeploy</span> the app</div>'
+      + '<div class="line" style="margin-top:10px;">'
+      + '<button class="btn-primary" onclick="closeWizard(\'gmail\')">done ✓</button>'
+      + '</div>';
+  }
+
+  window.gmailNextStep = function() {
+    var body = document.getElementById('gmailWizardBody');
+    if (!body) return;
+    var html = body.innerHTML;
+    if (html.indexOf('step 1/3') > -1) {
+      body.innerHTML = gmailStep1();
+    } else if (html.indexOf('step 2/3') > -1) {
+      body.innerHTML = gmailStep2();
+    }
+  };
+
+  // ── WhatsApp wizard steps ──
+  function whatsappStep0() {
+    return '<div class="line"><span class="prompt">step 1/2 — install Chrome extension</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. open <span class="highlight">chrome://extensions</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. enable <span class="highlight">Developer mode</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. click <span class="highlight">Load unpacked</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. select the <span class="highlight">extension/</span> folder from this project</div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" onclick="whatsappNextStep()" style="flex:1;">next →</button>'
+      + '<button class="btn-secondary" onclick="closeWizard(\'whatsapp\')">cancel</button>'
+      + '</div>';
+  }
+
+  function whatsappStep1() {
+    return '<div class="line"><span class="prompt">step 2/2 — connect WhatsApp</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. navigate to <span class="highlight">https://web.whatsapp.com</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. the extension will inject a "Connect" button</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. scan the QR code with your phone</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. messages will appear in this dashboard</div>'
+      + '<div class="line" style="margin-top:10px;">'
+      + '<button class="btn-primary" onclick="closeWizard(\'whatsapp\')">done ✓</button>'
+      + '</div>';
+  }
+
+  window.whatsappNextStep = function() {
+    var body = document.getElementById('whatsappWizardBody');
+    if (!body) return;
+    body.innerHTML = whatsappStep1();
+  };
+
   // ── Telegram terminal-style wizard ──
   var TG_WIZARD_STEP = 0;
 
@@ -1491,59 +1689,95 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   }
 
   window.connectDiscord = function() {
-    var token = prompt('Enter your Discord bot token from https://discord.com/developers/applications:');
-    if (!token || !token.trim()) return;
-    var btn = document.getElementById('discordBtn');
-    btn.textContent = 'connecting...';
-    btn.disabled = true;
+    showWizard('discord', 'discord bot setup', discordStep0());
+  };
+
+  // Discord wizard connect handler
+  window.discordWizardConnect = function() {
+    var tokenInput = document.getElementById('discordWizardToken');
+    var token = tokenInput ? tokenInput.value.trim() : '';
+    if (!token) return;
+    wizardLog('discord', 'connecting...');
     fetch(API + '/api/sources/discord/connect', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
-      body: JSON.stringify({token: token.trim()})
+      body: JSON.stringify({token: token})
     })
     .then(function(r){
       if (!r.ok) throw Error('Invalid token');
       return r.json();
     })
     .then(function(data){
-      btn.textContent = 'connected';
-      btn.className = 'btn-primary source-btn';
+      var body = document.getElementById('discordWizardBody');
+      if (body) body.innerHTML = discordStep1();
+      wizardLog('discord', 'connected');
       document.getElementById('discordStatus').textContent = 'connected';
       document.getElementById('discordStatus').style.color = 'var(--c-accent)';
+      var btn = document.getElementById('discordBtn');
+      if (btn) { btn.textContent = 'connected'; btn.className = 'btn-primary source-btn'; }
     })
-    .catch(function(){
-      btn.textContent = 'connect';
-      btn.disabled = false;
-      alert('Failed. Create a bot at discord.com/developers, enable Message Content Intent, then paste the token.');
+    .catch(function(e){
+      wizardLog('discord', 'error: ' + e.message);
     });
   };
 
   window.connectJina = function(platform) {
-    var handle = prompt('Enter ' + (platform === 'twitter' ? 'Twitter/X' : 'Facebook') + ' username or page handle:');
-    if (!handle || !handle.trim()) return;
-    var btn = document.getElementById(platform + 'Btn');
-    btn.textContent = 'adding...';
-    btn.disabled = true;
+    if (platform === 'twitter') {
+      showWizard('twitter', 'x / twitter setup', twitterStep0());
+    } else if (platform === 'facebook') {
+      showWizard('facebook', 'facebook setup', facebookStep0());
+    }
+  };
+
+  // Twitter wizard connect handler
+  window.twitterWizardConnect = function() {
+    var input = document.getElementById('twitterWizardHandle');
+    var handle = input ? input.value.trim() : '';
+    if (!handle) return;
+    var clean = handle.replace(/^@/, '');
+    wizardLog('twitter', 'adding ' + clean + '...');
     fetch(API + '/api/sources/jina/connect', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
-      body: JSON.stringify({platform: platform, handle: handle.trim()})
+      body: JSON.stringify({platform: 'twitter', handle: clean})
     })
     .then(function(r){ return r.json(); })
-    .then(function(data){
-      btn.textContent = 'watching';
-      btn.className = 'btn-primary source-btn';
-      document.getElementById(platform + 'Status').textContent = 'watching @' + handle;
-      document.getElementById(platform + 'Status').style.color = 'var(--c-accent)';
+    .then(function(){
+      var body = document.getElementById('twitterWizardBody');
+      if (body) body.innerHTML = twitterStep1(clean);
+      wizardLog('twitter', 'watching @' + clean);
+      updateSourceUI('twitter', true, 'watching @' + clean);
     })
-    .catch(function(){
-      btn.textContent = 'add profile';
-      btn.disabled = false;
+    .catch(function(e){
+      wizardLog('twitter', 'error: ' + e.message);
+    });
+  };
+
+  // Facebook wizard connect handler
+  window.facebookWizardConnect = function() {
+    var input = document.getElementById('facebookWizardHandle');
+    var handle = input ? input.value.trim() : '';
+    if (!handle) return;
+    wizardLog('facebook', 'adding ' + handle + '...');
+    fetch(API + '/api/sources/jina/connect', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
+      body: JSON.stringify({platform: 'facebook', handle: handle})
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(){
+      var body = document.getElementById('facebookWizardBody');
+      if (body) body.innerHTML = facebookStep1(handle);
+      wizardLog('facebook', 'watching ' + handle);
+      updateSourceUI('facebook', true, 'watching ' + handle);
+    })
+    .catch(function(e){
+      wizardLog('facebook', 'error: ' + e.message);
     });
   };
 
   window.connectGmail = function() {
-    alert('Gmail OAuth setup:\n\n1. Go to https://console.cloud.google.com\n2. Enable Gmail API\n3. Create OAuth 2.0 credentials\n4. Add redirect URI: http://localhost:8002/api/sources/gmail/callback\n5. Set GMAIL_OAUTH_CLIENT_ID and GMAIL_OAUTH_CLIENT_SECRET in .env\n6. Restart server');
+    showWizard('gmail', 'gmail setup', gmailStep0());
   };
 
   // ── Messages ──
