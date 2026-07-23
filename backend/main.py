@@ -27,6 +27,36 @@ async def lifespan(app):
     global tts_engine
     tts_engine = TTSEngine()
     init_db()
+    from backend.database import SessionLocal
+    from backend.models import User
+    db = SessionLocal()
+    try:
+        users_with_tokens = db.query(User).filter(
+            User.telegram_bot_token.isnot(None),
+            User.telegram_bot_token != ""
+        ).all()
+        for u in users_with_tokens:
+            try:
+                from backend.routers.sources import user_telegram_watchers
+                watcher = user_telegram_watchers.get(u.id)
+                if watcher and watcher.get("running"):
+                    continue
+                from backend.watchers.telegram_watcher import TelegramWatcher
+                from backend.routers.sources import _save_and_broadcast
+                async def _make_callback(uid=u.id):
+                    def cb(msg: dict):
+                        msg["user_id"] = uid
+                        _save_and_broadcast(msg, uid)
+                    return cb
+                w = TelegramWatcher(u.telegram_bot_token)
+                w.set_message_callback(await _make_callback())
+                await w.start()
+                user_telegram_watchers[u.id] = {"watcher": w, "running": True, "username": f"user_{u.id}"}
+            except Exception as exc:
+                logger = __import__("logging").getLogger("vigil.main")
+                logger.warning("Failed to resume Telegram bot for user %s: %s", u.id, exc)
+    finally:
+        db.close()
     yield
 
 

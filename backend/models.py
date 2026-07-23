@@ -16,9 +16,12 @@ class User(Base):
     email: Mapped[str | None] = mapped_column(String(255), unique=True, index=True, nullable=True)
     password_hash: Mapped[str | None] = mapped_column(String(255), nullable=True)
     google_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    github_id: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     wallet_address: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
     auth_method: Mapped[str] = mapped_column(String(20), default="password", nullable=False)
     email_verified: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    avatar_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    telegram_bot_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
     telegram_chat_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False

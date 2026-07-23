@@ -402,6 +402,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   <button class="auth-tab" data-tab="wallet" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">wallet</button>
   <button class="auth-tab active" data-tab="email" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid var(--c-accent);color:var(--c-accent);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">email</button>
   <button class="auth-tab" data-tab="google" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">google</button>
+  <button class="auth-tab" data-tab="github" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">github</button>
   <button class="auth-tab" data-tab="admin" style="flex:1;padding:8px;background:none;border:none;border-bottom:2px solid transparent;color:var(--c-text-secondary);font-family:var(--ff-mono);font-size:0.75rem;cursor:pointer;">admin</button>
 </div>
 
@@ -426,6 +427,12 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="line" style="text-align:center;padding:16px 0;">
   <div id="g_id_onload" style="display:inline-block;"></div>
   <button class="btn-primary" id="googleSignInBtn" onclick="initGoogleSignIn()" style="width:100%;justify-content:center;">▣ sign in with google</button>
+</div>
+</div>
+
+<div id="authTabGithub" class="auth-panel" style="display:none;">
+<div class="line" style="text-align:center;padding:16px 0;">
+  <button class="btn-primary" id="githubSignInBtn" onclick="initGitHubSignIn()" style="width:100%;justify-content:center;">⬡ sign in with github</button>
 </div>
 </div>
 
@@ -819,9 +826,11 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
   // ── Auth ──
   var GOOGLE_CLIENT_ID = '';
+  var GITHUB_CLIENT_ID = '';
 
   fetch(API + '/api/auth/config').then(function(r){ return r.json(); }).then(function(d){
-    GOOGLE_CLIENT_ID = d.google_oauth_client_id || '';
+    GOOGLE_CLIENT_ID = (d.google_oauth_client_id || d.google?.client_id || '');
+    GITHUB_CLIENT_ID = (d.github?.client_id || '');
     if (GOOGLE_CLIENT_ID && window.google && window.google.accounts) {
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -1012,6 +1021,43 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       btn.disabled = false;
     });
   };
+
+  // ── GitHub Sign-In ──
+  window.initGitHubSignIn = function() {
+    if (!GITHUB_CLIENT_ID) {
+      var err = document.getElementById('loginError');
+      err.textContent = 'GitHub OAuth not configured. Add GITHUB_OAUTH_CLIENT_ID to .env';
+      err.style.display = 'block';
+      return;
+    }
+    var redirect = window.location.origin + '/';
+    var url = 'https://github.com/login/oauth/authorize'
+      + '?client_id=' + encodeURIComponent(GITHUB_CLIENT_ID)
+      + '&redirect_uri=' + encodeURIComponent(redirect + '?github_oauth=1')
+      + '&scope=read:user%20user:email';
+    window.location.href = url;
+  };
+
+  // Handle GitHub OAuth redirect
+  (function(){
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('github_oauth') === '1') {
+      var code = params.get('code');
+      if (code) {
+        authFetch(API + '/api/auth/github', {code: code})
+          .then(function(data){
+            onLoginSuccess(data);
+            history.replaceState(null, '', window.location.pathname);
+          })
+          .catch(function(e){
+            var err = document.getElementById('loginError');
+            err.textContent = 'GitHub sign-in failed: ' + e.message;
+            err.style.display = 'block';
+            history.replaceState(null, '', window.location.pathname);
+          });
+      }
+    }
+  })();
 
   // ── Vigil Brief ──
   function loadBrief() {
@@ -1260,34 +1306,151 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     while (list.children.length > 20) list.removeChild(list.lastChild);
   }
 
-  // ── Telegram ──
+  // ── Telegram terminal-style wizard ──
+  var TG_WIZARD_STEP = 0;
+
   window.connectTelegram = function() {
-    var token = prompt('Enter your Telegram bot token from @BotFather:');
-    if (!token || !token.trim()) return;
-    var btn = document.getElementById('telegramBtn');
-    btn.textContent = 'connecting...';
-    btn.disabled = true;
-    fetch(API + '/api/sources/telegram/connect', {
+    showTelegramWizard();
+  };
+
+  function showTelegramWizard() {
+    TG_WIZARD_STEP = 0;
+    var panel = document.getElementById('telegramWizardPanel');
+    if (!panel) {
+      panel = document.createElement('div');
+      panel.id = 'telegramWizardPanel';
+      panel.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+      panel.addEventListener('click', function(e) { if (e.target === panel) closeTelegramWizard(); });
+      document.body.appendChild(panel);
+    }
+    panel.innerHTML = '<div class="terminal-block" style="max-width:520px;width:90%;max-height:80vh;overflow-y:auto;margin:0;animation:fadeIn 0.2s;">'
+      + '<div class="line" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">'
+      + '<span><span class="highlight">// telegram bot wizard</span></span>'
+      + '<span onclick="closeTelegramWizard()" style="cursor:pointer;color:var(--c-text-secondary);font-size:1.1rem;">✕</span>'
+      + '</div>'
+      + '<div id="tgWizardBody">'
+      + wizardStep0()
+      + '</div>'
+      + '<div id="tgWizardLog" style="margin-top:8px;font-size:0.7rem;color:var(--c-text-secondary);"></div>'
+      + '</div>';
+    panel.style.display = 'flex';
+  }
+
+  function wizardStep0() {
+    return '<div class="line"><span class="prompt">step 1/3 — create a bot</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">open Telegram, message <span class="highlight">@BotFather</span>, send:</div>'
+      + '<div class="line" style="background:var(--c-surface);padding:8px;font-size:0.75rem;margin:4px 0;">/newbot</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">follow the prompts, then copy the HTTP API token.</div>'
+      + '<div class="line" style="margin-top:12px;"><span class="prompt">paste your bot token below:</span></div>'
+      + '<div class="line" style="margin:6px 0;"><input type="text" id="tgWizardToken" placeholder="123456:ABCdefGHIjklmNOPqrstUVwxyz" style="width:100%;padding:10px 12px;background:var(--c-surface-2);border:1px solid var(--c-border);color:var(--c-text);font-family:var(--ff-mono);font-size:0.8rem;"></input></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" onclick="wizardConnect()" style="flex:1;">connect →</button>'
+      + '<button class="btn-secondary" onclick="closeTelegramWizard()">cancel</button>'
+      + '</div>';
+  }
+
+  function wizardStep1(username) {
+    return '<div class="line"><span class="prompt">step 2/3 — add bot to group</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">'
+      + 'bot <span class="highlight">@' + escapeHtml(username) + '</span> connected ✓</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">'
+      + 'open any Telegram group → add members → search <span class="highlight">@' + escapeHtml(username) + '</span></div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-primary" onclick="wizardSync()" style="flex:1;">sync groups →</button>'
+      + '<button class="btn-secondary" onclick="closeTelegramWizard()">close</button>'
+      + '</div>';
+  }
+
+  function wizardStep2(groups) {
+    var listHtml = '';
+    if (groups && groups.length) {
+      groups.forEach(function(g){
+        listHtml += '<div class="line" style="padding:4px 0;font-size:0.75rem;">⬡ ' + escapeHtml(g.name) + ' <span style="color:var(--c-text-secondary);">[' + g.external_id + ']</span></div>';
+      });
+    } else {
+      listHtml = '<div class="line" style="color:var(--c-amber);font-size:0.75rem;">no groups yet. add the bot and click sync again.</div>';
+    }
+    return '<div class="line"><span class="prompt">step 3/3 — monitoring active</span></div>'
+      + '<div class="line" style="color:var(--c-accent);font-size:0.8rem;margin:8px 0;">✓ telegram connected</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;">detected groups:</div>'
+      + '<div style="margin:6px 0;max-height:160px;overflow-y:auto;">' + listHtml + '</div>'
+      + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
+      + '<button class="btn-secondary" onclick="wizardSync()" style="flex:1;">resync</button>'
+      + '<button class="btn-primary" onclick="closeTelegramWizard()">done</button>'
+      + '</div>';
+  }
+
+  function tgWizardLog(msg) {
+    var log = document.getElementById('tgWizardLog');
+    if (log) log.innerHTML = '<span style="color:var(--c-text-secondary);">> ' + escapeHtml(msg) + '</span>';
+  }
+
+  window.wizardConnect = function() {
+    var tokenInput = document.getElementById('tgWizardToken');
+    var token = tokenInput ? tokenInput.value.trim() : '';
+    if (!token) return;
+    tgWizardLog('connecting...');
+    fetch(API + '/api/sources/telegram/connect-user', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + TOKEN},
-      body: JSON.stringify({token: token.trim()})
+      body: JSON.stringify({token: token})
     })
     .then(function(r){
       if (!r.ok) throw Error('Invalid token');
       return r.json();
     })
     .then(function(data){
+      var body = document.getElementById('tgWizardBody');
+      body.innerHTML = wizardStep1(data.bot_username);
+      tgWizardLog('connected as @' + data.bot_username);
+      updateTelegramUI('connected', data.bot_username);
+      setTimeout(wizardSync, 500);
+    })
+    .catch(function(e){
+      tgWizardLog('error: ' + e.message);
+    });
+  };
+
+  window.wizardSync = function() {
+    tgWizardLog('syncing groups...');
+    fetch(API + '/api/sources/telegram/sync-groups', {method:'POST', headers: authHeaders()})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        if (d.ok) {
+          return fetch(API + '/api/sources/telegram/groups', {headers: authHeaders()});
+        }
+        throw Error(d.error || 'sync failed');
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(groups){
+        var body = document.getElementById('tgWizardBody');
+        body.innerHTML = wizardStep2(groups);
+        tgWizardLog('synced ' + (groups ? groups.length : 0) + ' groups');
+      })
+      .catch(function(e){
+        tgWizardLog('sync error: ' + e.message);
+      });
+  };
+
+  function updateTelegramUI(connected, username) {
+    var btn = document.getElementById('telegramBtn');
+    var status = document.getElementById('telegramStatus');
+    if (connected) {
       btn.textContent = 'connected';
       btn.className = 'btn-primary source-btn';
-      document.getElementById('telegramStatus').textContent = 'connected — @' + data.bot_username;
-      document.getElementById('telegramStatus').style.color = 'var(--c-accent)';
-      setTimeout(loadTelegramGroups, 1500);
-    })
-    .catch(function(){
+      status.textContent = 'connected — @' + username;
+      status.style.color = 'var(--c-accent)';
+    } else {
       btn.textContent = 'connect';
-      btn.disabled = false;
-      alert('Failed. Create a bot with @BotFather first, then paste the token here.');
-    });
+      btn.className = 'btn-secondary source-btn';
+      status.textContent = 'not connected';
+      status.style.color = 'var(--c-text-secondary)';
+    }
+  }
+
+  window.closeTelegramWizard = function() {
+    var panel = document.getElementById('telegramWizardPanel');
+    if (panel) panel.style.display = 'none';
   };
 
   window.syncTelegramGroups = function() {
@@ -1496,6 +1659,8 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     if (!msg) return;
     if (input) input.value = '';
     var log = document.getElementById('voiceAssistantLog');
+    log.innerHTML += '<div class="msg user"><span>' + escapeHtml(msg) + '</span></div>';
+    log.scrollTop = log.scrollHeight;
     setWaveform('processing');
     document.getElementById('voiceStatusBig').textContent = 'thinking...';
 

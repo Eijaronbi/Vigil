@@ -31,6 +31,8 @@ class Settings(BaseSettings):
 
     google_oauth_client_id: str = ""
     google_oauth_client_secret: str = ""
+    github_oauth_client_id: str = ""
+    github_oauth_client_secret: str = ""
     jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_expire_hours: int = 72

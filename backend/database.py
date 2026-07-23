@@ -33,6 +33,12 @@ def _migrate_schema() -> None:
             db.execute(text("ALTER TABLE users ADD COLUMN password_hash VARCHAR(255)"))
         if "google_id" not in columns:
             db.execute(text("ALTER TABLE users ADD COLUMN google_id VARCHAR(255)"))
+        if "github_id" not in columns:
+            db.execute(text("ALTER TABLE users ADD COLUMN github_id VARCHAR(255)"))
+        if "avatar_url" not in columns:
+            db.execute(text("ALTER TABLE users ADD COLUMN avatar_url VARCHAR(1024)"))
+        if "telegram_bot_token" not in columns:
+            db.execute(text("ALTER TABLE users ADD COLUMN telegram_bot_token VARCHAR(255)"))
         if "wallet_address" not in columns:
             db.execute(text("ALTER TABLE users ADD COLUMN wallet_address VARCHAR(255)"))
         if "auth_method" not in columns:
@@ -44,6 +50,8 @@ def _migrate_schema() -> None:
             db.execute(text("CREATE INDEX IF NOT EXISTS ix_users_email ON users(email)"))
         if "google_id" in columns:
             db.execute(text("CREATE INDEX IF NOT EXISTS ix_users_google_id ON users(google_id)"))
+        if "github_id" in columns:
+            db.execute(text("CREATE INDEX IF NOT EXISTS ix_users_github_id ON users(github_id)"))
         if "wallet_address" in columns:
             db.execute(text("CREATE INDEX IF NOT EXISTS ix_users_wallet_address ON users(wallet_address)"))
 

@@ -1,11 +1,16 @@
 import os
 from datetime import datetime
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from backend.config import settings
-from backend.database import SessionLocal
+from backend.database import SessionLocal, get_db
+from backend.models import User
+from backend.routers.auth import get_current_user as auth_get_current_user
+
+get_current_user = auth_get_current_user
 
 router = APIRouter(prefix="/api/sources", tags=["sources"])
 
@@ -16,8 +21,14 @@ _DISCORD_BOT_INFO: dict | None = None
 _JINA_WATCHER = None
 _PROFILE_HANDLES: dict = {}
 
+user_telegram_watchers: dict[int, dict] = {}
+
 
 class TelegramConnectRequest(BaseModel):
+    token: str
+
+
+class TelegramUserConnectRequest(BaseModel):
     token: str
 
 
@@ -35,11 +46,12 @@ class JinaDisconnectRequest(BaseModel):
     handle: str
 
 
-def _save_and_broadcast(msg: dict):
+def _save_and_broadcast(msg: dict, user_id: int = 1):
     db = SessionLocal()
     try:
         from backend.models import Group, Message
         ext_id = str(msg.get("group_external_id", "")) or msg.get("group_name", "unknown")
+        uid = msg.get("user_id", user_id)
         group = (
             db.query(Group)
             .filter(Group.source == msg["source"], Group.external_id == ext_id)
@@ -50,7 +62,7 @@ def _save_and_broadcast(msg: dict):
                 source=msg["source"],
                 name=msg.get("group_name", "Unknown"),
                 external_id=ext_id,
-                user_id=1,
+                user_id=uid,
             )
             db.add(group)
             db.commit()
@@ -239,6 +251,72 @@ async def telegram_sync_groups():
         return {"ok": True, "new_groups": new_count, "total": len(updates)}
     except Exception as e:
         return {"ok": False, "error": str(e)}
+
+
+@router.post("/telegram/connect-user")
+async def connect_telegram_user(
+    body: TelegramUserConnectRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    result = await _verify_token(body.token)
+    if not result:
+        raise HTTPException(status_code=400, detail="Invalid token or bot not found")
+
+    current_user.telegram_bot_token = body.token
+    db.commit()
+
+    global user_telegram_watchers
+    existing = user_telegram_watchers.get(current_user.id)
+    if existing and existing.get("watcher"):
+        try:
+            await existing["watcher"].stop()
+        except Exception:
+            pass
+
+    from backend.watchers.telegram_watcher import TelegramWatcher
+    async def _user_cb(uid: int):
+        def cb(msg: dict):
+            msg["user_id"] = uid
+            _save_and_broadcast(msg, uid)
+        return cb
+
+    watcher = TelegramWatcher(body.token)
+    watcher.set_message_callback(await _user_cb(current_user.id))
+    user_telegram_watchers[current_user.id] = {
+        "watcher": watcher,
+        "running": True,
+        "username": result.get("username"),
+    }
+    await watcher.start()
+    return {"connected": True, "bot_username": result["username"]}
+
+
+@router.post("/telegram/disconnect-user")
+async def disconnect_telegram_user(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    global user_telegram_watchers
+    entry = user_telegram_watchers.pop(current_user.id, None)
+    if entry and entry.get("watcher"):
+        try:
+            await entry["watcher"].stop()
+        except Exception:
+            pass
+    current_user.telegram_bot_token = None
+    db.commit()
+    return {"connected": False}
+
+
+@router.get("/telegram/status-user")
+def telegram_status_user(current_user: User = Depends(get_current_user)):
+    entry = user_telegram_watchers.get(current_user.id)
+    if entry and entry.get("running"):
+        return {"connected": True, "bot_username": entry.get("username")}
+    if current_user.telegram_bot_token:
+        return {"connected": False, "token_stored": True}
+    return {"connected": False, "token_stored": False}
 
 
 DISCORD_BOT_TOKEN_STORED: str = ""

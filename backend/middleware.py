@@ -26,9 +26,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
                 "style-src 'self' 'unsafe-inline' https:; "
                 "img-src 'self' data: blob: https:; "
                 "font-src 'self' data: https:; "
-                "connect-src 'self' https: wss: https://accounts.google.com; "
+                "connect-src 'self' https: wss: https://accounts.google.com https://api.github.com; "
                 "media-src 'self' blob: data: https:; "
-                "frame-src 'self' https://accounts.google.com; "
+                "frame-src 'self' https://accounts.google.com https://github.com; "
                 "object-src 'none'; "
                 "base-uri 'self'"
             )
