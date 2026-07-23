@@ -1962,49 +1962,51 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     var text = (data.sender || 'Someone') + ' from ' + (data.group_name || data.source || 'unknown') + ': ' + (data.text || '');
     if (!text) return;
     text = text.substring(0, 300);
+    _speaking = true;
     setWaveform('speaking');
+    var done = function(){ _speaking = false; setWaveform('idle'); };
     fetch(API + '/api/tts?text=' + encodeURIComponent(text), {cache:'no-store'})
       .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
       .then(function(blob){
         var url = URL.createObjectURL(blob);
         var audio = new Audio(url);
-        audio.onended = function(){ URL.revokeObjectURL(url); setWaveform('idle'); };
-        audio.onerror = function(){ setWaveform('idle'); };
-        audio.play().catch(function(){ setWaveform('idle'); });
+        audio.onended = function(){ URL.revokeObjectURL(url); done(); };
+        audio.onerror = function(){ done(); };
+        audio.play().catch(function(){ done(); });
       })
       .catch(function(){
         if(window.speechSynthesis){
           var u = new SpeechSynthesisUtterance(text);
           u.rate = 0.9;
-          u.onend = function(){ setWaveform('idle'); };
-          u.onerror = function(){ setWaveform('idle'); };
+          u.onend = done;
+          u.onerror = done;
           window.speechSynthesis.speak(u);
-        } else { setWaveform('idle'); }
+        } else { done(); }
       });
   }
 
   function speakResponse(text) {
     if (!VOICE_REPLY_ENABLED || !text) return;
+    _speaking = true;
     setWaveform('speaking');
+    var done = function(){ _speaking = false; setWaveform('idle'); };
     fetch(API + '/api/tts?text=' + encodeURIComponent(text.substring(0, 500)), {cache:'no-store'})
       .then(function(r){ if(!r.ok)throw Error(r.status); return r.blob(); })
       .then(function(blob){
         var url = URL.createObjectURL(blob);
         var audio = new Audio(url);
-        audio.onended = function(){ URL.revokeObjectURL(url); setWaveform('idle'); };
-        audio.onerror = function(){ setWaveform('idle'); };
-        audio.play().catch(function(){ setWaveform('idle'); });
+        audio.onended = function(){ URL.revokeObjectURL(url); done(); };
+        audio.onerror = function(){ done(); };
+        audio.play().catch(function(){ done(); });
       })
       .catch(function(){
         if(window.speechSynthesis){
           var u = new SpeechSynthesisUtterance(text.substring(0, 200));
           u.rate = 0.9;
-          u.onend = function(){ setWaveform('idle'); };
-          u.onerror = function(){ setWaveform('idle'); };
+          u.onend = done;
+          u.onerror = done;
           window.speechSynthesis.speak(u);
-        } else {
-          setWaveform('idle');
-        }
+        } else { done(); }
       });
   }
 
@@ -2080,6 +2082,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
   // ── Voice Input (Speech-to-Text) ──
   var speechRecognition = null;
   var isListening = false;
+  var _speaking = false;
 
   function showTyping(msg, status) {
     var log = document.getElementById('voiceAssistantLog');
@@ -2158,6 +2161,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     document.getElementById('voiceTranscript').textContent = '';
     var voiceTimeout = null;
     speechRecognition.onresult = function(event) {
+      if (_speaking) return;
       var transcript = '';
       for (var i = event.resultIndex; i < event.results.length; i++) {
         var r = event.results[i];
@@ -2169,7 +2173,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       }
       if (voiceTimeout) clearTimeout(voiceTimeout);
       voiceTimeout = setTimeout(function() {
-        if (isListening) {
+        if (isListening && !_speaking) {
           var autoText = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
           if (autoText && autoText.length > 3) {
             if (speechRecognition) speechRecognition.stop();
@@ -2189,6 +2193,10 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       isListening = false;
       if (voiceTimeout) clearTimeout(voiceTimeout);
       voiceTimeout = null;
+      if (_speaking) {
+        setWaveform('speaking');
+        return;
+      }
       setWaveform('processing');
       document.getElementById('voiceStatusBig').textContent = 'processing...';
       var finalText = document.getElementById('voiceTranscript').textContent.replace(/^✎ /, '');
