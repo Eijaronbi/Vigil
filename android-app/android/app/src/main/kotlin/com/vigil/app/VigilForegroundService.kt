@@ -17,6 +17,7 @@ class VigilForegroundService : Service() {
         const val CHANNEL_ID = "vigil_foreground"
         const val NOTIFICATION_ID = 1
         var methodChannel: MethodChannel? = null
+        var alertCount: Int = 0
     }
 
     override fun onCreate() {
@@ -67,5 +68,19 @@ class VigilForegroundService : Service() {
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
+    }
+
+    fun startWakeWordService() {
+        val intent = Intent(this, VigilWakeWordService::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            startForegroundService(intent)
+        } else {
+            startService(intent)
+        }
+    }
+
+    fun stopWakeWordService() {
+        val intent = Intent(this, VigilWakeWordService::class.java)
+        stopService(intent)
     }
 }

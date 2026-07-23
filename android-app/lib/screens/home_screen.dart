@@ -2,21 +2,28 @@ import 'package:flutter/material.dart';
 import '../services/notification_listener.dart';
 import '../services/websocket_service.dart';
 import '../services/tts_service.dart';
+import '../services/wake_word_service.dart';
 
 class HomeScreen extends StatelessWidget {
   final bool isListening;
   final int alertCount;
+  final bool wakeWordEnabled;
   final TTSService ttsService;
   final WebSocketService wsService;
   final NotificationListenerService notifService;
+  final WakeWordService wakeWordService;
+  final VoidCallback onWakeWordToggle;
 
   const HomeScreen({
     super.key,
     required this.isListening,
     required this.alertCount,
+    required this.wakeWordEnabled,
     required this.ttsService,
     required this.wsService,
     required this.notifService,
+    required this.wakeWordService,
+    required this.onWakeWordToggle,
   });
 
   @override
@@ -97,6 +104,8 @@ class HomeScreen extends StatelessWidget {
                   children: [
                     _statusRow('Status', isListening ? 'Listening' : 'Idle'),
                     const SizedBox(height: 8),
+                    _statusRow('Wake Word', wakeWordEnabled ? '"Vigil" active' : 'off'),
+                    const SizedBox(height: 8),
                     _statusRow('Alerts Today', alertCount.toString()),
                     const SizedBox(height: 8),
                     _statusRow('Server', 'ws://localhost:8002/ws'),
@@ -126,6 +135,10 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 12),
+                    _controlButton(context, wakeWordEnabled ? 'Stop Wake Word' : 'Start Wake Word', () {
+                      onWakeWordToggle();
+                    }),
+                    const SizedBox(height: 8),
                     _controlButton(context, 'Test TTS', () async {
                       await ttsService.speak('Vigil online. Never miss what matters.');
                     }),

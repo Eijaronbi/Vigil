@@ -4,6 +4,7 @@ import 'screens/home_screen.dart';
 import 'services/notification_listener.dart';
 import 'services/websocket_service.dart';
 import 'services/tts_service.dart';
+import 'services/wake_word_service.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,8 +22,10 @@ class _VigilAppState extends State<VigilApp> {
   final NotificationListenerService _notifService = NotificationListenerService();
   final WebSocketService _wsService = WebSocketService();
   final TTSService _ttsService = TTSService();
+  final WakeWordService _wakeWordService = WakeWordService();
   late MethodChannel _methodChannel;
   bool _isListening = false;
+  bool _wakeWordEnabled = false;
   int _alertCount = 0;
 
   @override
@@ -30,7 +33,24 @@ class _VigilAppState extends State<VigilApp> {
     super.initState();
     _methodChannel = const MethodChannel('com.vigil.app/notifications');
     _methodChannel.setMethodCallHandler(_handleMethodCall);
+    _initWakeWordChannel();
     _initServices();
+  }
+
+  void _initWakeWordChannel() {
+    const wakeWordChannel = MethodChannel('com.vigil.app/wake_word');
+    wakeWordChannel.setMethodCallHandler((call) async {
+      if (call.method == 'startWakeWord') {
+        setState(() => _wakeWordEnabled = true);
+        return true;
+      } else if (call.method == 'stopWakeWord') {
+        setState(() => _wakeWordEnabled = false);
+        return true;
+      } else if (call.method == 'checkAudioPermission') {
+        return true;
+      }
+      return false;
+    });
   }
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
@@ -101,9 +121,17 @@ class _VigilAppState extends State<VigilApp> {
       home: HomeScreen(
         isListening: _isListening,
         alertCount: _alertCount,
+        wakeWordEnabled: _wakeWordEnabled,
         ttsService: _ttsService,
         wsService: _wsService,
         notifService: _notifService,
+        wakeWordService: _wakeWordService,
+        onWakeWordToggle: () async {
+          try {
+            await _wakeWordService.toggle();
+            setState(() => _wakeWordEnabled = _wakeWordService.isEnabled);
+          } catch (_) {}
+        },
       ),
     );
   }

@@ -15,6 +15,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- Prevent doze from killing WS -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- Audio / wake word -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
 
     <application
         android:label="Vigil"
@@ -47,6 +50,11 @@
             android:name=".VigilForegroundService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
+        <!-- Wake word listening service -->
+        <service
+            android:name=".VigilWakeWordService"
+            android:exported="false"
+            android:foregroundServiceType="microphone" />
 
         <receiver
             android:name=".BootReceiver"
