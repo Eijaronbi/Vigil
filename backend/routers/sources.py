@@ -281,6 +281,7 @@ async def connect_telegram_user(
             _save_and_broadcast(msg, uid)
         return cb
 
+    global _TG_WATCHER, TELEGRAM_BOT_INFO
     watcher = TelegramWatcher(body.token)
     watcher.set_message_callback(await _user_cb(current_user.id))
     user_telegram_watchers[current_user.id] = {
@@ -288,6 +289,9 @@ async def connect_telegram_user(
         "running": True,
         "username": result.get("username"),
     }
+    if not _TG_WATCHER:
+        _TG_WATCHER = watcher
+        TELEGRAM_BOT_INFO = result
     await watcher.start()
     return {"connected": True, "bot_username": result["username"]}
 
@@ -307,6 +311,46 @@ async def disconnect_telegram_user(
     current_user.telegram_bot_token = None
     db.commit()
     return {"connected": False}
+
+
+@router.post("/telegram/sync-groups-user")
+async def telegram_sync_groups_user(
+    current_user: User = Depends(get_current_user),
+):
+    entry = user_telegram_watchers.get(current_user.id)
+    if not entry or not entry.get("running"):
+        return {"ok": False, "error": "Telegram bot not connected for this user"}
+    watcher = entry["watcher"]
+    try:
+        updates = await watcher.fetch_updates() if hasattr(watcher, 'fetch_updates') else []
+        new_count = 0
+        from backend.models import Group
+        from backend.database import SessionLocal
+        db = SessionLocal()
+        try:
+            for update in updates:
+                msg = update.get("message", {})
+                chat = msg.get("chat", {})
+                chat_id = str(chat.get("id"))
+                title = chat.get("title") or chat.get("first_name", "Unknown")
+                existing = db.query(Group).filter(
+                    Group.source == "telegram", Group.external_id == chat_id
+                ).first()
+                if not existing:
+                    group = Group(
+                        source="telegram",
+                        name=title,
+                        external_id=chat_id,
+                        user_id=current_user.id,
+                    )
+                    db.add(group)
+                    new_count += 1
+            db.commit()
+        finally:
+            db.close()
+        return {"ok": True, "new_groups": new_count}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
 
 
 @router.get("/telegram/status-user")

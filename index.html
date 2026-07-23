@@ -1611,13 +1611,20 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 
   window.wizardSync = function() {
     tgWizardLog('syncing groups...');
-    fetch(API + '/api/sources/telegram/sync-groups', {method:'POST', headers: authHeaders()})
-      .then(function(r){ return r.json(); })
+    var trySync = function(url) {
+      return fetch(url, {method:'POST', headers: authHeaders()}).then(function(r){ return r.json(); });
+    };
+    trySync(API + '/api/sources/telegram/sync-groups-user')
       .then(function(d){
         if (d.ok) {
           return fetch(API + '/api/sources/telegram/groups', {headers: authHeaders()});
         }
-        throw Error(d.error || 'sync failed');
+        return trySync(API + '/api/sources/telegram/sync-groups').then(function(d2){
+          if (d2.ok) {
+            return fetch(API + '/api/sources/telegram/groups', {headers: authHeaders()});
+          }
+          throw Error(d2.error || 'sync failed');
+        });
       })
       .then(function(r){ return r.json(); })
       .then(function(groups){
