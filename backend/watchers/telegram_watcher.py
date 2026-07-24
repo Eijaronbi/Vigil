@@ -39,13 +39,17 @@ class TelegramWatcher:
         if dedup_key in self._seen_ids:
             return None
         self._seen_ids.add(dedup_key)
+        chat = update.message.chat
+        title = chat.title
+        if not title:
+            title = "DM with Bot"
         return {
             "source": "telegram",
             "sender": update.message.from_user.username if update.message.from_user else None,
-            "group_name": update.message.chat.title,
+            "group_name": title,
             "text": update.message.text,
             "timestamp": update.message.date.astimezone(timezone.utc).replace(tzinfo=None),
-            "group_external_id": str(update.message.chat_id),
+            "group_external_id": str(chat.id),
         }
 
     async def start(self):
@@ -72,7 +76,7 @@ class TelegramWatcher:
                     if not msg_data.get("text"):
                         continue
                     chat_id = msg_data.get("chat", {}).get("id")
-                    title = msg_data.get("chat", {}).get("title") or msg_data.get("chat", {}).get("first_name", "Unknown")
+                    title = msg_data.get("chat", {}).get("title") or "DM with Bot"
                     sender = msg_data.get("from", {}).get("username") if msg_data.get("from") else None
                     text = msg_data.get("text", "")
                     msg_id = str(msg_data.get("message_id", ""))
