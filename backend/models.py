@@ -23,6 +23,9 @@ class User(Base):
     avatar_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     telegram_bot_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
     telegram_chat_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    whatsapp_access_token: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    whatsapp_phone_number_id: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    whatsapp_verify_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.now, nullable=False
     )

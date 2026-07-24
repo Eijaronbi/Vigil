@@ -55,6 +55,26 @@ async def lifespan(app):
             except Exception as exc:
                 logger = __import__("logging").getLogger("vigil.main")
                 logger.warning("Failed to resume Telegram bot for user %s: %s", u.id, exc)
+
+        users_with_wa = db.query(User).filter(
+            User.whatsapp_access_token.isnot(None),
+            User.whatsapp_access_token != "",
+            User.whatsapp_phone_number_id.isnot(None),
+        ).all()
+        for u in users_with_wa:
+            try:
+                from backend.watchers.whatsapp_watcher import configure, set_callback
+                from backend.routers.sources import _save_and_broadcast
+                configure(u.whatsapp_access_token, u.whatsapp_phone_number_id, u.whatsapp_verify_token or "")
+                async def _wa_cb(msg: dict):
+                    msg["user_id"] = u.id
+                    _save_and_broadcast(msg, u.id)
+                set_callback(_wa_cb)
+                from backend.routers.sources import _WHATSAPP_CONNECTED
+                _WHATSAPP_CONNECTED = True
+            except Exception as exc:
+                logger = __import__("logging").getLogger("vigil.main")
+                logger.warning("Failed to resume WhatsApp for user %s: %s", u.id, exc)
     finally:
         db.close()
     yield

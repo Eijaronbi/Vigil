@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -490,11 +490,106 @@ async def init_telegram_bot():
             await _start_watcher(settings.telegram_bot_token)
 
 
+class WhatsAppConnectRequest(BaseModel):
+    access_token: str
+    phone_number_id: str
+    verify_token: str
+
+
+class WhatsAppSendRequest(BaseModel):
+    to: str
+    text: str
+
+
 _WHATSAPP_CONNECTED = False
 
 
+@router.post("/whatsapp/connect")
+async def whatsapp_connect(body: WhatsAppConnectRequest, current_user: User = Depends(get_current_user)):
+    from backend.watchers.whatsapp_watcher import configure, set_callback
+
+    configure(body.access_token, body.phone_number_id, body.verify_token)
+
+    async def _wa_callback(msg: dict):
+        msg["user_id"] = current_user.id
+        _save_and_broadcast(msg, current_user.id)
+
+    set_callback(_wa_callback)
+
+    current_user.whatsapp_access_token = body.access_token
+    current_user.whatsapp_phone_number_id = body.phone_number_id
+    current_user.whatsapp_verify_token = body.verify_token
+
+    db = SessionLocal()
+    try:
+        db.add(current_user)
+        db.commit()
+    finally:
+        db.close()
+
+    global _WHATSAPP_CONNECTED
+    _WHATSAPP_CONNECTED = True
+    return {"connected": True, "phone_number_id": body.phone_number_id}
+
+
+@router.post("/whatsapp/disconnect")
+async def whatsapp_disconnect(current_user: User = Depends(get_current_user)):
+    from backend.watchers.whatsapp_watcher import configure, set_callback
+
+    configure("", "", "")
+    set_callback(None)
+
+    current_user.whatsapp_access_token = None
+    current_user.whatsapp_phone_number_id = None
+    current_user.whatsapp_verify_token = None
+
+    db = SessionLocal()
+    try:
+        db.add(current_user)
+        db.commit()
+    finally:
+        db.close()
+
+    global _WHATSAPP_CONNECTED
+    _WHATSAPP_CONNECTED = False
+    return {"connected": False}
+
+
+@router.post("/whatsapp/webhook")
+async def whatsapp_webhook(request: Request):
+    from backend.watchers.whatsapp_watcher import process_webhook
+    body = await request.json()
+    await process_webhook(body)
+    return {"status": "ok"}
+
+
+@router.get("/whatsapp/webhook")
+async def whatsapp_webhook_verify(
+    hub_mode: str = Query("", alias="hub.mode"),
+    hub_verify_token: str = Query("", alias="hub.verify_token"),
+    hub_challenge: str = Query("", alias="hub.challenge"),
+):
+    from backend.watchers.whatsapp_watcher import verify_webhook
+    result = verify_webhook(hub_mode, hub_verify_token, hub_challenge)
+    if result is not None:
+        return Response(content=str(result), media_type="text/plain")
+    return Response(status_code=403, content="Verification failed")
+
+
+@router.get("/whatsapp/status")
+async def whatsapp_status():
+    return {"connected": _WHATSAPP_CONNECTED}
+
+
+@router.post("/whatsapp/send")
+async def whatsapp_send(body: WhatsAppSendRequest):
+    from backend.watchers.whatsapp_watcher import send_message
+    result = await send_message(body.to, body.text)
+    return result
+
+
 @router.post("/whatsapp/message")
-async def whatsapp_message(body: dict):
+async def whatsapp_message_legacy(body: dict):
     global _WHATSAPP_CONNECTED
     _WHATSAPP_CONNECTED = True
     from backend.models import Group, Message
@@ -541,29 +636,3 @@ async def whatsapp_message(body: dict):
         return {"ok": True, "message_id": db_msg.id, "score": db_msg.importance_score}
     finally:
         db.close()
-
-
-@router.get("/whatsapp/status")
-def whatsapp_status():
-    return {"connected": _WHATSAPP_CONNECTED}
-
-
-_WHATSAPP_AUTH_TOKEN: str = ""
-
-
-class WhatsAppAuthRequest(BaseModel):
-    token: str
-
-
-@router.post("/whatsapp/auth")
-async def whatsapp_auth(body: WhatsAppAuthRequest):
-    global _WHATSAPP_AUTH_TOKEN
-    _WHATSAPP_AUTH_TOKEN = body.token
-    return {"ok": True, "authenticated": True}
-
-
-@router.get("/whatsapp/auth-token")
-def whatsapp_get_auth_token():
-    if not _WHATSAPP_AUTH_TOKEN:
-        _WHATSAPP_AUTH_TOKEN = os.urandom(16).hex()
-    return {"token": _WHATSAPP_AUTH_TOKEN}
