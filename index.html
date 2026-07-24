@@ -528,7 +528,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
 <div class="source-status-text" id="whatsappStatus">not connected</div>
 </div>
 <div class="source-action">
-<button class="btn-secondary source-btn" onclick="downloadExtension()">install extension</button>
+<button class="btn-secondary source-btn" id="whatsappBtn" onclick="connectWhatsApp()">install extension</button>
 </div>
 </div>
 </div>
@@ -821,8 +821,13 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       });
   };
 
-  window.downloadExtension = function() {
-    showWizard('whatsapp', 'whatsapp setup', whatsappStep0());
+  window.connectWhatsApp = function() {
+    var btn = document.getElementById('whatsappBtn');
+    if (btn && btn.className === 'btn-primary source-btn') {
+      whatsappDisconnect();
+      return;
+    }
+    showWizard('whatsapp', 'whatsapp cloud api', whatsappStep0());
   };
   window.downloadApk = function() {
     alert('Android app: Flutter build in progress.\n\nOnce built, APK will be available for sideload.\nFor now, use the browser dashboard to test.');
@@ -1145,7 +1150,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
               el.textContent = 'connected' + (s.bot_username ? ' — @' + s.bot_username : '') + (s.profile_count ? ' (' + s.profile_count + ')' : '');
               el.style.color = 'var(--c-accent)';
             } else {
-              el.textContent = s.id === 'whatsapp' ? 'install extension' : 'not connected';
+              el.textContent = s.id === 'whatsapp' ? 'not connected' : 'not connected';
               el.style.color = 'var(--c-text-secondary)';
             }
           }
@@ -1400,7 +1405,7 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         status.textContent = label || 'connected';
         status.style.color = 'var(--c-accent)';
       } else {
-        status.textContent = sourceId === 'whatsapp' ? 'install extension' : 'not connected';
+        status.textContent = 'not connected';
         status.style.color = 'var(--c-text-secondary)';
       }
     }
@@ -1520,34 +1525,65 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
     }
   };
 
-  // ── WhatsApp wizard steps ──
+  // ── WhatsApp Cloud API wizard ──
   function whatsappStep0() {
-    return '<div class="line"><span class="prompt">step 1/2 — install Chrome extension</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. open <span class="highlight">chrome://extensions</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. enable <span class="highlight">Developer mode</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. click <span class="highlight">Load unpacked</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. select the <span class="highlight">extension/</span> folder from this project</div>'
+    var baseUrl = window.location.origin;
+    return '<div class="line"><span class="prompt">WhatsApp Cloud API — connect</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">You need a Meta Developer account and a WhatsApp Business profile.</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">1. Go to <span class="highlight">https://developers.facebook.com</span> → Create App → WhatsApp</div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. Copy your <span class="highlight">Phone Number ID</span> and a <span class="highlight">Permanent Access Token</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. Set webhook URL: <span class="highlight" style="user-select:all;">' + baseUrl + '/api/sources/whatsapp/webhook</span></div>'
+      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. Set Verify Token to any secret string you choose</div>'
+      + '<div class="line" style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">'
+      + '<input id="waAccessToken" type="password" placeholder="Access Token" style="padding:8px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text);font-size:0.8rem;">'
+      + '<input id="waPhoneNumberId" type="text" placeholder="Phone Number ID" style="padding:8px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text);font-size:0.8rem;">'
+      + '<input id="waVerifyToken" type="text" placeholder="Verify Token (secret string)" style="padding:8px;border-radius:6px;border:1px solid var(--c-border);background:var(--c-surface);color:var(--c-text);font-size:0.8rem;">'
+      + '</div>'
       + '<div class="line" style="margin-top:10px;display:flex;gap:8px;">'
-      + '<button class="btn-primary" onclick="whatsappNextStep()" style="flex:1;">next →</button>'
+      + '<button class="btn-primary" onclick="whatsappConnect()" style="flex:1;">connect</button>'
       + '<button class="btn-secondary" onclick="closeWizard(\'whatsapp\')">cancel</button>'
       + '</div>';
   }
 
-  function whatsappStep1() {
-    return '<div class="line"><span class="prompt">step 2/2 — connect WhatsApp</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:8px 0;">1. navigate to <span class="highlight">https://web.whatsapp.com</span></div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">2. the extension will inject a "Connect" button</div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">3. scan the QR code with your phone</div>'
-      + '<div class="line" style="color:var(--c-text-secondary);font-size:0.75rem;margin:4px 0;">4. messages will appear in this dashboard</div>'
-      + '<div class="line" style="margin-top:10px;">'
-      + '<button class="btn-primary" onclick="closeWizard(\'whatsapp\')">done ✓</button>'
-      + '</div>';
-  }
+  window.whatsappConnect = async function() {
+    var token = document.getElementById('waAccessToken').value;
+    var phoneId = document.getElementById('waPhoneNumberId').value;
+    var verifyToken = document.getElementById('waVerifyToken').value;
+    if (!token || !phoneId || !verifyToken) {
+      alert('Fill in all three fields');
+      return;
+    }
+    try {
+      var resp = await fetch('/api/sources/whatsapp/connect', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('vigil_token')},
+        body: JSON.stringify({access_token: token, phone_number_id: phoneId, verify_token: verifyToken}),
+      });
+      var data = await resp.json();
+      if (data.connected) {
+        closeWizard('whatsapp');
+        updateSourceStatus('whatsapp', true, 'connected');
+      } else {
+        alert('Connection failed: ' + JSON.stringify(data));
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
+  };
 
-  window.whatsappNextStep = function() {
-    var body = document.getElementById('whatsappWizardBody');
-    if (!body) return;
-    body.innerHTML = whatsappStep1();
+  window.whatsappDisconnect = async function() {
+    try {
+      var resp = await fetch('/api/sources/whatsapp/disconnect', {
+        method: 'POST',
+        headers: {'Authorization': 'Bearer ' + localStorage.getItem('vigil_token')},
+      });
+      var data = await resp.json();
+      if (!data.connected) {
+        updateSourceStatus('whatsapp', false, 'not connected');
+      }
+    } catch (e) {
+      alert('Error: ' + e.message);
+    }
   };
 
   // ── Telegram terminal-style wizard ──
