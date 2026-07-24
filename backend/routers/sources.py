@@ -208,9 +208,24 @@ def telegram_groups():
             .all()
         )
         return [
-            {"id": g.id, "name": g.name, "external_id": g.external_id, "enabled": g.enabled}
+            {"id": g.id, "name": g.name, "external_id": g.external_id, "enabled": g.enabled, "reply_enabled": g.reply_enabled}
             for g in groups
         ]
+    finally:
+        db.close()
+
+
+@router.post("/telegram/groups/{group_id}/reply-toggle")
+def telegram_toggle_reply(group_id: int):
+    from backend.models import Group
+    db = SessionLocal()
+    try:
+        group = db.query(Group).filter(Group.id == group_id, Group.source == "telegram").first()
+        if not group:
+            raise HTTPException(status_code=404, detail="Group not found")
+        group.reply_enabled = not group.reply_enabled
+        db.commit()
+        return {"ok": True, "reply_enabled": group.reply_enabled}
     finally:
         db.close()
 
@@ -284,6 +299,7 @@ async def connect_telegram_user(
     global _TG_WATCHER, TELEGRAM_BOT_INFO
     watcher = TelegramWatcher(body.token)
     watcher.set_message_callback(await _user_cb(current_user.id))
+    watcher.set_reply_handler(_tg_reply_handler)
     user_telegram_watchers[current_user.id] = {
         "watcher": watcher,
         "running": True,
@@ -457,6 +473,63 @@ async def _verify_token(token: str) -> dict | None:
         return None
 
 
+async def _tg_reply_handler(update, msg: dict):
+    import logging
+    logger = logging.getLogger("vigil.sources")
+    ext_id = str(msg.get("group_external_id", ""))
+    if not ext_id:
+        return
+    db = SessionLocal()
+    try:
+        from backend.models import Group
+        group = db.query(Group).filter(Group.source == "telegram", Group.external_id == ext_id).first()
+        if not group or not group.reply_enabled:
+            return
+        from backend.schemas import MessageIn
+        from backend.classifier.classification_service import classify_message
+        from backend.models import Message as MessageModel
+        db_msg = MessageModel(
+            group_id=group.id,
+            source="telegram",
+            sender=msg.get("sender", "?"),
+            text=msg.get("text", ""),
+            timestamp=msg.get("timestamp"),
+        )
+        db.add(db_msg)
+        db.commit()
+        db.refresh(db_msg)
+        message_in = MessageIn(source="telegram", group_name=msg.get("group_name", ""), sender=msg.get("sender", ""), text=msg.get("text", ""))
+        await classify_message(db, db_msg, message_in)
+        db.refresh(db_msg)
+
+        if db_msg.importance_score is not None and db_msg.importance_score >= settings.importance_threshold:
+            import httpx
+            prompt = (
+                f"You are in a Telegram group called '{msg.get('group_name', '')}'. "
+                f"User @{msg.get('sender', '')} said: \"{msg.get('text', '')}\". "
+                "Reply helpfully and concisely (max 2 sentences). Sign with — Vigil"
+            )
+            provider_cfg = None
+            if settings.groq_api_key:
+                provider_cfg = {"key": settings.groq_api_key, "model": settings.groq_model, "url": "https://api.groq.com/openai/v1"}
+            elif settings.openrouter_api_key:
+                provider_cfg = {"key": settings.openrouter_api_key, "model": settings.openrouter_model, "url": settings.openrouter_base_url}
+            if provider_cfg:
+                async with httpx.AsyncClient(timeout=30) as client:
+                    resp = await client.post(
+                        f"{provider_cfg['url'].rstrip('/')}/chat/completions",
+                        headers={"Authorization": f"Bearer {provider_cfg['key']}", "Content-Type": "application/json"},
+                        json={"model": provider_cfg["model"], "messages": [{"role": "user", "content": prompt}], "max_tokens": 200},
+                    )
+                    if resp.status_code == 200:
+                        reply_text = resp.json()["choices"][0]["message"]["content"]
+                        await update.message.reply_text(reply_text[:500])
+    except Exception as e:
+        logger.warning("auto-reply failed: %s", e)
+    finally:
+        db.close()
+
+
 async def _tg_callback_async(msg: dict):
     _save_and_broadcast(msg)
 
@@ -467,6 +540,7 @@ async def _start_watcher(token: str):
     from backend.watchers.telegram_watcher import TelegramWatcher
     watcher = TelegramWatcher(token)
     watcher.set_message_callback(_tg_callback_async)
+    watcher.set_reply_handler(_tg_reply_handler)
     _TG_WATCHER = watcher
     await watcher.start()
 

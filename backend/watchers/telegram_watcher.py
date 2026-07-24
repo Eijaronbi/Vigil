@@ -9,12 +9,16 @@ class TelegramWatcher:
     def __init__(self, token: str):
         self._token = token
         self._callback = None
+        self._reply_handler = None
         self._monitored_groups: list[int] | None = None
         self._app: Application | None = None
         self._seen_ids: set[str] = set()
 
     def set_message_callback(self, callback):
         self._callback = callback
+
+    def set_reply_handler(self, handler):
+        self._reply_handler = handler
 
     def set_monitored_groups(self, group_ids: list[int]):
         self._monitored_groups = group_ids
@@ -30,6 +34,9 @@ class TelegramWatcher:
         msg = self._build_msg(update)
         if msg and self._callback:
             await self._callback(msg)
+
+        if msg and self._reply_handler and self._app:
+            await self._reply_handler(update, msg)
 
     def _build_msg(self, update: Update) -> dict | None:
         if not update.message or not update.message.text:

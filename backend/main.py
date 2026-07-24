@@ -42,7 +42,7 @@ async def lifespan(app):
                 if watcher and watcher.get("running"):
                     continue
                 from backend.watchers.telegram_watcher import TelegramWatcher
-                from backend.routers.sources import _save_and_broadcast
+                from backend.routers.sources import _save_and_broadcast, _tg_reply_handler
                 async def _make_callback(uid=u.id):
                     def cb(msg: dict):
                         msg["user_id"] = uid
@@ -50,6 +50,7 @@ async def lifespan(app):
                     return cb
                 w = TelegramWatcher(u.telegram_bot_token)
                 w.set_message_callback(await _make_callback())
+                w.set_reply_handler(_tg_reply_handler)
                 await w.start()
                 user_telegram_watchers[u.id] = {"watcher": w, "running": True, "username": f"user_{u.id}"}
             except Exception as exc:

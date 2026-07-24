@@ -1799,7 +1799,8 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
         }
         var html = '';
         groups.forEach(function(g){
-          html += '<div class="line" style="display:flex;justify-content:space-between;padding:4px 0;"><span>⬡ ' + escapeHtml(g.name) + '</span><span style="color:var(--c-text-secondary);font-size:0.7rem;">' + g.external_id + '</span></div>';
+          var replyBtn = g.reply_enabled ? '<span style="color:var(--c-accent);cursor:pointer;font-size:0.7rem;" onclick="toggleTelegramReply(' + g.id + ')">reply:on</span>' : '<span style="color:var(--c-text-secondary);cursor:pointer;font-size:0.7rem;" onclick="toggleTelegramReply(' + g.id + ')">reply:off</span>';
+          html += '<div class="line" style="display:flex;justify-content:space-between;padding:4px 0;"><span>⬡ ' + escapeHtml(g.name) + '</span><span style="display:flex;gap:8px;align-items:center;">' + replyBtn + '<span style="color:var(--c-text-secondary);font-size:0.7rem;">' + g.external_id + '</span></span></div>';
         });
         list.innerHTML = html;
         fetchMessages();
@@ -1807,6 +1808,18 @@ footer p { font-family: var(--ff-mono); font-size: 0.78rem; color: var(--c-text-
       })
       .catch(function(){});
   }
+
+  window.toggleTelegramReply = function(groupId) {
+    fetch(API + '/api/sources/telegram/groups/' + groupId + '/reply-toggle', {
+      method: 'POST',
+      headers: {'Authorization': 'Bearer ' + localStorage.getItem('vigil_token')},
+    })
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      loadTelegramGroups();
+    })
+    .catch(function(){});
+  };
 
   window.connectDiscord = function() {
     showWizard('discord', 'discord bot setup', discordStep0());
